@@ -43,8 +43,8 @@ class Div2K(Folder):
     Args:
         root (string): Root directory of the DIV2K Dataset.
         scale (int, optional): The upsampling ratio: 2, 3, 4 or 8.
-        track (str, optional): The downscaling method: bicubic, unknown, realistic_mild,
-            realistic_difficult, realistic_wild.
+        track (str, optional): The downscaling method: bicubic, unknown, real_mild,
+            real_difficult, real_wild.
         split (string, optional): The dataset split, supports ``train``, or ``val``.
         transform (callable, optional): A function/transform that takes in several PIL images
             and returns a transformed version. It is not a torchvision transform!
@@ -81,8 +81,33 @@ class Div2K(Folder):
       , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_difficult.zip"
       , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_wild.zip"
       , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_wild.zip"
-       ]
+    ]
 
+    track_dirs = {
+        ('hr', 'train', 1) : os.path.join('DIV2K_train_HR')
+      , ('hr', 'val', 1) : os.path.join('DIV2K_valid_HR')
+      , ('bicubic', 'train', 2) : os.path.join('DIV2K_train_LR_bicubic', 'X2')
+      , ('bicubic', 'train', 3) : os.path.join('DIV2K_train_LR_bicubic', 'X3')
+      , ('bicubic', 'train', 4) : os.path.join('DIV2K_train_LR_bicubic', 'X4')
+      , ('bicubic', 'train', 8) : os.path.join('DIV2K_train_LR_X8')
+      , ('bicubic', 'val', 2) : os.path.join('DIV2K_valid_LR_bicubic', 'X2')
+      , ('bicubic', 'val', 3) : os.path.join('DIV2K_valid_LR_bicubic', 'X3')
+      , ('bicubic', 'val', 4) : os.path.join('DIV2K_valid_LR_bicubic', 'X4')
+      , ('bicubic', 'val', 8) : os.path.join('DIV2K_valid_LR_X8')
+      , ('unknown', 'train', 2) : os.path.join('DIV2K_train_LR_unknown', 'X2')
+      , ('unknown', 'train', 3) : os.path.join('DIV2K_train_LR_unknown', 'X3')
+      , ('unknown', 'train', 4) : os.path.join('DIV2K_train_LR_unknown', 'X4')
+      , ('unknown', 'val', 2) : os.path.join('DIV2K_valid_LR_unknown', 'X2')
+      , ('unknown', 'val', 3) : os.path.join('DIV2K_valid_LR_unknown', 'X3')
+      , ('unknown', 'val', 4) : os.path.join('DIV2K_valid_LR_unknown', 'X4')
+      , ('real_mild', 'train', 4) : os.path.join('DIV2K_train_LR_mild')
+      , ('real_mild', 'val', 4) : os.path.join('DIV2K_valid_LR_mild')
+      , ('real_difficult', 'train', 4) : os.path.join('DIV2K_train_LR_difficult')
+      , ('real_difficult', 'val', 4) : os.path.join('DIV2K_valid_LR_difficult')
+      # real_wild is there but needs special handling (multiple downscaled images)
+      #, ('real_wild', 'train', 4) : os.path.join('DIV2K_train_LR_wild')
+      #, ('real_wild', 'val', 4) : os.path.join('DIV2K_valid_LR_wild')
+    }
 
     def __init__(
             self,
@@ -106,29 +131,20 @@ class Div2K(Folder):
             self.download()
         self.init_samples()
 
-    def get_dir(self, track, split, scale):
-        track_dirs = {
-            ('hr', 'train', 1) : os.path.join('DIV2K_train_HR')
-          , ('hr', 'val', 1) : os.path.join('DIV2K_valid_HR')
-          , ('bicubic', 'train', 2) : os.path.join('DIV2K_train_LR_bicubic', 'X2')
-          , ('bicubic', 'train', 3) : os.path.join('DIV2K_train_LR_bicubic', 'X3')
-          , ('bicubic', 'train', 4) : os.path.join('DIV2K_train_LR_bicubic', 'X4')
-          , ('bicubic', 'train', 8) : os.path.join('DIV2K_train_LR_X8')
-          , ('bicubic', 'val', 2) : os.path.join('DIV2K_valid_LR_bicubic', 'X2')
-          , ('bicubic', 'val', 3) : os.path.join('DIV2K_valid_LR_bicubic', 'X3')
-          , ('bicubic', 'val', 4) : os.path.join('DIV2K_valid_LR_bicubic', 'X4')
-          , ('bicubic', 'val', 8) : os.path.join('DIV2K_valid_LR_X8')
-          , ('unknown', 'train', 2) : os.path.join('DIV2K_train_LR_unknown', 'X2')
-          , ('unknown', 'train', 3) : os.path.join('DIV2K_train_LR_unknown', 'X3')
-          , ('unknown', 'train', 4) : os.path.join('DIV2K_train_LR_unknown', 'X4')
-          , ('unknown', 'val', 2) : os.path.join('DIV2K_valid_LR_unknown', 'X2')
-          , ('unknown', 'val', 3) : os.path.join('DIV2K_valid_LR_unknown', 'X3')
-          , ('unknown', 'val', 4) : os.path.join('DIV2K_valid_LR_unknown', 'X4')
-        }
+    def get_tracks(self):
+        return set(t for (t, sp, sc) in self.track_dirs.keys())
 
-        if (track, split, scale) not in track_dirs:
-            raise ValueError(f"Track {track}X{scale} is not part of DIV2K")
-        return os.path.join(self.root, track_dirs[(track, split, scale)])
+    def get_splits(self):
+        return ["train", "val"]
+
+    def get_dir(self, track, split, scale):
+        if (track, split, scale) not in self.track_dirs:
+            if track not in self.get_tracks():
+                raise ValueError(f"Track {track} does not exist. Use one of {list(self.get_tracks())}")
+            if split not in self.get_splits():
+                raise ValueError(f"Split {split} is not valid")
+            raise ValueError(f"Div2K track {track} does not include scale X{scale}")
+        return os.path.join(self.root, self.track_dirs[(track, split, scale)])
 
     def list_samples(self, track, split, scale):
         track_dir = self.get_dir(track, split, scale)
@@ -147,6 +163,7 @@ class Div2K(Folder):
             self.samples.append([s[i] for s in samples])
 
     def download(self):
+        # We just download everything: the X4/X8 datasets are not big anyway
         for url in self.urls:
             torchvision.datasets.utils.download_and_extract_archive(url, self.root)
 
