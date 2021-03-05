@@ -19,18 +19,21 @@ class Folder(data.Dataset):
             self,
             root: str,
             scales: List[Union[int, float]],
-            transforms: Optional[Callable] = None,
+            transform: Optional[Callable] = None,
             loader = pil_loader
     ) -> None:
         super(Folder, self).__init__()
         self.root = os.path.expanduser(root)
         self.loader = loader
-        self.transforms = transforms
+        self.transform = transform
         self.scales = scales
         self.samples = []
 
     def __getitem__(self, index: int) -> List[Any]:
-        return [self.loader(path) for path in self.samples[index]]
+        images = [self.loader(path) for path in self.samples[index]]
+        if self.transform is not None:
+            images = self.transform(images)
+        return images
         
 
     def __len__(self) -> int:
@@ -115,7 +118,7 @@ class Div2K(Folder):
             scale: Union[int, List[int]] = 2,
             track: Union[str, List[str]] = 'bicubic',
             split: str = 'train',
-            transforms: Optional[Callable] = None,
+            transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False):
         if isinstance(scale, int):
@@ -126,7 +129,7 @@ class Div2K(Folder):
             raise ValueError("The number of scales and of tracks must be the same")
         self.split = split
         self.tracks = track
-        super(Div2K, self).__init__(os.path.join(root, 'DIV2K'), scale, transforms, loader)
+        super(Div2K, self).__init__(os.path.join(root, 'DIV2K'), scale, transform, loader)
         if download:
             self.download()
         self.init_samples()
