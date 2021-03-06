@@ -39,8 +39,69 @@ class Folder(data.Dataset):
     def __len__(self) -> int:
         return len(self.samples)
 
+class FolderByDir(Folder):
+    urls = {}
+    track_dirs = {}
 
-class Div2K(Folder):
+    def __init__(
+            self,
+            root: str,
+            scale: Union[int, List[int]],
+            track: Union[str, List[str]],
+            split: str = 'train',
+            transform: Optional[Callable] = None,
+            loader = pil_loader,
+            download: bool = False):
+        if isinstance(scale, int):
+            scale = [scale]
+        if isinstance(track, str):
+            track = [track] * len(scale)
+        if len(track) != len(scale):
+            raise ValueError("The number of scales and of tracks must be the same")
+        self.split = split
+        self.tracks = track
+        super(FolderByDir, self).__init__(root, scale, transform, loader)
+        if download:
+            self.download()
+        self.init_samples()
+
+    def get_tracks(self):
+        return set(t for (t, sp, sc) in self.track_dirs.keys())
+
+    def get_splits(self):
+        return ["train", "val"]
+
+    def get_dir(self, track, split, scale):
+        if (track, split, scale) not in self.track_dirs:
+            if track not in self.get_tracks():
+                raise ValueError(f"Track {track} does not exist. Use one of {list(self.get_tracks())}")
+            if split not in self.get_splits():
+                raise ValueError(f"Split {split} is not valid")
+            raise ValueError(f"Div2K track {track} does not include scale X{scale}")
+        return os.path.join(self.root, self.track_dirs[(track, split, scale)])
+
+    def list_samples(self, track, split, scale):
+        track_dir = self.get_dir(track, split, scale)
+        all_samples = sorted(os.listdir(track_dir))
+        return [os.path.join(track_dir, s) for s in all_samples]
+
+    def init_samples(self):
+        samples = []
+        for track, scale in zip(['hr'] + self.tracks, [1] + self.scales):
+            samples.append(self.list_samples(track, self.split, scale))
+        for i, s in enumerate(samples[1:]):
+            if len(s) != len(samples[0]):
+                raise ValueError(f"Number of files for {self.tracks[i]}X{self.scales[i]} does not match HR")
+        self.samples = []
+        for i in range(len(samples[0])):
+            self.samples.append([s[i] for s in samples])
+
+    def download(self):
+        # We just always download everything: the X4/X8 datasets are not big anyway
+        for url, md5sum in self.urls.items():
+            torchvision.datasets.utils.download_and_extract_archive(url, self.root, md5=md5sum)
+
+class Div2K(FolderByDir):
     """`DIV2K <https://data.vision.ee.ethz.ch/cvl/DIV2K/>` Superresolution Dataset
 
     Args:
@@ -121,52 +182,102 @@ class Div2K(Folder):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False):
-        if isinstance(scale, int):
-            scale = [scale]
-        if isinstance(track, str):
-            track = [track] * len(scale)
-        if len(track) != len(scale):
-            raise ValueError("The number of scales and of tracks must be the same")
-        self.split = split
-        self.tracks = track
-        super(Div2K, self).__init__(os.path.join(root, 'DIV2K'), scale, transform, loader)
-        if download:
-            self.download()
-        self.init_samples()
+        super(Div2K, self).__init__(os.path.join(root, 'DIV2K'), scale,
+                                    track, split, transform, loader, download)
 
-    def get_tracks(self):
-        return set(t for (t, sp, sc) in self.track_dirs.keys())
+class Set5(FolderByDir):
+    urls = {
+        "https://cv.snu.ac.kr/research/EDSR/benchmark.tar" : "4ace41d33c2384b97e6b320cd0afd6ba"
+    }
+    
+    track_dirs = {
+        ('hr', 'val', 1) : os.path.join('benchmark', 'Set5', 'HR')
+      , ('bicubic', 'val', 2) : os.path.join('benchmark', 'Set5', 'LR_bicubic', 'X2')
+      , ('bicubic', 'val', 3) : os.path.join('benchmark', 'Set5', 'LR_bicubic', 'X3')
+      , ('bicubic', 'val', 4) : os.path.join('benchmark', 'Set5', 'LR_bicubic', 'X4')
+    }
 
-    def get_splits(self):
-        return ["train", "val"]
+    def __init__(
+            self,
+            root: str,
+            scale: Union[int, List[int]] = 2,
+            track: Union[str, List[str]] = 'bicubic',
+            split: str = 'val',
+            transform: Optional[Callable] = None,
+            loader = pil_loader,
+            download: bool = False):
+        super(Set5, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
+                                    track, split, transform, loader, download)
 
-    def get_dir(self, track, split, scale):
-        if (track, split, scale) not in self.track_dirs:
-            if track not in self.get_tracks():
-                raise ValueError(f"Track {track} does not exist. Use one of {list(self.get_tracks())}")
-            if split not in self.get_splits():
-                raise ValueError(f"Split {split} is not valid")
-            raise ValueError(f"Div2K track {track} does not include scale X{scale}")
-        return os.path.join(self.root, self.track_dirs[(track, split, scale)])
+class Set14(FolderByDir):
+    urls = {
+        "https://cv.snu.ac.kr/research/EDSR/benchmark.tar" : "4ace41d33c2384b97e6b320cd0afd6ba"
+    }
+    
+    track_dirs = {
+        ('hr', 'val', 1) : os.path.join('benchmark', 'Set14', 'HR')
+      , ('bicubic', 'val', 2) : os.path.join('benchmark', 'Set14', 'LR_bicubic', 'X2')
+      , ('bicubic', 'val', 3) : os.path.join('benchmark', 'Set14', 'LR_bicubic', 'X3')
+      , ('bicubic', 'val', 4) : os.path.join('benchmark', 'Set14', 'LR_bicubic', 'X4')
+    }
 
-    def list_samples(self, track, split, scale):
-        track_dir = self.get_dir(track, split, scale)
-        all_samples = sorted(os.listdir(track_dir))
-        return [os.path.join(track_dir, s) for s in all_samples]
+    def __init__(
+            self,
+            root: str,
+            scale: Union[int, List[int]] = 2,
+            track: Union[str, List[str]] = 'bicubic',
+            split: str = 'val',
+            transform: Optional[Callable] = None,
+            loader = pil_loader,
+            download: bool = False):
+        super(Set14, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
+                                   track, split, transform, loader, download)
 
-    def init_samples(self):
-        samples = []
-        for track, scale in zip(['hr'] + self.tracks, [1] + self.scales):
-            samples.append(self.list_samples(track, self.split, scale))
-        for i, s in enumerate(samples[1:]):
-            if len(s) != len(samples[0]):
-                raise ValueError(f"Number of files for {self.tracks[i]}X{self.scales[i]} does not match HR")
-        self.samples = []
-        for i in range(len(samples[0])):
-            self.samples.append([s[i] for s in samples])
+class B100(FolderByDir):
+    urls = {
+        "https://cv.snu.ac.kr/research/EDSR/benchmark.tar" : "4ace41d33c2384b97e6b320cd0afd6ba"
+    }
+    
+    track_dirs = {
+        ('hr', 'val', 1) : os.path.join('benchmark', 'B100', 'HR')
+      , ('bicubic', 'val', 2) : os.path.join('benchmark', 'B100', 'LR_bicubic', 'X2')
+      , ('bicubic', 'val', 3) : os.path.join('benchmark', 'B100', 'LR_bicubic', 'X3')
+      , ('bicubic', 'val', 4) : os.path.join('benchmark', 'B100', 'LR_bicubic', 'X4')
+    }
 
-    def download(self):
-        # We just download everything: the X4/X8 datasets are not big anyway
-        for url, md5sum in self.urls.items():
-            torchvision.datasets.utils.download_and_extract_archive(url, self.root, md5=md5sum)
+    def __init__(
+            self,
+            root: str,
+            scale: Union[int, List[int]] = 2,
+            track: Union[str, List[str]] = 'bicubic',
+            split: str = 'val',
+            transform: Optional[Callable] = None,
+            loader = pil_loader,
+            download: bool = False):
+        super(B100, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
+                                   track, split, transform, loader, download)
 
+class Urban100(FolderByDir):
+    urls = {
+        "https://cv.snu.ac.kr/research/EDSR/benchmark.tar" : "4ace41d33c2384b97e6b320cd0afd6ba"
+    }
+    
+    track_dirs = {
+        ('hr', 'val', 1) : os.path.join('benchmark', 'Urban100', 'HR')
+      , ('bicubic', 'val', 2) : os.path.join('benchmark', 'Urban100', 'LR_bicubic', 'X2')
+      , ('bicubic', 'val', 3) : os.path.join('benchmark', 'Urban100', 'LR_bicubic', 'X3')
+      , ('bicubic', 'val', 4) : os.path.join('benchmark', 'Urban100', 'LR_bicubic', 'X4')
+    }
+
+    def __init__(
+            self,
+            root: str,
+            scale: Union[int, List[int]] = 2,
+            track: Union[str, List[str]] = 'bicubic',
+            split: str = 'val',
+            transform: Optional[Callable] = None,
+            loader = pil_loader,
+            download: bool = False):
+        super(Urban100, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
+                                       track, split, transform, loader, download)
+    
