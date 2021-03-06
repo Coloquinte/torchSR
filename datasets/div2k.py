@@ -61,30 +61,30 @@ class Div2K(Folder):
         scales (list): List of the downsampling scales
     """
 
-    urls = [
-        "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_bicubic_X2.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_bicubic_X2.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_bicubic_X3.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_bicubic_X3.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_bicubic_X4.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_bicubic_X4.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_unknown_X2.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_unknown_X2.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_unknown_X3.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_unknown_X3.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_unknown_X4.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_unknown_X4.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_x8.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_x8.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_mild.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_mild.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_difficult.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_difficult.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_wild.zip"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_wild.zip"
-    ]
+    urls = {
+        "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip" : "bdc2d9338d4e574fe81bf7d158758658"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_HR.zip" : "9fcdda83005c5e5997799b69f955ff88"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_bicubic_X2.zip" : "9a637d2ef4db0d0a81182be37fb00692"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_bicubic_X2.zip" : "1512c9a3f7bde2a1a21a73044e46b9cb"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_bicubic_X3.zip" : "ad80b9fe40c049a07a8a6c51bfab3b6d"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_bicubic_X3.zip" : "18b1d310f9f88c13618c287927b29898"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_bicubic_X4.zip" : "76c43ec4155851901ebbe8339846d93d"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_bicubic_X4.zip" : "21962de700c8d368c6ff83314480eff0"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_unknown_X2.zip" : "1396d023072c9aaeb999c28b81315233"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_unknown_X2.zip" : "d319bd9033573d21de5395e6454f34f8"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_unknown_X3.zip" : "4e651308aaa54d917fb1264395b7f6fa"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_unknown_X3.zip" : "05184168e3608b5c539fbfb46bcade4f"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_unknown_X4.zip" : "e3c7febb1b3f78bd30f9ba15fe8e3956"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_unknown_X4.zip" : "8ac3413102bb3d0adc67012efb8a6c94"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_x8.zip" : "613db1b855721b3d2b26f4194a1d22a6"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_x8.zip" : "c5aeea2004e297e9ff3abfbe143576a5"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_mild.zip" : "807b3e3a5156f35bd3a86c5bbfb674bc"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_mild.zip" : "8c433f812ca532eed62c11ec0de08370"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_difficult.zip" : "5a8f2b9e0c5f5ed0dac271c1293662f4"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_difficult.zip" : "1620af11bf82996bc94df655cb6490fe"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_LR_wild.zip" : "d00982366bffee7c4739ba7ff1316b3b"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_wild.zip" : "aacae8db6bec39151ca5bb9c80bf2f6c"
+    }
 
     track_dirs = {
         ('hr', 'train', 1) : os.path.join('DIV2K_train_HR')
@@ -167,6 +167,6 @@ class Div2K(Folder):
 
     def download(self):
         # We just download everything: the X4/X8 datasets are not big anyway
-        for url in self.urls:
-            torchvision.datasets.utils.download_and_extract_archive(url, self.root)
+        for url, md5sum in self.urls.items():
+            torchvision.datasets.utils.download_and_extract_archive(url, self.root, md5=md5sum)
 
