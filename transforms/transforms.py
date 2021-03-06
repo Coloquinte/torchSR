@@ -7,7 +7,7 @@ import PIL
 import numbers
 
 
-__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomCrop')
+__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomCrop', 'ColorJitter')
 
 
 def apply_all(x, func):
@@ -52,6 +52,16 @@ def get_image_size(img):
     if isinstance(img, torch.Tensor):
         return (img.shape[-1], img.shape[-2])
     raise ValueError("Unsupported image type")
+
+
+def random_uniform(minval, maxval):
+    return float(torch.empty(1).uniform_(minval, maxval))
+
+
+def random_uniform_none(bounds):
+    if bounds is None:
+        return None
+    return random_uniform(bounds[0], bounds[1])
 
 
 class Compose:
@@ -132,11 +142,48 @@ class RandomCrop(nn.Module):
 class ColorJitter(nn.Module):
     def __init__(self, brightness=0, contrast=0, saturation=0, hue=0):
         super(ColorJitter, self).__init__()
-        pass
+        self.brightness = self.param_to_tuple(brightness)
+        self.contrast = self.param_to_tuple(contrast)
+        self.saturation = self.param_to_tuple(saturation)
+        self.hue = self.param_to_tuple(hue, center=0, bounds=[-0.5, 0.5])
+
+    @staticmethod
+    def param_to_tuple(param, center=1.0, bounds=(0.0, float("inf"))):
+        if isinstance(param, (list, tuple)):
+            if len(param) != 2:
+                raise ValueError("ColorJitter params must have two bounds")
+            return (max(bounds[0], param[0]), min(bounds[1], param[1]))
+        if not isinstance(param, numbers.Number):
+            raise ValueError("ColorJitter params must be a number or a pair")
+        if param == 0:
+            return None
+        minval = max(center - param, bounds[0])
+        maxval = min(center + param, bounds[1])
+        return (minval, maxval)
+
+    def get_params(self):
+        brightness_factor = random_uniform_none(self.brightness)
+        contrast_factor = random_uniform_none(self.contrast)
+        saturation_factor = random_uniform_none(self.saturation)
+        hue_factor = random_uniform_none(self.hue)
+        return (brightness_factor, contrast_factor, saturation_factor, hue_factor)
+
+    def apply_jitter(self, img, brightness_factor, contrast_factor, saturation_factor, hue_factor):
+        if brightness_factor is not None:
+            img = F.adjust_brightness(img, brightness_factor)
+        if contrast_factor is not None:
+            img = F.adjust_contrast(img, contrast_factor)
+        if saturation_factor is not None:
+            img = F.adjust_saturation(img, saturation_factor)
+        if hue_factor is not None:
+            img = F.adjust_hue(img, hue_factor)
+        return img
 
     def forward(self, x):
-        # TODO
-        pass
+        brightness_factor, contrast_factor, saturation_factor, hue_factor = self.get_params()
+        print(f"Jitter params {self.brightness} {self.contrast} {self.saturation} {self.hue}")
+        print(f"Jitter with {brightness_factor} {contrast_factor} {saturation_factor} {hue_factor}")
+        return apply_all(x, lambda y: self.apply_jitter(y, brightness_factor, contrast_factor, saturation_factor, hue_factor))
 
 
 class RandomHorizontalFlip(nn.Module):
