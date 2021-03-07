@@ -71,6 +71,9 @@ class FolderByDir(Folder):
     def get_splits(self):
         return set(sp for (t, sp, sc) in self.track_dirs.keys())
 
+    def has_split(self, split):
+        return split in self.get_splits()
+
     def get_dir(self, track, split, scale):
         if (track, split, scale) not in self.track_dirs:
             if track not in self.get_tracks():

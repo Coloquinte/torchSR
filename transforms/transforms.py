@@ -7,7 +7,7 @@ import PIL
 import numbers
 
 
-__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomCrop', 'ColorJitter')
+__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomCrop', 'ColorJitter', 'GaussianBlur')
 
 
 def apply_all(x, func):
@@ -62,6 +62,20 @@ def random_uniform_none(bounds):
     if bounds is None:
         return None
     return random_uniform(bounds[0], bounds[1])
+
+
+def param_to_tuple(param, name, center=1.0, bounds=(0.0, float("inf"))):
+    if isinstance(param, (list, tuple)):
+        if len(param) != 2:
+            raise ValueError(f"{name} must have two bounds")
+        return (max(bounds[0], param[0]), min(bounds[1], param[1]))
+    if not isinstance(param, numbers.Number):
+        raise ValueError("f{name} must be a number or a pair")
+    if param == 0:
+        return None
+    minval = max(center - param, bounds[0])
+    maxval = min(center + param, bounds[1])
+    return (minval, maxval)
 
 
 class Compose:
@@ -142,24 +156,10 @@ class RandomCrop(nn.Module):
 class ColorJitter(nn.Module):
     def __init__(self, brightness=0, contrast=0, saturation=0, hue=0):
         super(ColorJitter, self).__init__()
-        self.brightness = self.param_to_tuple(brightness)
-        self.contrast = self.param_to_tuple(contrast)
-        self.saturation = self.param_to_tuple(saturation)
-        self.hue = self.param_to_tuple(hue, center=0, bounds=[-0.5, 0.5])
-
-    @staticmethod
-    def param_to_tuple(param, center=1.0, bounds=(0.0, float("inf"))):
-        if isinstance(param, (list, tuple)):
-            if len(param) != 2:
-                raise ValueError("ColorJitter params must have two bounds")
-            return (max(bounds[0], param[0]), min(bounds[1], param[1]))
-        if not isinstance(param, numbers.Number):
-            raise ValueError("ColorJitter params must be a number or a pair")
-        if param == 0:
-            return None
-        minval = max(center - param, bounds[0])
-        maxval = min(center + param, bounds[1])
-        return (minval, maxval)
+        self.brightness = param_to_tuple(brightness, 'ColorJitter.brightness')
+        self.contrast = param_to_tuple(contrast, 'ColorJitter.contrast')
+        self.saturation = param_to_tuple(saturation, 'ColorJitter.saturation')
+        self.hue = param_to_tuple(hue, 'ColorJitter.hue', center=0, bounds=[-0.5, 0.5])
 
     def get_params(self):
         brightness_factor = random_uniform_none(self.brightness)
@@ -206,4 +206,30 @@ class RandomVerticalFlip(nn.Module):
         if torch.rand(1) < self.p:
             x = apply_all(x, F.vflip)
         return x
+
+
+class GaussianBlur(nn.Module):
+    def __init__(self, kernel_size=None, sigma=(0.1, 2.0), isotropic=False):
+        super(GaussianBlur, self).__init__()
+        self.kernel_size = None if kernel_size is None else to_tuple(kernel_size)
+        self.sigma = param_to_tuple(sigma, 'GaussianBlur.sigma')
+        self.isotropic = isotropic
+
+    def forward(self, x):
+        if self.isotropic:
+            sigma_x = random_uniform(self.sigma[0], self.sigma[1])
+            sigma_y = sigma_x
+        else:
+            sigma_x = random_uniform(self.sigma[0], self.sigma[1])
+            sigma_y = random_uniform(self.sigma[0], self.sigma[1])
+        sigma = (sigma_x, sigma_y)
+        if self.kernel_size is not None:
+            kernel_size = self.kernel_size
+        else:
+            k_x = max(2*int(math.ceil(3*sigma_x))+1, 3)
+            k_y = max(2*int(math.ceil(3*sigma_y))+1, 3)
+            kernel_size = (k_x, k_y)
+        return apply_all(x, lambda y: F.gaussian_blur(y, kernel_size, sigma))
+
+
 
