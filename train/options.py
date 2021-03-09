@@ -1,0 +1,95 @@
+import argparse
+from .enums import *
+
+parser = argparse.ArgumentParser(description='Super-Resolution networks')
+train = parser.add_argument_group('Training')
+data = parser.add_argument_group('Data')
+hw = parser.add_argument_group('Harware')
+model = parser.add_argument_group('Model')
+
+# Model specification: network
+model.add_argument('--network-width', type=int, default=64,
+                   help='number of feature maps')
+model.add_argument('--network-depth', type=int, default=16,
+                   help='number of blocks')
+model.add_argument('--network-backbone', type=BackboneType, default=BackboneType.Sequential,
+                   choices=list(BackboneType),
+                   help='global structure of the network')
+model.add_argument('--kernel-size', type=int, default=3,
+                   help='size of the convolution kernels')
+
+# Model specification: structure
+model.add_argument('--upsampler', type=UpsamplerType, default=UpsamplerType.Conv,
+                   choices=list(UpsamplerType),
+                   help='upsampler type')
+model.add_argument('--skip-connection', type=SkipConnectionType, default=SkipConnectionType.Features,
+                   choices=list(SkipConnectionType),
+                   help='type of skip connection')
+
+# Model specification: block
+model.add_argument('--block-type', type=BlockType, default=BlockType.Residual,
+                   choices=list(BlockType),
+                   help='block type')
+model.add_argument('--block-depth', type=int, default=2,
+                   help='depth of the block')
+model.add_argument('--block-expansion', type=float, default=1.0,
+                   help='block expansion ratio')
+model.add_argument('--block-scale-in', type=float, default=1.0,
+                   help='residual scaling (block input)')
+model.add_argument('--block-scale-out', type=float, default=1.0,
+                   help='residual scaling (block output)')
+
+# Model specification: activation/normalization
+model.add_argument('--activation', type=ActivationType, default=ActivationType.ReLU,
+                   choices=list(ActivationType),
+                   help='activation function')
+model.add_argument('--batch-norm', action='store_true',
+                   help='use batch normalization')
+
+# Model specification: attention
+model.add_argument('--attention', action='store_true',
+                   help='use channel attention')
+model.add_argument('--attention-field', type=int,
+                   help='attention field of view')
+model.add_argument('--attention-squeeze', type=float,
+                   help='attention squeeze factor')
+
+
+# Training specification
+train.add_argument('--scale', type=int, nargs='+', default=2,
+                   help='upsampling scale')
+train.add_argument('--batch-size', type=int, default=16,
+                   help='batch size')
+train.add_argument('--epochs', type=int, default=2000,
+                   help='number of epochs')
+train.add_argument('--patch-size', type=int, default=96,
+                   help='image patch size for training')
+train.add_argument('--lr', type=float, default=0.01,
+                    help='learning rate')
+train.add_argument('--pretrained', action='store_true',
+                   help='use pretrained model')
+
+
+# Dataset specification
+data.add_argument('--evaluate', action='store_true',
+                  help='only evaluate the model')
+data.add_argument('--dataset-train', nargs='+', default=[DatasetType.Div2K],
+                  type=DatasetType, choices=list(DatasetType),
+                  help='Training dataset')
+data.add_argument('--dataset-val', nargs='+', default=[DatasetType.Div2K],
+                  type=DatasetType, choices=list(DatasetType),
+                  help='Validation dataset')
+data.add_argument('--dataset-test', nargs='+', default=[],
+                  type=DatasetType, choices=list(DatasetType),
+                  help='Test dataset (no HR data)')
+data.add_argument('--download-dataset', action='store_true',
+                  help='download the dataset')
+data.add_argument('--dataset-root', type=str, default='./data',
+                  help='root directory for datasets')
+
+
+# Hardware specification
+hw.add_argument('--cpu', action='store_true', help='use CPU instead of GPU')
+
+args = parser.parse_args()
+
