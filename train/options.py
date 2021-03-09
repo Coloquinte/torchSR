@@ -1,5 +1,7 @@
 import argparse
+
 from .enums import *
+
 
 parser = argparse.ArgumentParser(description='Super-Resolution networks')
 train = parser.add_argument_group('Training')
@@ -73,15 +75,12 @@ train.add_argument('--pretrained', action='store_true',
 # Dataset specification
 data.add_argument('--evaluate', action='store_true',
                   help='only evaluate the model')
-data.add_argument('--dataset-train', nargs='+', default=[DatasetType.Div2K],
-                  type=DatasetType, choices=list(DatasetType),
+data.add_argument('--dataset-train', nargs='+', default=[DatasetType.Div2KBicubic],
+                  type=DatasetType, choices=[DatasetType.Div2KBicubic, DatasetType.Div2KUnknown],
                   help='Training dataset')
-data.add_argument('--dataset-val', nargs='+', default=[DatasetType.Div2K],
+data.add_argument('--dataset-val', nargs='+', default=[DatasetType.Div2KBicubic],
                   type=DatasetType, choices=list(DatasetType),
                   help='Validation dataset')
-data.add_argument('--dataset-test', nargs='+', default=[],
-                  type=DatasetType, choices=list(DatasetType),
-                  help='Test dataset (no HR data)')
 data.add_argument('--download-dataset', action='store_true',
                   help='download the dataset')
 data.add_argument('--dataset-root', type=str, default='./data',

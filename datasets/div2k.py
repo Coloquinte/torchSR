@@ -65,22 +65,27 @@ class FolderByDir(Folder):
             self.download()
         self.init_samples()
 
-    def get_tracks(self):
-        return set(t for (t, sp, sc) in self.track_dirs.keys())
+    @classmethod
+    def get_tracks(cls):
+        return set(t for (t, sp, sc) in cls.track_dirs.keys())
 
-    def get_splits(self):
-        return set(sp for (t, sp, sc) in self.track_dirs.keys())
+    @classmethod
+    def get_splits(cls):
+        return set(sp for (t, sp, sc) in cls.track_dirs.keys())
 
+    @classmethod
     def has_split(self, split):
-        return split in self.get_splits()
+        return split in cls.get_splits()
 
     def get_dir(self, track, split, scale):
         if (track, split, scale) not in self.track_dirs:
             if track not in self.get_tracks():
-                raise ValueError(f"Track {track} does not exist. Use one of {list(self.get_tracks())}")
+                raise ValueError(f"{self.__class__.__name__} does not include track {track}. "
+                                 f"Use one of {list(self.get_tracks())}")
             if split not in self.get_splits():
-                raise ValueError(f"Split {split} is not valid")
-            raise ValueError(f"Div2K track {track} does not include scale X{scale}")
+                raise ValueError(f"{self.__class__.__name__} does not include split {split}. "
+                                 f"Use one of {list(self.get_splits())}")
+            raise ValueError(f"{self.__class__.__name__} track {track} does not include scale X{scale}")
         return os.path.join(self.root, self.track_dirs[(track, split, scale)])
 
     def list_samples(self, track, split, scale):
@@ -234,11 +239,12 @@ class Set5(FolderByDir):
             self,
             root: str,
             scale: Union[int, List[int]] = 2,
+            split: str = 'val',
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False):
         super(Set5, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
-                                    'bicubic', 'val', transform, loader, download)
+                                    'bicubic', split, transform, loader, download)
 
 class Set14(FolderByDir):
     """`Set14 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -269,11 +275,12 @@ class Set14(FolderByDir):
             self,
             root: str,
             scale: Union[int, List[int]] = 2,
+            split: str = 'val',
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False):
         super(Set14, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
-                                   'bicubic', 'val', transform, loader, download)
+                                   'bicubic', split, transform, loader, download)
 
 class B100(FolderByDir):
     """`B100 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -304,11 +311,12 @@ class B100(FolderByDir):
             self,
             root: str,
             scale: Union[int, List[int]] = 2,
+            split: str = 'val',
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False):
         super(B100, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
-                                   'bicubic', 'val', transform, loader, download)
+                                   'bicubic', split, transform, loader, download)
 
 class Urban100(FolderByDir):
     """`Urban100 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -339,9 +347,10 @@ class Urban100(FolderByDir):
             self,
             root: str,
             scale: Union[int, List[int]] = 2,
+            split: str = 'val',
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False):
         super(Urban100, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
-                                       'bicubic', 'val', transform, loader, download)
+                                       'bicubic', split, transform, loader, download)
 

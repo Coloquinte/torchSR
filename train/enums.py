@@ -32,7 +32,7 @@ class SkipConnectionType(CEnum):
     Bicubic = 'bicubic'
 
 class DatasetType(CEnum):
-    Div2K = 'div2k'
+    Div2KBicubic = 'div2k_bicubic'
     Div2KUnknown = 'div2k_unknown'
     Set5 = 'set5'
     Set14 = 'set14'
