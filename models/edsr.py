@@ -3,6 +3,8 @@ import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
 
+__all__ = [ 'edsr_r16f64x2', 'edsr_r16f64x3', 'edsr_r16f64x4', 'edsr_r32f256x2', 'edsr_r32f256x3', 'edsr_r32f256x4', ]
+
 url = {
     'r16f64x2': 'https://cv.snu.ac.kr/research/EDSR/models/edsr_baseline_x2-1bc95232.pt',
     'r16f64x3': 'https://cv.snu.ac.kr/research/EDSR/models/edsr_baseline_x3-abf2a44e.pt',

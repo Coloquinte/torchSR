@@ -38,3 +38,8 @@ class DatasetType(CEnum):
     Set14 = 'set14'
     B100 = 'b100'
     Urban100 = 'urban100'
+
+class LossType(CEnum):
+    L1 = "l1"
+    SmoothL1 = "smooth_l1"
+    L2 = "l2"
