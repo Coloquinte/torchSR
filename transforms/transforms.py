@@ -112,13 +112,14 @@ class RandomCrop(nn.Module):
     @staticmethod
     def gcd_size(x):
         if isinstance(x, list) or isinstance(x, tuple):
-            w, h = (x[0].width, x[0].height)
+            w, h = get_image_size(x[0])
             for img in x:
-                w = math.gcd(w, img.width)
-                h = math.gcd(h, img.height)
+                img_w, img_h = get_image_size(img)
+                w = math.gcd(w, img_w)
+                h = math.gcd(h, img_h)
             return (w, h)
         else:
-            return img.width, img.height
+            return get_image_size(x)
 
     def apply_crop(self, img, common_size, common_crop_region):
         i, j, th, tw = common_crop_region
@@ -142,7 +143,7 @@ class RandomCrop(nn.Module):
         img = first_image(x)
         # This size determines a valid cropping region
         common_size = self.gcd_size(x)
-        common_crop_size = self.get_common_crop_size(img.size, common_size)
+        common_crop_size = self.get_common_crop_size(get_image_size(img), common_size)
         if common_crop_size[0] > common_size[0] or common_crop_size[1] > common_size[1]:
             raise ValueError(f"Crop size {self.size} is too large for {img.size}")
         w, h = common_size

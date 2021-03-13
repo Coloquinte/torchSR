@@ -36,6 +36,7 @@ def train(model, optimizer, loss_fn, loader, device):
         l2_avg = AverageMeter()
         for hr, lr in t:
             hr, lr = hr.to(device), lr.to(device)
+            optimizer.zero_grad()
             sr = model(lr)
             loss = loss_fn(sr, hr)
             loss.backward()
@@ -97,10 +98,20 @@ def names_to_dataset(names, split, transform):
     return torch.utils.data.ConcatDataset(datasets)
 
 def get_datasets():
+    transform_train = Compose([
+        RandomCrop(args.patch_size),
+        RandomHorizontalFlip(),
+        RandomVerticalFlip(),
+        ToTensor()
+        ])
+    transform_val = Compose([
+        RandomCrop(args.patch_size),
+        ToTensor()
+        ])
     dataset_train = names_to_dataset(args.dataset_train, 'train',
-        transform=Compose([RandomCrop(args.patch_size), ToTensor()]))
+        transform=transform_train)
     dataset_val = names_to_dataset(args.dataset_val, 'val',
-        transform=ToTensor())
+        transform=transform_val)
     loader_train = torch.utils.data.DataLoader(
         dataset_train, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers)
@@ -151,6 +162,6 @@ if args.evaluate:
 else:
     for epoch in range(args.epochs):
         train(model, optimizer, loss_fn, loader_train, device)
-        if (epoch-1) % args.test_every == 0:
+        if (epoch+1) % args.test_every == 0:
             test(model, loader_val, device)
 
