@@ -67,6 +67,14 @@ def test(model, loader, device):
                 t.set_postfix(PSNR=psnr_avg.get(), SSIM=ssim_avg.get())
 
 
+def load_checkpoint(model, path):
+    pass
+
+
+def save_checkpoint(model, path):
+    pass
+
+
 def name_to_dataset(name, split, transform):
     kwargs = {
         'root' : args.dataset_root,
@@ -105,6 +113,8 @@ def get_datasets():
         ToTensor()
         ])
     transform_val = Compose([
+        # Full images are too big
+        # TODO: use CenterCrop for determinism
         RandomCrop(args.patch_size),
         ToTensor()
         ])
@@ -114,10 +124,10 @@ def get_datasets():
         transform=transform_val)
     loader_train = torch.utils.data.DataLoader(
         dataset_train, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers)
+        num_workers=args.workers, pin_memory=not args.cpu)
     loader_val = torch.utils.data.DataLoader(
         dataset_val, batch_size=1, shuffle=False,
-        num_workers=args.workers)
+        num_workers=args.workers, pin_memory=not args.cpu)
     return loader_train, loader_val
 
 
@@ -140,7 +150,7 @@ def get_model():
         raise ValueError("No model is specified")
     if args.arch not in models.__dict__:
         raise ValueError(f"Unknown model {args.arch}")
-    model = models.__dict__[args.arch](pretrained=args.pretrained)
+    model = models.__dict__[args.arch](pretrained=args.download_model)
     return model
 
 
@@ -164,4 +174,6 @@ else:
         train(model, optimizer, loss_fn, loader_train, device)
         if (epoch+1) % args.test_every == 0:
             test(model, loader_val, device)
+        if (epoch+1) % args.checkpoint_every == 0:
+            save_checkpoint(model)
 

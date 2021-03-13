@@ -12,8 +12,12 @@ model = parser.add_argument_group('Model')
 # Model specification: network
 model.add_argument("--arch", type=str,
                    help='network architecture to use')
-model.add_argument('--pretrained', action='store_true',
-                   help='use pretrained model')
+model.add_argument('--download-model', action='store_true',
+                   help='download pretrained model')
+model.add_argument('--load-checkpoint', type=str,
+                   help='load model checkpoint')
+model.add_argument('--save-checkpoint', type=str,
+                   help='save model checkpoint')
 #model.add_argument('--network-width', type=int, default=64,
 #                   help='number of feature maps')
 #model.add_argument('--network-depth', type=int, default=16,
@@ -69,6 +73,8 @@ train.add_argument('--patch-size', type=int, default=96,
                    help='image patch size for training')
 train.add_argument('--test-every', type=int, default=16,
                    help='number of training epochs between tests')
+train.add_argument('--checkpoint-every', type=int, default=16,
+                   help='number of training epochs between checkpoints')
 train.add_argument('--lr', type=float, default=1e-4,
                     help='learning rate')
 train.add_argument('--loss', type=LossType, default=LossType.SmoothL1,
