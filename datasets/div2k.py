@@ -158,12 +158,12 @@ class Div2K(FolderByDir):
       , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_difficult.zip" : "1620af11bf82996bc94df655cb6490fe"
       , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_valid_LR_wild.zip" : "aacae8db6bec39151ca5bb9c80bf2f6c"
     # Testing datasets; no HR, and not all tracks
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_test_LR_bicubic_X2.zip" : "8acf28bea75077e0e7f091c5b2833740"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_test_LR_bicubic_X3.zip" : "2379a7d09c0466e93783398873edd168"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_test_LR_bicubic_X4.zip" : "6f7cc64f0d8da00b415edd1bc3ef50c3"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_test_LR_unknown_X2.zip" : "8fbf73d6aaa28f88c1826db4527356cf"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_test_LR_unknown_X3.zip" : "0da7370efb61d4a49be29e84c8071cfb"
-      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_test_LR_unknown_X4.zip" : "1bc4643dbadc18617aa19a865f1b2b28"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/DIV2K_test_LR_bicubic_X2.zip" : "8acf28bea75077e0e7f091c5b2833740"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/DIV2K_test_LR_bicubic_X3.zip" : "2379a7d09c0466e93783398873edd168"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/DIV2K_test_LR_bicubic_X4.zip" : "6f7cc64f0d8da00b415edd1bc3ef50c3"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/DIV2K_test_LR_unknown_X2.zip" : "8fbf73d6aaa28f88c1826db4527356cf"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/DIV2K_test_LR_unknown_X3.zip" : "0da7370efb61d4a49be29e84c8071cfb"
+      , "http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/DIV2K_test_LR_unknown_X4.zip" : "1bc4643dbadc18617aa19a865f1b2b28"
     }
 
     track_dirs = {
