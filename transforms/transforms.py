@@ -70,14 +70,14 @@ def get_common_crop_size(crop_size, hr_size, common_size):
     width_scale = hr_size[0] // common_size[0]
     height_scale = hr_size[1] // common_size[1]
     if crop_size[0] % width_scale != 0:
-        raise ValueError(f"Crop width {self.size[0]} is incompatible with the required scale {width_scale}")
+        raise ValueError(f"Crop width {crop_size[0]} is incompatible with the required scale {width_scale}")
     if crop_size[1] % height_scale != 0:
-        raise ValueError(f"Crop height {self.size[1]} is incompatible with the required scale {height_scale}")
+        raise ValueError(f"Crop height {crop_size[1]} is incompatible with the required scale {height_scale}")
     crop_width = crop_size[0] // width_scale
     crop_height = crop_size[1] // height_scale
     common_crop_size = (crop_width, crop_height)
     if common_crop_size[0] > common_size[0] or common_crop_size[1] > common_size[1]:
-        raise ValueError(f"Crop size {self.size} is too large for {img.size}")
+        raise ValueError(f"Crop size {crop_size} is too large for {hr_size}")
     return common_crop_size
 
 
