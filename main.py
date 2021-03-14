@@ -141,6 +141,12 @@ def get_optimizer(model):
     return torch.optim.Adam(model.parameters(), lr=args.lr)
 
 
+def get_scheduler(optimizer):
+    return torch.optim.lr_scheduler.MultiStepLR(
+        optimizer, milestones=args.lr_decay_steps,
+        gamma=1.0/args.lr_decay_rate)
+
+
 def get_loss():
     if args.loss == LossType.L1:
         return nn.L1Loss()
@@ -171,6 +177,7 @@ loader_train, loader_val = get_datasets()
 device = get_device()
 model = get_model().to(device)
 optimizer = get_optimizer(model)
+scheduler = get_scheduler(optimizer)
 loss_fn = get_loss()
 load_checkpoint(args.load_checkpoint, model)
 
@@ -182,4 +189,5 @@ else:
         if (epoch+1) % args.test_every == 0:
             test(model, loader_val, device)
             save_checkpoint(args.save_checkpoint, model)
+        scheduler.step()
 
