@@ -73,8 +73,6 @@ train.add_argument('--patch-size', type=int, default=96,
                    help='image patch size for training')
 train.add_argument('--test-every', type=int, default=16,
                    help='number of training epochs between tests')
-train.add_argument('--checkpoint-every', type=int, default=16,
-                   help='number of training epochs between checkpoints')
 train.add_argument('--lr', type=float, default=1e-4,
                     help='learning rate')
 train.add_argument('--loss', type=LossType, default=LossType.SmoothL1,

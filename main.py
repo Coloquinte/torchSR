@@ -32,6 +32,7 @@ def train(model, optimizer, loss_fn, loader, device):
     with torch.enable_grad():
         model.train()
         t = tqdm(loader)
+        t.set_description("Train")
         l1_avg = AverageMeter()
         l2_avg = AverageMeter()
         for hr, lr in t:
@@ -52,6 +53,7 @@ def test(model, loader, device):
     with torch.no_grad():
         model.eval()
         t = tqdm(loader)
+        t.set_description("Test")
         psnr_avg = AverageMeter()
         ssim_avg = AverageMeter()
         for hr, lr in t:
@@ -67,12 +69,17 @@ def test(model, loader, device):
                 t.set_postfix(PSNR=psnr_avg.get(), SSIM=ssim_avg.get())
 
 
-def load_checkpoint(model, path):
-    pass
+def load_checkpoint(path, model):
+    if path is None:
+        return
+    ckp = torch.load(path)
+    model.load_state_dict(ckp, strict=False)
 
 
-def save_checkpoint(model, path):
-    pass
+def save_checkpoint(path, model):
+    if path is None:
+        return
+    torch.save(model.state_dict(), path)
 
 
 def name_to_dataset(name, split, transform):
@@ -166,6 +173,7 @@ device = get_device()
 model = get_model().to(device)
 optimizer = get_optimizer(model)
 loss_fn = get_loss()
+load_checkpoint(args.load_checkpoint, model)
 
 if args.evaluate:
     test(model, loader_val, device)
@@ -174,6 +182,5 @@ else:
         train(model, optimizer, loss_fn, loader_train, device)
         if (epoch+1) % args.test_every == 0:
             test(model, loader_val, device)
-        if (epoch+1) % args.checkpoint_every == 0:
-            save_checkpoint(model)
+            save_checkpoint(args.save_checkpoint, model)
 
