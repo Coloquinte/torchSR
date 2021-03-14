@@ -7,7 +7,7 @@ import PIL
 import numbers
 
 
-__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomCrop', 'CenterCrop', 'ColorJitter', 'GaussianBlur')
+__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomFlipTurn', 'RandomCrop', 'CenterCrop', 'ColorJitter', 'GaussianBlur')
 
 
 def apply_all(x, func):
@@ -211,8 +211,6 @@ class ColorJitter(nn.Module):
 
     def forward(self, x):
         brightness_factor, contrast_factor, saturation_factor, hue_factor = self.get_params()
-        print(f"Jitter params {self.brightness} {self.contrast} {self.saturation} {self.hue}")
-        print(f"Jitter with {brightness_factor} {contrast_factor} {saturation_factor} {hue_factor}")
         return apply_all(x, lambda y: self.apply_jitter(y, brightness_factor, contrast_factor, saturation_factor, hue_factor))
 
 
@@ -235,6 +233,20 @@ class RandomVerticalFlip(nn.Module):
     def forward(self, x):
         if torch.rand(1) < self.p:
             x = apply_all(x, F.vflip)
+        return x
+
+
+class RandomFlipTurn(nn.Module):
+    def __init__(self):
+        super(RandomFlipTurn, self).__init__()
+
+    def forward(self, x):
+        if torch.rand(1) < 0.5:
+            x = apply_all(x, F.vflip)
+        if torch.rand(1) < 0.5:
+            x = apply_all(x, F.hflip)
+        if torch.rand(1) < 0.5:
+            x = apply_all(x, lambda y: F.rotate(y, 90))
         return x
 
 
