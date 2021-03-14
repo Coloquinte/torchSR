@@ -69,8 +69,6 @@ train.add_argument('--batch-size', type=int, default=16,
                    help='batch size')
 train.add_argument('--epochs', type=int, default=5000,
                    help='number of epochs')
-train.add_argument('--patch-size', type=int, default=96,
-                   help='image patch size for training')
 train.add_argument('--test-every', type=int, default=16,
                    help='number of training epochs between tests')
 train.add_argument('--lr', type=float, default=1e-4,
@@ -93,6 +91,10 @@ data.add_argument('--download-dataset', action='store_true',
                   help='download the dataset')
 data.add_argument('--dataset-root', type=str, default='./data',
                   help='root directory for datasets')
+data.add_argument('--train-patch-size', type=int, default=192,
+                  help='image patch size for training')
+data.add_argument('--val-patch-size', type=int, default=384,
+                  help='image patch size for validation')
 
 
 # Hardware specification

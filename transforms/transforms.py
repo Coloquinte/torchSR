@@ -7,7 +7,7 @@ import PIL
 import numbers
 
 
-__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomCrop', 'ColorJitter', 'GaussianBlur')
+__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomCrop', 'CenterCrop', 'ColorJitter', 'GaussianBlur')
 
 
 def apply_all(x, func):
@@ -52,6 +52,43 @@ def get_image_size(img):
     if isinstance(img, torch.Tensor):
         return (img.shape[-1], img.shape[-2])
     raise ValueError("Unsupported image type")
+
+
+def image_gcd_size(x):
+    if isinstance(x, list) or isinstance(x, tuple):
+        w, h = get_image_size(x[0])
+        for img in x:
+            img_w, img_h = get_image_size(img)
+            w = math.gcd(w, img_w)
+            h = math.gcd(h, img_h)
+        return (w, h)
+    else:
+        return get_image_size(x)
+
+
+def get_common_crop_size(crop_size, hr_size, common_size):
+    width_scale = hr_size[0] // common_size[0]
+    height_scale = hr_size[1] // common_size[1]
+    if crop_size[0] % width_scale != 0:
+        raise ValueError(f"Crop width {self.size[0]} is incompatible with the required scale {width_scale}")
+    if crop_size[1] % height_scale != 0:
+        raise ValueError(f"Crop height {self.size[1]} is incompatible with the required scale {height_scale}")
+    crop_width = crop_size[0] // width_scale
+    crop_height = crop_size[1] // height_scale
+    common_crop_size = (crop_width, crop_height)
+    if common_crop_size[0] > common_size[0] or common_crop_size[1] > common_size[1]:
+        raise ValueError(f"Crop size {self.size} is too large for {img.size}")
+    return common_crop_size
+
+
+def apply_crop(img, common_size, common_crop_region):
+    i, j, th, tw = common_crop_region
+    width, height = get_image_size(img)
+    assert width % common_size[0] == 0
+    assert height % common_size[1] == 0
+    width_scale = width // common_size[0]
+    height_scale = height // common_size[1]
+    return F.crop(img, i * height_scale, j * width_scale, th * height_scale, tw * width_scale)
 
 
 def random_uniform(minval, maxval):
@@ -109,49 +146,41 @@ class RandomCrop(nn.Module):
         self.size = to_tuple(size, 2, "RandomCrop.size")
         # TODO: other torchvision.transforms.RandomCrop options
 
-    @staticmethod
-    def gcd_size(x):
-        if isinstance(x, list) or isinstance(x, tuple):
-            w, h = get_image_size(x[0])
-            for img in x:
-                img_w, img_h = get_image_size(img)
-                w = math.gcd(w, img_w)
-                h = math.gcd(h, img_h)
-            return (w, h)
-        else:
-            return get_image_size(x)
-
-    def apply_crop(self, img, common_size, common_crop_region):
-        i, j, th, tw = common_crop_region
-        width, height = get_image_size(img)
-        width_scale = width // common_size[0]
-        height_scale = height // common_size[1]
-        return F.crop(img, i * height_scale, j * width_scale, th * height_scale, tw * width_scale)
-
-    def get_common_crop_size(self, hr_size, common_size):
-        width_scale = hr_size[0] // common_size[0]
-        height_scale = hr_size[1] // common_size[1]
-        if self.size[0] % width_scale != 0:
-            raise ValueError(f"Crop width {self.size[0]} is incompatible with the required scale {width_scale}")
-        if self.size[1] % height_scale != 0:
-            raise ValueError(f"Crop height {self.size[1]} is incompatible with the required scale {height_scale}")
-        crop_width = self.size[0] // width_scale
-        crop_height = self.size[1] // height_scale
-        return (crop_width, crop_height)
-
     def forward(self, x):
-        img = first_image(x)
+        hr_img = first_image(x)
         # This size determines a valid cropping region
-        common_size = self.gcd_size(x)
-        common_crop_size = self.get_common_crop_size(get_image_size(img), common_size)
-        if common_crop_size[0] > common_size[0] or common_crop_size[1] > common_size[1]:
-            raise ValueError(f"Crop size {self.size} is too large for {img.size}")
+        common_size = image_gcd_size(x)
+        common_crop_size = get_common_crop_size(self.size, get_image_size(hr_img), common_size)
         w, h = common_size
         tw, th = common_crop_size
         i = torch.randint(0, h - th + 1, size=(1, )).item()
         j = torch.randint(0, w - tw + 1, size=(1, )).item()
         common_crop_region = (i, j, th, tw)
-        return apply_all(x, lambda y: self.apply_crop(y, common_size, common_crop_region))
+        return apply_all(x, lambda y: apply_crop(y, common_size, common_crop_region))
+
+
+class CenterCrop(nn.Module):
+    """Crop the center of the given images
+    The location is chosen so that all images are cropped at a pixel boundary,
+    even if they have different resolutions.
+    """
+
+    def __init__(self, size):
+        super(CenterCrop, self).__init__()
+        self.size = to_tuple(size, 2, "CenterCrop.size")
+        # TODO: other torchvision.transforms.CenterCrop options
+
+    def forward(self, x):
+        hr_img = first_image(x)
+        # This size determines a valid cropping region
+        common_size = image_gcd_size(x)
+        common_crop_size = get_common_crop_size(self.size, get_image_size(hr_img), common_size)
+        w, h = common_size
+        tw, th = common_crop_size
+        i = (h - th) // 2
+        j = (w - tw) // 2
+        common_crop_region = (i, j, th, tw)
+        return apply_all(x, lambda y: apply_crop(y, common_size, common_crop_region))
 
 
 class ColorJitter(nn.Module):
