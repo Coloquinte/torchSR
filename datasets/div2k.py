@@ -2,9 +2,11 @@ from PIL import Image
 
 import os
 
+import pickle
 import torch
 import torch.utils.data as data
 import torchvision
+from tqdm import tqdm
 from typing import Any, Callable, List, Optional, Tuple, Union
 
 
@@ -20,28 +22,37 @@ class Folder(data.Dataset):
             root: str,
             scales: List[Union[int, float]],
             transform: Optional[Callable] = None,
-            loader = pil_loader
+            loader = pil_loader,
+            predecode: bool = False
     ) -> None:
         super(Folder, self).__init__()
         self.root = os.path.expanduser(root)
         self.loader = loader
         self.transform = transform
         self.scales = scales
+        self.predecode = predecode
         self.samples = []
 
     def __getitem__(self, index: int) -> List[Any]:
-        images = [self.loader(path) for path in self.samples[index]]
+        images = []
+        for path in self.samples[index]:
+            if self.predecode:
+                with open(os.path.splitext(path)[0] + '.pickle', 'rb') as f:
+                    images.append(pickle.load(f))
+            else:
+                images.append(self.loader(path))
         if self.transform is not None:
             images = self.transform(images)
         return images
-        
 
     def __len__(self) -> int:
         return len(self.samples)
 
+
 class FolderByDir(Folder):
     urls = {}
     track_dirs = {}
+    extensions = ( '.bmp', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp' )
 
     def __init__(
             self,
@@ -51,7 +62,8 @@ class FolderByDir(Folder):
             split: str = 'train',
             transform: Optional[Callable] = None,
             loader = pil_loader,
-            download: bool = False):
+            download: bool = False,
+            predecode: bool = False):
         if isinstance(scale, int):
             scale = [scale]
         if isinstance(track, str):
@@ -60,10 +72,12 @@ class FolderByDir(Folder):
             raise ValueError("The number of scales and of tracks must be the same")
         self.split = split
         self.tracks = track
-        super(FolderByDir, self).__init__(root, scale, transform, loader)
+        super(FolderByDir, self).__init__(root, scale, transform, loader, predecode)
         if download:
             self.download()
         self.init_samples()
+        if download and predecode:
+            self.do_predecode()
 
     @classmethod
     def get_tracks(cls):
@@ -91,6 +105,7 @@ class FolderByDir(Folder):
     def list_samples(self, track, split, scale):
         track_dir = self.get_dir(track, split, scale)
         all_samples = sorted(os.listdir(track_dir))
+        all_samples = [s for s in all_samples if s.lower().endswith(self.extensions)]
         return [os.path.join(track_dir, s) for s in all_samples]
 
     def init_samples(self):
@@ -115,6 +130,16 @@ class FolderByDir(Folder):
         for url, md5sum in self.urls.items():
             torchvision.datasets.utils.download_and_extract_archive(url, self.root, md5=md5sum)
 
+    def do_predecode(self):
+        t = tqdm(self.samples)
+        t.set_description("Predecode")
+        for sample in t:
+            images = [self.loader(path) for path in sample]
+            for path, image in zip(sample, images):
+                with open(os.path.splitext(path)[0] + '.pickle', 'wb') as f:
+                    pickle.dump(image, f)
+
+
 class Div2K(FolderByDir):
     """`DIV2K <https://data.vision.ee.ethz.ch/cvl/DIV2K/>` Superresolution Dataset
 
@@ -130,6 +155,7 @@ class Div2K(FolderByDir):
         download (boolean, optional): If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+        predecode (boolean, optional): If true, decompress the image files to disk
     """
 
     urls = {
@@ -206,9 +232,12 @@ class Div2K(FolderByDir):
             split: str = 'train',
             transform: Optional[Callable] = None,
             loader = pil_loader,
-            download: bool = False):
-        super(Div2K, self).__init__(os.path.join(root, 'DIV2K'), scale,
-                                    track, split, transform, loader, download)
+            download: bool = False,
+            predecode: bool = True):
+        super(Div2K, self).__init__(os.path.join(root, 'DIV2K'),
+                                    scale, track, split, transform,
+                                    loader, download, predecode)
+
 
 class Set5(FolderByDir):
     """`Set5 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -222,6 +251,7 @@ class Set5(FolderByDir):
         download (boolean, optional): If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+        predecode (boolean, optional): If true, decompress the image files to disk
     """
 
     urls = {
@@ -242,9 +272,12 @@ class Set5(FolderByDir):
             split: str = 'val',
             transform: Optional[Callable] = None,
             loader = pil_loader,
-            download: bool = False):
-        super(Set5, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
-                                    'bicubic', split, transform, loader, download)
+            download: bool = False,
+            predecode: bool = True):
+        super(Set5, self).__init__(os.path.join(root, 'SRBenchmarks'),
+                                   scale, 'bicubic', split, transform,
+                                   loader, download, predecode)
+
 
 class Set14(FolderByDir):
     """`Set14 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -258,6 +291,7 @@ class Set14(FolderByDir):
         download (boolean, optional): If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+        predecode (boolean, optional): If true, decompress the image files to disk
     """
 
     urls = {
@@ -278,9 +312,12 @@ class Set14(FolderByDir):
             split: str = 'val',
             transform: Optional[Callable] = None,
             loader = pil_loader,
-            download: bool = False):
-        super(Set14, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
-                                   'bicubic', split, transform, loader, download)
+            download: bool = False,
+            predecode: bool = True):
+        super(Set14, self).__init__(os.path.join(root, 'SRBenchmarks'),
+                                    scale, 'bicubic', split, transform,
+                                    loader, download, predecode)
+
 
 class B100(FolderByDir):
     """`B100 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -294,6 +331,7 @@ class B100(FolderByDir):
         download (boolean, optional): If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+        predecode (boolean, optional): If true, decompress the image files to disk
     """
 
     urls = {
@@ -314,9 +352,11 @@ class B100(FolderByDir):
             split: str = 'val',
             transform: Optional[Callable] = None,
             loader = pil_loader,
-            download: bool = False):
-        super(B100, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
-                                   'bicubic', split, transform, loader, download)
+            download: bool = False,
+            predecode: bool = True):
+        super(B100, self).__init__(os.path.join(root, 'SRBenchmarks'),
+                                   scale, 'bicubic', split, transform,
+                                   loader, download, predecode)
 
 class Urban100(FolderByDir):
     """`Urban100 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -330,6 +370,7 @@ class Urban100(FolderByDir):
         download (boolean, optional): If true, downloads the dataset from the internet and
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
+        predecode (boolean, optional): If true, decompress the image files to disk
     """
 
     urls = {
@@ -350,7 +391,9 @@ class Urban100(FolderByDir):
             split: str = 'val',
             transform: Optional[Callable] = None,
             loader = pil_loader,
-            download: bool = False):
-        super(Urban100, self).__init__(os.path.join(root, 'SRBenchmarks'), scale,
-                                       'bicubic', split, transform, loader, download)
+            download: bool = False,
+            predecode: bool = True):
+        super(Urban100, self).__init__(os.path.join(root, 'SRBenchmarks'),
+                                       scale, 'bicubic', split, transform,
+                                       loader, download, predecode)
 
