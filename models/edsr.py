@@ -3,7 +3,7 @@ import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
 
-__all__ = [ 'edsr_r16f64x2', 'edsr_r16f64x3', 'edsr_r16f64x4', 'edsr_r32f256x2', 'edsr_r32f256x3', 'edsr_r32f256x4', ]
+__all__ = [ 'edsr_r16f64', 'edsr_r32f256', ]
 
 url = {
     'r16f64x2': 'https://cv.snu.ac.kr/research/EDSR/models/edsr_baseline_x2-1bc95232.pt',
@@ -91,6 +91,9 @@ class Upsampler(nn.Sequential):
 class EDSR(nn.Module):
     def __init__(self, n_resblocks, n_feats, scale, res_scale, pretrained=False):
         super(EDSR, self).__init__()
+        if len(scale) != 1:
+            raise ValueError("Exactly one scale is required for EDSR")
+        scale = scale[0]
 
         kernel_size = 3 
         n_colors = 3
@@ -148,25 +151,9 @@ class EDSR(nn.Module):
         self.load_state_dict(state_dict)
 
 
-def edsr_r16f64x2(pretrained=False):
-    return EDSR(16, 64, 2, 1.0, pretrained)
+def edsr_r16f64(scale, pretrained=False):
+    return EDSR(16, 64, scale, 1.0, pretrained)
 
 
-def edsr_r16f64x3(pretrained=False):
-    return EDSR(16, 64, 3, 1.0, pretrained)
-
-
-def edsr_r16f64x4(pretrained=False):
-    return EDSR(16, 64, 4, 1.0, pretrained)
-
-
-def edsr_r32f256x2(pretrained=False):
-    return EDSR(32, 256, 2, 0.1, pretrained)
-
-
-def edsr_r32f256x3(pretrained=False):
-    return EDSR(32, 256, 3, 0.1, pretrained)
-
-
-def edsr_r32f256x4(pretrained=False):
-    return EDSR(32, 256, 4, 0.1, pretrained)
+def edsr_r32f256(scale, pretrained=False):
+    return EDSR(32, 256, scale, 0.1, pretrained)

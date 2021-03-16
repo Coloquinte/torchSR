@@ -63,7 +63,7 @@ model.add_argument('--save-checkpoint', type=str,
 
 
 # Training specification
-train.add_argument('--scale', type=int, nargs='+', default=2,
+train.add_argument('--scale', type=int, nargs='+', default=[2],
                    help='upsampling scale')
 train.add_argument('--batch-size', type=int, default=16,
                    help='batch size')

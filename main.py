@@ -162,7 +162,7 @@ def get_model():
         raise ValueError("No model is specified")
     if args.arch not in models.__dict__:
         raise ValueError(f"Unknown model {args.arch}")
-    model = models.__dict__[args.arch](pretrained=args.download_model)
+    model = models.__dict__[args.arch](scale=args.scale, pretrained=args.download_model)
     return model
 
 
