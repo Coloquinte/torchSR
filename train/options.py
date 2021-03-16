@@ -67,13 +67,13 @@ train.add_argument('--scale', type=int, nargs='+', default=2,
                    help='upsampling scale')
 train.add_argument('--batch-size', type=int, default=16,
                    help='batch size')
-train.add_argument('--epochs', type=int, default=4800,
+train.add_argument('--epochs', type=int, default=6000,
                    help='number of epochs')
-train.add_argument('--test-every', type=int, default=16,
+train.add_argument('--test-every', type=int, default=20,
                    help='number of training epochs between tests')
 train.add_argument('--lr', type=float, default=1e-4,
                     help='learning rate')
-train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[3200],
+train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[4000],
                     help='steps for learning rate decay')
 train.add_argument('--lr-decay-rate', type=float, default=10.0,
                     help='learning rate decay per step')
