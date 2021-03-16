@@ -96,9 +96,9 @@ data.add_argument('--download-dataset', action='store_true',
 data.add_argument('--dataset-root', type=str, default='./data',
                   help='root directory for datasets')
 data.add_argument('--train-patch-size', type=int, default=192,
-                  help='image patch size for training')
+                  help='image patch size for training (HR)')
 data.add_argument('--val-patch-size', type=int, default=384,
-                  help='image patch size for validation')
+                  help='image patch size for validation (HR)')
 
 
 # Hardware specification

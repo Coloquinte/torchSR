@@ -60,8 +60,8 @@ def test(model, loader, device):
             hr, lr = hr.to(device), lr.to(device)
             sr = model(lr)
             for i in range(sr.shape[0]):
-                img_hr = np.array(F.to_pil_image(hr[i]))
-                img_sr = np.array(F.to_pil_image(sr[i]))
+                img_hr = np.array(F.to_pil_image(hr[i].cpu()))
+                img_sr = np.array(F.to_pil_image(sr[i].cpu()))
                 psnr = skimage.metrics.peak_signal_noise_ratio(img_hr, img_sr)
                 ssim = skimage.metrics.structural_similarity(img_hr, img_sr, gaussian_weights=True, multichannel=True)
                 psnr_avg.update(psnr)
