@@ -1,3 +1,7 @@
+# Implementation from https://github.com/thstkdgus35/EDSR-PyTorch
+# Enhanced Deep Residual Networks for Single Image Super-Resolution
+# https://arxiv.org/abs/1707.02921
+
 import math
 import torch
 import torch.nn as nn
