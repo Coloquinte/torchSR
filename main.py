@@ -46,7 +46,7 @@ def train(model, optimizer, loss_fn, loader, device):
             l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
             l1_avg.update(l1_loss)
             l2_avg.update(l2_loss)
-            t.set_postfix(L1=l1_avg.get(), L2=l2_avg.get())
+            t.set_postfix(L1=f'{l1_avg.get():.4f}', L2=f'{l2_avg.get():.4f}')
 
 
 def test(model, loader, device):
@@ -66,7 +66,7 @@ def test(model, loader, device):
                 ssim = skimage.metrics.structural_similarity(img_hr, img_sr, gaussian_weights=True, multichannel=True)
                 psnr_avg.update(psnr)
                 ssim_avg.update(ssim)
-                t.set_postfix(PSNR=psnr_avg.get(), SSIM=ssim_avg.get())
+                t.set_postfix(PSNR=f'{psnr_avg.get():.2f}', SSIM=f'{ssim_avg.get():.4f}')
 
 
 def load_checkpoint(path, model):
