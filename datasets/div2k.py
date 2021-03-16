@@ -131,13 +131,15 @@ class FolderByDir(Folder):
             torchvision.datasets.utils.download_and_extract_archive(url, self.root, md5=md5sum)
 
     def do_predecode(self):
-        t = tqdm(self.samples)
+        samples = []
+        for track, split, scale in self.track_dirs.keys():
+            samples.extend(self.list_samples(track, split, scale))
+        t = tqdm(samples)
         t.set_description("Predecode")
-        for sample in t:
-            images = [self.loader(path) for path in sample]
-            for path, image in zip(sample, images):
-                with open(os.path.splitext(path)[0] + '.pickle', 'wb') as f:
-                    pickle.dump(image, f)
+        for path in t:
+            image = self.loader(path)
+            with open(os.path.splitext(path)[0] + '.pickle', 'wb') as f:
+                pickle.dump(image, f)
 
 
 class Div2K(FolderByDir):
