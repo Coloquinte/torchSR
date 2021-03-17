@@ -12,7 +12,7 @@ model = parser.add_argument_group('Model')
 # Model specification: network
 model.add_argument("--arch", type=str,
                    help='network architecture to use')
-model.add_argument('--download-model', action='store_true',
+model.add_argument('--download-pretrained', action='store_true',
                    help='download pretrained model')
 model.add_argument('--load-checkpoint', type=str,
                    help='load model checkpoint')
@@ -85,16 +85,16 @@ train.add_argument('--loss', type=LossType, default=LossType.L1,
 # Dataset specification
 data.add_argument('--evaluate', action='store_true',
                   help='only evaluate the model')
+data.add_argument('--download-dataset', action='store_true',
+                  help='download the dataset')
+data.add_argument('--dataset-root', type=str, default='./data',
+                  help='root directory for datasets')
 data.add_argument('--dataset-train', nargs='+', default=[DatasetType.Div2KBicubic],
                   type=DatasetType, choices=[DatasetType.Div2KBicubic, DatasetType.Div2KUnknown],
                   help='Training dataset')
 data.add_argument('--dataset-val', nargs='+', default=[DatasetType.Div2KBicubic],
                   type=DatasetType, choices=list(DatasetType),
                   help='Validation dataset')
-data.add_argument('--download-dataset', action='store_true',
-                  help='download the dataset')
-data.add_argument('--dataset-root', type=str, default='./data',
-                  help='root directory for datasets')
 data.add_argument('--patch-size-train', type=int, default=192,
                   help='image patch size for training (HR)')
 data.add_argument('--patch-size-val', type=int, default=384,
