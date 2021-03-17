@@ -95,9 +95,9 @@ data.add_argument('--download-dataset', action='store_true',
                   help='download the dataset')
 data.add_argument('--dataset-root', type=str, default='./data',
                   help='root directory for datasets')
-data.add_argument('--train-patch-size', type=int, default=192,
+data.add_argument('--patch-size-train', type=int, default=192,
                   help='image patch size for training (HR)')
-data.add_argument('--val-patch-size', type=int, default=384,
+data.add_argument('--patch-size-val', type=int, default=384,
                   help='image patch size for validation (HR)')
 
 

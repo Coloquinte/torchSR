@@ -115,14 +115,14 @@ def names_to_dataset(names, split, transform):
 
 def get_datasets():
     transform_train = Compose([
-        RandomCrop(args.train_patch_size),
+        RandomCrop(args.patch_size_train),
         RandomFlipTurn(),
         ColorJitter(brightness=0.2, contrast=0.05, saturation=0.05),
         ToTensor()
         ])
     transform_val = Compose([
         # Full images are too big: only validate on a centered patch
-        CenterCrop(args.val_patch_size),
+        CenterCrop(args.patch_size_val),
         ToTensor()
         ])
     dataset_train = names_to_dataset(args.dataset_train, 'train',
