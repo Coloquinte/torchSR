@@ -2,7 +2,7 @@ from PIL import Image
 
 import os
 
-import pickle
+import numpy as np
 import torch
 import torch.utils.data as data
 import torchvision
@@ -37,13 +37,22 @@ class Folder(data.Dataset):
         images = []
         for path in self.samples[index]:
             if self.predecode:
-                with open(os.path.splitext(path)[0] + '.pickle', 'rb') as f:
-                    images.append(pickle.load(f))
+                images.append(self.get_or_create_predecode(path))
             else:
                 images.append(self.loader(path))
         if self.transform is not None:
             images = self.transform(images)
         return images
+
+    def get_or_create_predecode(self, path):
+        prepath = os.path.splitext(path)[0] + '.npy'
+        try:
+            arr = np.load(prepath, mmap_mode='r', allow_pickle=False)
+        except IOError:
+            img = self.loader(path)
+            arr = np.array(img)
+            np.save(prepath, arr)
+        return Image.fromarray(arr)
 
     def __len__(self) -> int:
         return len(self.samples)
@@ -76,8 +85,6 @@ class FolderByDir(Folder):
         if download:
             self.download()
         self.init_samples()
-        if download and predecode:
-            self.do_predecode()
 
     @classmethod
     def get_tracks(cls):
@@ -129,17 +136,6 @@ class FolderByDir(Folder):
         # We just always download everything: the X4/X8 datasets are not big anyway
         for url, md5sum in self.urls.items():
             torchvision.datasets.utils.download_and_extract_archive(url, self.root, md5=md5sum)
-
-    def do_predecode(self):
-        samples = []
-        for track, split, scale in self.track_dirs.keys():
-            samples.extend(self.list_samples(track, split, scale))
-        t = tqdm(samples)
-        t.set_description("Predecode")
-        for path in t:
-            image = self.loader(path)
-            with open(os.path.splitext(path)[0] + '.pickle', 'wb') as f:
-                pickle.dump(image, f)
 
 
 class Div2K(FolderByDir):
