@@ -77,7 +77,7 @@ train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[4000],
                     help='steps for learning rate decay')
 train.add_argument('--lr-decay-rate', type=float, default=10.0,
                     help='learning rate decay per step')
-train.add_argument('--loss', type=LossType, default=LossType.SmoothL1,
+train.add_argument('--loss', type=LossType, default=LossType.L1,
                     choices=list(LossType),
                     help='training loss')
 
