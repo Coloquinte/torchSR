@@ -231,7 +231,7 @@ class Div2K(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = True):
+            predecode: bool = False):
         super(Div2K, self).__init__(os.path.join(root, 'DIV2K'),
                                     scale, track, split, transform,
                                     loader, download, predecode)
@@ -271,7 +271,7 @@ class Set5(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = True):
+            predecode: bool = False):
         super(Set5, self).__init__(os.path.join(root, 'SRBenchmarks'),
                                    scale, 'bicubic', split, transform,
                                    loader, download, predecode)
@@ -311,7 +311,7 @@ class Set14(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = True):
+            predecode: bool = False):
         super(Set14, self).__init__(os.path.join(root, 'SRBenchmarks'),
                                     scale, 'bicubic', split, transform,
                                     loader, download, predecode)
@@ -351,7 +351,7 @@ class B100(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = True):
+            predecode: bool = False):
         super(B100, self).__init__(os.path.join(root, 'SRBenchmarks'),
                                    scale, 'bicubic', split, transform,
                                    loader, download, predecode)
@@ -390,7 +390,7 @@ class Urban100(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = True):
+            predecode: bool = False):
         super(Urban100, self).__init__(os.path.join(root, 'SRBenchmarks'),
                                        scale, 'bicubic', split, transform,
                                        loader, download, predecode)
