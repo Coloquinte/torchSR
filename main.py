@@ -122,7 +122,7 @@ def get_datasets():
         ])
     transform_val = Compose([
         # Full images are too big: only validate on a centered patch
-        CenterCrop(args.patch_size_val),
+        CenterCrop(args.patch_size_val, allow_smaller=True),
         ToTensor()
         ])
     dataset_train = names_to_dataset(args.dataset_train, 'train',

@@ -85,7 +85,7 @@ def image_gcd_size(x):
         return get_image_size(x)
 
 
-def get_common_crop_size(crop_size, hr_size, common_size):
+def get_common_crop_size(crop_size, hr_size, common_size, allow_smaller=False):
     width_scale = hr_size[0] // common_size[0]
     height_scale = hr_size[1] // common_size[1]
     if crop_size[0] % width_scale != 0:
@@ -96,6 +96,8 @@ def get_common_crop_size(crop_size, hr_size, common_size):
     crop_height = crop_size[1] // height_scale
     common_crop_size = (crop_width, crop_height)
     if common_crop_size[0] > common_size[0] or common_crop_size[1] > common_size[1]:
+        if allow_smaller:
+            return tuple(min(a, b) for a, b in zip(common_crop_size, common_size))
         raise ValueError(f"Crop size {crop_size} is too large for {hr_size}")
     return common_crop_size
 
@@ -186,16 +188,18 @@ class CenterCrop(nn.Module):
     even if they have different resolutions.
     """
 
-    def __init__(self, size):
+    def __init__(self, size, allow_smaller=False):
         super(CenterCrop, self).__init__()
         self.size = to_tuple(size, 2, "CenterCrop.size")
+        self.allow_smaller = allow_smaller
         # TODO: other torchvision.transforms.CenterCrop options
 
     def forward(self, x):
         hr_img = first_image(x)
         # This size determines a valid cropping region
         common_size = image_gcd_size(x)
-        common_crop_size = get_common_crop_size(self.size, get_image_size(hr_img), common_size)
+        common_crop_size = get_common_crop_size(
+            self.size, get_image_size(hr_img), common_size, self.allow_smaller)
         w, h = common_size
         tw, th = common_crop_size
         i = (h - th) // 2
