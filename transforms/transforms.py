@@ -1,3 +1,4 @@
+import numpy as np
 import torch
 import torch.nn as nn
 import torchvision
@@ -11,6 +12,9 @@ __all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomV
 
 
 def apply_all(x, func):
+    """
+    Apply a function to a list of tensors/images or a single tensor/image
+    """
     if isinstance(x, list) or isinstance(x, tuple):
         return [func(t) for t in x]
     else:
@@ -24,6 +28,15 @@ def first_image(x):
         return x[0]
     else:
         return x
+
+
+def remove_numpy(x):
+    """
+    Transform numpy arrays to Pil Images, so we can apply torchvision transforms
+    """
+    if isinstance(x, np.ndarray):
+        return Image.fromarray(x)
+    return x
 
 
 def smallest_image(x):
@@ -50,7 +63,13 @@ def get_image_size(img):
     if isinstance(img, PIL.Image.Image):
         return (img.width, img.height)
     if isinstance(img, torch.Tensor):
+        if img.ndim < 3:
+            raise ValueError("Unsupported torch tensor (should have 3 dimensions or more)")
         return (img.shape[-1], img.shape[-2])
+    if isinstance(img, np.ndarray):
+        if img.ndim != 3:
+            raise ValueError("Unsupported numpy array (should have 3 dimensions)")
+        return (img.shape[1], img.shape[0])
     raise ValueError("Unsupported image type")
 
 
@@ -88,6 +107,8 @@ def apply_crop(img, common_size, common_crop_region):
     assert height % common_size[1] == 0
     width_scale = width // common_size[0]
     height_scale = height // common_size[1]
+    if isinstance(img, np.ndarray):
+        return PIL.Image.fromarray(img[i*height_scale:(i+th)*height_scale, j * width_scale:(j+tw)*width_scale])
     return F.crop(img, i * height_scale, j * width_scale, th * height_scale, tw * width_scale)
 
 
@@ -210,6 +231,7 @@ class ColorJitter(nn.Module):
         return img
 
     def forward(self, x):
+        x = apply_all(x, remove_numpy)
         brightness_factor, contrast_factor, saturation_factor, hue_factor = self.get_params()
         return apply_all(x, lambda y: self.apply_jitter(y, brightness_factor, contrast_factor, saturation_factor, hue_factor))
 
@@ -220,6 +242,7 @@ class RandomHorizontalFlip(nn.Module):
         self.p = p
 
     def forward(self, x):
+        x = apply_all(x, remove_numpy)
         if torch.rand(1) < self.p:
             x = apply_all(x, F.hflip)
         return x
@@ -231,6 +254,7 @@ class RandomVerticalFlip(nn.Module):
         self.p = p
 
     def forward(self, x):
+        x = apply_all(x, remove_numpy)
         if torch.rand(1) < self.p:
             x = apply_all(x, F.vflip)
         return x
@@ -241,6 +265,7 @@ class RandomFlipTurn(nn.Module):
         super(RandomFlipTurn, self).__init__()
 
     def forward(self, x):
+        x = apply_all(x, remove_numpy)
         if torch.rand(1) < 0.5:
             x = apply_all(x, F.vflip)
         if torch.rand(1) < 0.5:
@@ -258,6 +283,7 @@ class GaussianBlur(nn.Module):
         self.isotropic = isotropic
 
     def forward(self, x):
+        x = apply_all(x, remove_numpy)
         if self.isotropic:
             sigma_x = random_uniform(self.sigma[0], self.sigma[1])
             sigma_y = sigma_x

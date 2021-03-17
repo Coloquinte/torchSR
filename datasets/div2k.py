@@ -52,7 +52,7 @@ class Folder(data.Dataset):
             img = self.loader(path)
             arr = np.array(img)
             np.save(prepath, arr)
-        return Image.fromarray(arr)
+        return arr
 
     def __len__(self) -> int:
         return len(self.samples)
