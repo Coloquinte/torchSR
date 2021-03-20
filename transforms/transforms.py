@@ -1,3 +1,4 @@
+import functools
 import numpy as np
 import torch
 import torch.nn as nn
@@ -19,15 +20,6 @@ def apply_all(x, func):
         return [func(t) for t in x]
     else:
         return func(x)
-
-
-def first_image(x):
-    if isinstance(x, list) or isinstance(x, tuple):
-        if len(x) == 0:
-            raise ValueError("Expected a non-empty image list")
-        return x[0]
-    else:
-        return x
 
 
 def remove_numpy(x):
@@ -73,45 +65,12 @@ def get_image_size(img):
     raise ValueError("Unsupported image type")
 
 
-def image_gcd_size(x):
-    if isinstance(x, list) or isinstance(x, tuple):
-        w, h = get_image_size(x[0])
-        for img in x:
-            img_w, img_h = get_image_size(img)
-            w = math.gcd(w, img_w)
-            h = math.gcd(h, img_h)
-        return (w, h)
-    else:
-        return get_image_size(x)
-
-
-def get_common_crop_size(crop_size, hr_size, common_size, allow_smaller=False):
-    width_scale = hr_size[0] // common_size[0]
-    height_scale = hr_size[1] // common_size[1]
-    if crop_size[0] % width_scale != 0:
-        raise ValueError(f"Crop width {crop_size[0]} is incompatible with the required scale {width_scale}")
-    if crop_size[1] % height_scale != 0:
-        raise ValueError(f"Crop height {crop_size[1]} is incompatible with the required scale {height_scale}")
-    crop_width = crop_size[0] // width_scale
-    crop_height = crop_size[1] // height_scale
-    common_crop_size = (crop_width, crop_height)
-    if common_crop_size[0] > common_size[0] or common_crop_size[1] > common_size[1]:
-        if allow_smaller:
-            return tuple(min(a, b) for a, b in zip(common_crop_size, common_size))
-        raise ValueError(f"Crop size {crop_size} is too large for {hr_size}")
-    return common_crop_size
-
-
-def apply_crop(img, common_size, common_crop_region):
-    i, j, th, tw = common_crop_region
-    width, height = get_image_size(img)
-    assert width % common_size[0] == 0
-    assert height % common_size[1] == 0
-    width_scale = width // common_size[0]
-    height_scale = height // common_size[1]
+def crop(img, top, left, height, width):
+    """Torchvision crop + numpy ndarrau support
+    """
     if isinstance(img, np.ndarray):
-        return PIL.Image.fromarray(img[i*height_scale:(i+th)*height_scale, j * width_scale:(j+tw)*width_scale])
-    return F.crop(img, i * height_scale, j * width_scale, th * height_scale, tw * width_scale)
+        return PIL.Image.fromarray(img[top:top+height, left:left+width])
+    return F.crop(img, top, left, height, width)
 
 
 def random_uniform(minval, maxval):
@@ -138,6 +97,43 @@ def param_to_tuple(param, name, center=1.0, bounds=(0.0, float("inf"))):
     return (minval, maxval)
 
 
+def get_crop_params(x, scales):
+    if not isinstance(x, (list, tuple)):
+        # Just the image size with no scaling needed
+        return get_image_size(x), [(1, 1)]
+    assert len(x) == len(scales)
+    sizes = [get_image_size(img) for img in x]
+    # Find a size in which all images fit
+    scaled_widths = [sc[0]*sz[0] for sc, sz in zip(scales, sizes)]
+    scaled_heights = [sc[1]*sz[1] for sc, sz in zip(scales, sizes)]
+    min_width = min(scaled_widths)
+    min_height = min(scaled_heights)
+    # Check that the scales are close enough to the actual sizes (5%)
+    if max(scaled_widths) > min_width * 1.05:
+        raise ValueError(
+            f"Scaled widths range from {min_width} to {max(scaled_widths)}. "
+            f"This does not seem compatible")
+    if max(scaled_heights) > min_height* 1.05:
+        raise ValueError(
+            f"Scaled heights range from {min_height} to {max(scaled_heights)}. "
+            f"This does not seem compatible")
+    # Now find a size so that pixel-accurate cropping is possible for all images
+    pixels_x = functools.reduce(np.lcm, [sc[0] for sc in scales])
+    pixels_y = functools.reduce(np.lcm, [sc[1] for sc in scales])
+    common_size = (min_width // pixels_x, min_height // pixels_y)
+    size_ratios = [(pixels_x // sc[0], pixels_y // sc[1]) for sc in scales]
+    return common_size, size_ratios
+
+
+def check_size_valid(size, scales, name):
+    width, height = size
+    for ws, hs in scales:
+        if width % ws != 0:
+            raise ValueError(f"Scale {ws} is incompatible with {name} {width}")
+        if height % hs != 0:
+            raise ValueError(f"Scale {hs} is incompatible with {name} {height}")
+
+
 class Compose:
     def __init__(self, transforms):
         self.transforms = transforms
@@ -160,52 +156,71 @@ class ToPILImage:
 
 class RandomCrop(nn.Module):
     """Crop the given images at a common random location.
+
     The location is chosen so that all images are cropped at a pixel boundary,
     even if they have different resolutions.
     """
 
-    def __init__(self, size):
+    def __init__(self, size, scales=None):
         super(RandomCrop, self).__init__()
         self.size = to_tuple(size, 2, "RandomCrop.size")
+        self.scales = None
+        if scales is not None:
+            self.scales = [to_tuple(s, 2, "RandomCrop.scale") for s in scales]
+            check_size_valid(self.size, self.scales, "RandomCrop.size")
         # TODO: other torchvision.transforms.RandomCrop options
 
     def forward(self, x):
-        hr_img = first_image(x)
-        # This size determines a valid cropping region
-        common_size = image_gcd_size(x)
-        common_crop_size = get_common_crop_size(self.size, get_image_size(hr_img), common_size)
+        if self.scales is not None:
+            scales = self.scales
+        common_size, size_ratios = get_crop_params(x, scales)
+        crop_ratio = size_ratios[0]
+        common_crop_size = (self.size[0] // crop_ratio[0], self.size[1] // crop_ratio[1])
         w, h = common_size
         tw, th = common_crop_size
         i = torch.randint(0, h - th + 1, size=(1, )).item()
         j = torch.randint(0, w - tw + 1, size=(1, )).item()
-        common_crop_region = (i, j, th, tw)
-        return apply_all(x, lambda y: apply_crop(y, common_size, common_crop_region))
+        if not isinstance(x, (list, tuple)):
+            return crop(x, h, w, th, tw)
+        ret = []
+        for img, (rw, rh) in zip(x, size_ratios):
+            ret.append(crop(img, i * rh, j * rw, th * rh, tw * rw))
+        return ret
 
 
 class CenterCrop(nn.Module):
     """Crop the center of the given images
+
     The location is chosen so that all images are cropped at a pixel boundary,
     even if they have different resolutions.
     """
 
-    def __init__(self, size, allow_smaller=False):
+    def __init__(self, size, allow_smaller=False, scales=None):
         super(CenterCrop, self).__init__()
         self.size = to_tuple(size, 2, "CenterCrop.size")
         self.allow_smaller = allow_smaller
+        self.scales = None
+        if scales is not None:
+            self.scales = [to_tuple(s, 2, "CenterCrop.scale") for s in scales]
+            check_size_valid(self.size, self.scales, "CenterCrop.size")
         # TODO: other torchvision.transforms.CenterCrop options
 
     def forward(self, x):
-        hr_img = first_image(x)
-        # This size determines a valid cropping region
-        common_size = image_gcd_size(x)
-        common_crop_size = get_common_crop_size(
-            self.size, get_image_size(hr_img), common_size, self.allow_smaller)
+        if self.scales is not None:
+            scales = self.scales
+        common_size, size_ratios = get_crop_params(x, scales)
+        crop_ratio = size_ratios[0]
+        common_crop_size = (self.size[0] // crop_ratio[0], self.size[1] // crop_ratio[1])
         w, h = common_size
         tw, th = common_crop_size
         i = (h - th) // 2
         j = (w - tw) // 2
-        common_crop_region = (i, j, th, tw)
-        return apply_all(x, lambda y: apply_crop(y, common_size, common_crop_region))
+        if not isinstance(x, (list, tuple)):
+            return crop(x, h, w, th, tw)
+        ret = []
+        for img, (rw, rh) in zip(x, size_ratios):
+            ret.append(crop(img, i * rh, j * rw, th * rh, tw * rw))
+        return ret
 
 
 class ColorJitter(nn.Module):
