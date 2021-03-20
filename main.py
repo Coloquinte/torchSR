@@ -5,12 +5,12 @@ from train.options import args
 import models
 
 import numpy as np
+import os
 import torch
 import torch.nn as nn
 import torchvision.transforms.functional as F
 from tqdm import tqdm
 import skimage.metrics
-import pdb
 
 
 class AverageMeter:
@@ -28,45 +28,75 @@ class AverageMeter:
         return self.sum / self.count
 
 
-def train(model, optimizer, loss_fn, loader, device):
-    with torch.enable_grad():
-        model.train()
-        t = tqdm(loader)
-        t.set_description("Train")
-        l1_avg = AverageMeter()
-        l2_avg = AverageMeter()
-        for hr, lr in t:
-            hr, lr = hr.to(device), lr.to(device)
-            optimizer.zero_grad()
-            sr = model(lr)
-            loss = loss_fn(sr, hr)
-            loss.backward()
-            optimizer.step()
-            l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
-            l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
-            l1_avg.update(l1_loss)
-            l2_avg.update(l2_loss)
-            t.set_postfix(L1=f'{l1_avg.get():.4f}', L2=f'{l2_avg.get():.4f}')
+class Trainer:
+    def __init__(self, model, optimizer, scheduler, loss_fn, loader_train, loader_val, device):
+        self.model = model
+        self.optimizer = optimizer
+        self.scheduler = scheduler
+        self.loss_fn = loss_fn
+        self.loader_train = loader_train
+        self.loader_val = loader_val
+        self.device = device
+        self.best_psnr = None
+        self.best_epoch = None
 
+    def train_iter(self, epoch):
+        with torch.enable_grad():
+            self.model.train()
+            t = tqdm(self.loader_train)
+            t.set_description(f"Epoch {epoch} train ")
+            l1_avg = AverageMeter()
+            l2_avg = AverageMeter()
+            for hr, lr in t:
+                hr, lr = hr.to(self.device), lr.to(self.device)
+                self.optimizer.zero_grad()
+                sr = self.model(lr)
+                loss = self.loss_fn(sr, hr)
+                loss.backward()
+                optimizer.step()
+                l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
+                l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
+                l1_avg.update(l1_loss)
+                l2_avg.update(l2_loss)
+                t.set_postfix(L1=f'{l1_avg.get():.4f}', L2=f'{l2_avg.get():.4f}')
 
-def test(model, loader, device):
-    with torch.no_grad():
-        model.eval()
-        t = tqdm(loader)
-        t.set_description("Test")
-        psnr_avg = AverageMeter()
-        ssim_avg = AverageMeter()
-        for hr, lr in t:
-            hr, lr = hr.to(device), lr.to(device)
-            sr = model(lr)
-            for i in range(sr.shape[0]):
-                img_hr = np.array(F.to_pil_image(hr[i].cpu()))
-                img_sr = np.array(F.to_pil_image(sr[i].cpu()))
-                psnr = skimage.metrics.peak_signal_noise_ratio(img_hr, img_sr)
-                ssim = skimage.metrics.structural_similarity(img_hr, img_sr, gaussian_weights=True, multichannel=True)
-                psnr_avg.update(psnr)
-                ssim_avg.update(ssim)
-                t.set_postfix(PSNR=f'{psnr_avg.get():.2f}', SSIM=f'{ssim_avg.get():.4f}')
+    def val_iter(self, epoch=None):
+        with torch.no_grad():
+            self.model.eval()
+            t = tqdm(self.loader_val)
+            if epoch is None:
+                t.set_description("Validation")
+            else:
+                t.set_description(f"Epoch {epoch} val   ")
+            psnr_avg = AverageMeter()
+            ssim_avg = AverageMeter()
+            for hr, lr in t:
+                hr, lr = hr.to(self.device), lr.to(self.device)
+                sr = self.model(lr)
+                for i in range(sr.shape[0]):
+                    img_hr = np.array(F.to_pil_image(hr[i].cpu()))
+                    img_sr = np.array(F.to_pil_image(sr[i].cpu()))
+                    psnr = skimage.metrics.peak_signal_noise_ratio(img_hr, img_sr)
+                    ssim = skimage.metrics.structural_similarity(img_hr, img_sr, gaussian_weights=True, multichannel=True)
+                    psnr_avg.update(psnr)
+                    ssim_avg.update(ssim)
+                    t.set_postfix(PSNR=f'{psnr_avg.get():.2f}', SSIM=f'{ssim_avg.get():.4f}')
+            return psnr_avg.get(), ssim_avg.get()
+
+    def evaluate(self):
+        self.val_iter()
+
+    def train(self):
+        for epoch in range(1, args.epochs+1):
+            self.train_iter(epoch)
+            if epoch % args.test_every == 0:
+                psnr, ssim = self.val_iter(epoch)
+                save_checkpoint(args.save_checkpoint, model)
+                if self.best_psnr is None or psnr > self.best_psnr:
+                    self.best_psnr = psnr
+                    self.best_epoch = epoch
+                    save_checkpoint(args.save_checkpoint, model, best=True)
+            scheduler.step()
 
 
 def load_checkpoint(path, model):
@@ -76,9 +106,12 @@ def load_checkpoint(path, model):
     model.load_state_dict(ckp, strict=False)
 
 
-def save_checkpoint(path, model):
+def save_checkpoint(path, model, best=False):
     if path is None:
         return
+    if best:
+        base, ext = os.path.splitext(path)
+        path = base + "_best" + ext
     torch.save(model.state_dict(), path)
 
 
@@ -182,13 +215,10 @@ scheduler = get_scheduler(optimizer)
 loss_fn = get_loss()
 load_checkpoint(args.load_checkpoint, model)
 
+trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device)
+
 if args.evaluate:
-    test(model, loader_val, device)
+    trainer.evaluate()
 else:
-    for epoch in range(args.epochs):
-        train(model, optimizer, loss_fn, loader_train, device)
-        if (epoch+1) % args.test_every == 0:
-            test(model, loader_val, device)
-            save_checkpoint(args.save_checkpoint, model)
-        scheduler.step()
+    trainer.train()
 
