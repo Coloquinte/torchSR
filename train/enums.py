@@ -1,9 +1,15 @@
 
 from enum import Enum
 
+
 class CEnum(Enum):
     def __str__(self):
         return self.value
+
+    @classmethod
+    def _missing_(cls, value):
+        return cls(value.lower())
+
 
 class BlockType(CEnum):
     Residual = 'residual'
