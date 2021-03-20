@@ -8,6 +8,8 @@ import math
 import PIL
 import numbers
 
+from typing import List, Tuple, Union
+
 
 __all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomFlipTurn', 'RandomCrop', 'CenterCrop', 'ColorJitter', 'GaussianBlur')
 
@@ -161,18 +163,17 @@ class RandomCrop(nn.Module):
     even if they have different resolutions.
     """
 
-    def __init__(self, size, scales=None):
+    def __init__(self,
+                 size: Union[int, Tuple[int, int]],
+                 scales: List[int]):
         super(RandomCrop, self).__init__()
         self.size = to_tuple(size, 2, "RandomCrop.size")
-        self.scales = None
-        if scales is not None:
-            self.scales = [to_tuple(s, 2, "RandomCrop.scale") for s in scales]
-            check_size_valid(self.size, self.scales, "RandomCrop.size")
+        self.scales = [to_tuple(s, 2, "RandomCrop.scale") for s in scales]
+        check_size_valid(self.size, self.scales, "RandomCrop.size")
         # TODO: other torchvision.transforms.RandomCrop options
 
     def forward(self, x):
-        if self.scales is not None:
-            scales = self.scales
+        scales = self.scales
         common_size, size_ratios = get_crop_params(x, scales)
         crop_ratio = size_ratios[0]
         common_crop_size = (self.size[0] // crop_ratio[0], self.size[1] // crop_ratio[1])
@@ -195,19 +196,19 @@ class CenterCrop(nn.Module):
     even if they have different resolutions.
     """
 
-    def __init__(self, size, allow_smaller=False, scales=None):
+    def __init__(self,
+                 size: Union[int, Tuple[int, int]],
+                 scales: List[int],
+                 allow_smaller: bool = False):
         super(CenterCrop, self).__init__()
         self.size = to_tuple(size, 2, "CenterCrop.size")
         self.allow_smaller = allow_smaller
-        self.scales = None
-        if scales is not None:
-            self.scales = [to_tuple(s, 2, "CenterCrop.scale") for s in scales]
-            check_size_valid(self.size, self.scales, "CenterCrop.size")
+        self.scales = [to_tuple(s, 2, "CenterCrop.scale") for s in scales]
+        check_size_valid(self.size, self.scales, "CenterCrop.size")
         # TODO: other torchvision.transforms.CenterCrop options
 
     def forward(self, x):
-        if self.scales is not None:
-            scales = self.scales
+        scales = self.scales
         common_size, size_ratios = get_crop_params(x, scales)
         crop_ratio = size_ratios[0]
         common_crop_size = (self.size[0] // crop_ratio[0], self.size[1] // crop_ratio[1])
