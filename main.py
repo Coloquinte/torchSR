@@ -87,7 +87,9 @@ class Trainer:
         self.val_iter()
 
     def train(self):
-        for epoch in range(1, args.epochs+1):
+        t = tqdm(range(1, args.epochs+1))
+        t.set_description("Epochs")
+        for epoch in t:
             self.train_iter(epoch)
             if epoch % args.test_every == 0:
                 psnr, ssim = self.val_iter(epoch)
@@ -96,6 +98,7 @@ class Trainer:
                     self.best_psnr = psnr
                     self.best_epoch = epoch
                     save_checkpoint(args.save_checkpoint, model, best=True)
+                    t.set_postfix(best=epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
             scheduler.step()
 
 
