@@ -175,7 +175,13 @@ def get_datasets():
 
 
 def get_optimizer(model):
-    return torch.optim.Adam(model.parameters(), lr=args.lr)
+    return torch.optim.AdamW(
+        model.parameters(),
+        lr=args.lr,
+        betas=args.adam_betas,
+        eps=args.adam_epsilon,
+        weight_decay=args.weight_decay
+        )
 
 
 def get_scheduler(optimizer):

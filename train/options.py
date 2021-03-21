@@ -73,6 +73,12 @@ train.add_argument('--test-every', type=int, default=20,
                    help='number of training epochs between tests')
 train.add_argument('--lr', type=float, default=1e-4,
                     help='learning rate')
+train.add_argument('--adam-betas', type=float, nargs=2, default=[0.9, 0.999],
+                    help='adam momentum coefficients', metavar=("ADAM_BETA1", "ADAM_BETA2"))
+train.add_argument('--adam-epsilon', type=float, default=1e-8,
+                    help='adam epsilon for stability')
+train.add_argument('--weight-decay', type=float, default=0.,
+                    help='weight decay coefficient')
 train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[4000],
                     help='steps for learning rate decay')
 train.add_argument('--lr-decay-rate', type=float, default=10.0,
