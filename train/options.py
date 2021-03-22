@@ -115,4 +115,7 @@ hw.add_argument('--workers', type=int, default=0,
                 help='number of workers for data loaders')
 
 args = parser.parse_args()
+if args.workers != 0 and args.preload_dataset:
+    raise ValueError("Dataset preloading is incompatible with multiprocessing. "
+                     "--worker argument cannot be given with --preload-dataset")
 
