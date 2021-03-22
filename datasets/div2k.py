@@ -23,7 +23,8 @@ class Folder(data.Dataset):
             scales: List[Union[int, float]],
             transform: Optional[Callable] = None,
             loader = pil_loader,
-            predecode: bool = False
+            predecode: bool = False,
+            preload: bool = False
     ) -> None:
         super(Folder, self).__init__()
         self.root = os.path.expanduser(root)
@@ -31,15 +32,25 @@ class Folder(data.Dataset):
         self.transform = transform
         self.scales = scales
         self.predecode = predecode
+        self.preload = preload
         self.samples = []
+        self.cache = {}
 
     def __getitem__(self, index: int) -> List[Any]:
         images = []
         for path in self.samples[index]:
-            if self.predecode:
-                images.append(self.get_or_create_predecode(path))
+            if self.preload:
+                if path in self.cache:
+                    img = self.cache[path]
+                else:
+                    img = self.loader(path)
+                    self.cache[path] = img
             else:
-                images.append(self.loader(path))
+                if self.predecode:
+                    img = self.get_or_create_predecode(path)
+                else:
+                    img = self.loader(path)
+            images.append(img)
         if self.transform is not None:
             images = self.transform(images)
         return images
@@ -72,7 +83,8 @@ class FolderByDir(Folder):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = False):
+            predecode: bool = False,
+            preload: bool = False):
         if isinstance(scale, int):
             scale = [scale]
         if isinstance(track, str):
@@ -81,7 +93,8 @@ class FolderByDir(Folder):
             raise ValueError("The number of scales and of tracks must be the same")
         self.split = split
         self.tracks = track
-        super(FolderByDir, self).__init__(root, scale, transform, loader, predecode)
+        super(FolderByDir, self).__init__(root, scale, transform, loader,
+                                          predecode, preload)
         if download:
             self.download()
         self.init_samples()
@@ -154,6 +167,7 @@ class Div2K(FolderByDir):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
         predecode (boolean, optional): If true, decompress the image files to disk
+        preload (boolean, optional): If true, load all images in memory
     """
 
     urls = {
@@ -231,10 +245,11 @@ class Div2K(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = False):
+            predecode: bool = False,
+            preload: bool = False):
         super(Div2K, self).__init__(os.path.join(root, 'DIV2K'),
                                     scale, track, split, transform,
-                                    loader, download, predecode)
+                                    loader, download, predecode, preload)
 
 
 class Set5(FolderByDir):
@@ -250,6 +265,7 @@ class Set5(FolderByDir):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
         predecode (boolean, optional): If true, decompress the image files to disk
+        preload (boolean, optional): If true, load all images in memory
     """
 
     urls = {
@@ -271,10 +287,11 @@ class Set5(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = False):
+            predecode: bool = False,
+            preload: bool = False):
         super(Set5, self).__init__(os.path.join(root, 'SRBenchmarks'),
                                    scale, 'bicubic', split, transform,
-                                   loader, download, predecode)
+                                   loader, download, predecode, preload)
 
 
 class Set14(FolderByDir):
@@ -290,6 +307,7 @@ class Set14(FolderByDir):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
         predecode (boolean, optional): If true, decompress the image files to disk
+        preload (boolean, optional): If true, load all images in memory
     """
 
     urls = {
@@ -311,10 +329,11 @@ class Set14(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = False):
+            predecode: bool = False,
+            preload: bool = False):
         super(Set14, self).__init__(os.path.join(root, 'SRBenchmarks'),
                                     scale, 'bicubic', split, transform,
-                                    loader, download, predecode)
+                                    loader, download, predecode, preload)
 
 
 class B100(FolderByDir):
@@ -330,6 +349,7 @@ class B100(FolderByDir):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
         predecode (boolean, optional): If true, decompress the image files to disk
+        preload (boolean, optional): If true, load all images in memory
     """
 
     urls = {
@@ -351,10 +371,11 @@ class B100(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = False):
+            predecode: bool = False,
+            preload: bool = False):
         super(B100, self).__init__(os.path.join(root, 'SRBenchmarks'),
                                    scale, 'bicubic', split, transform,
-                                   loader, download, predecode)
+                                   loader, download, predecode, preload)
 
 class Urban100(FolderByDir):
     """`Urban100 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -369,6 +390,7 @@ class Urban100(FolderByDir):
             puts it in root directory. If dataset is already downloaded, it is not
             downloaded again.
         predecode (boolean, optional): If true, decompress the image files to disk
+        preload (boolean, optional): If true, load all images in memory
     """
 
     urls = {
@@ -390,8 +412,9 @@ class Urban100(FolderByDir):
             transform: Optional[Callable] = None,
             loader = pil_loader,
             download: bool = False,
-            predecode: bool = False):
+            predecode: bool = False,
+            preload: bool = False):
         super(Urban100, self).__init__(os.path.join(root, 'SRBenchmarks'),
                                        scale, 'bicubic', split, transform,
-                                       loader, download, predecode)
+                                       loader, download, predecode, preload)
 

@@ -105,6 +105,8 @@ data.add_argument('--patch-size-train', type=int, default=192,
                   help='image patch size for training (HR)')
 data.add_argument('--patch-size-val', type=int, default=384,
                   help='image patch size for validation (HR)')
+data.add_argument('--preload-dataset', action='store_true',
+                  help='load the whole dataset in memory')
 
 
 # Hardware specification

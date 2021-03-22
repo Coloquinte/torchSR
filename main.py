@@ -125,7 +125,8 @@ def name_to_dataset(name, split, transform):
         'split' : split,
         'transform' : transform,
         'download' : args.download_dataset,
-        'predecode' : True
+        'predecode' : not args.preload_dataset,
+        'preload' : args.preload_dataset,
         }
     if name == DatasetType.Div2KBicubic:
         return Div2K(**kwargs, track='bicubic')
