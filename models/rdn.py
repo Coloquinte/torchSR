@@ -1,11 +1,11 @@
-# Implementation from https://github.com/thstkdgus35/EDSR-PyTorch
+# Implementation from https://github.com/sanghyun-son/EDSR-PyTorch
 # Residual Dense Network for Image Super-Resolution
 # https://arxiv.org/abs/1802.08797
 
 import torch
 import torch.nn as nn
 
-__all__ = [ 'rdn_a', 'rdn_b', ]
+__all__ = [ 'rdn', 'rdn_a', 'rdn_b', ]
 
 
 class RDB_Conv(nn.Module):
@@ -109,3 +109,7 @@ def rdn_a(scale, pretrained=False):
 
 def rdn_b(scale, pretrained=False):
     return RDN(scale, G0=64, D=16, C=8, G=64)
+
+
+def rdn(scale, pretrained=False):
+    return rdn_b(scale, pretrained)
