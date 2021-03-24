@@ -32,9 +32,6 @@ class MeanShift(nn.Conv2d):
 class VDSR(nn.Module):
     def __init__(self, n_resblocks, n_feats, scale, pretrained):
         super(VDSR, self).__init__()
-        if len(scale) != 1:
-            raise ValueError("Exactly one scale is required for VDSR")
-        scale = scale[0]
 
         kernel_size = 3 
         n_colors = 3

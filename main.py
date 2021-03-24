@@ -206,7 +206,9 @@ def get_model():
         raise ValueError("No model is specified")
     if args.arch not in models.__dict__:
         raise ValueError(f"Unknown model {args.arch}")
-    model = models.__dict__[args.arch](scale=args.scale, pretrained=args.download_pretrained)
+    if len(args.scale) != 1:
+        raise ValueError("Multiscale superresolution is not supported")
+    model = models.__dict__[args.arch](scale=args.scale[0], pretrained=args.download_pretrained)
     return model
 
 

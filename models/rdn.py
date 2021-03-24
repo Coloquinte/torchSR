@@ -45,9 +45,6 @@ class RDB(nn.Module):
 class RDN(nn.Module):
     def __init__(self, scale, G0, D, C, G):
         super(RDN, self).__init__()
-        if len(scale) != 1:
-            raise ValueError("Exactly one scale is required for RDN")
-        scale = scale[0]
         r = scale
         kSize = 3
         n_colors = 3

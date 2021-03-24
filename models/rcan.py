@@ -129,9 +129,6 @@ class ResidualGroup(nn.Module):
 class RCAN(nn.Module):
     def __init__(self, n_resgroups, n_resblocks, n_feats, reduction, scale, pretrained=False):
         super(RCAN, self).__init__()
-        if len(scale) != 1:
-            raise ValueError("Exactly one scale is required for RCAN")
-        scale = scale[0]
         
         kernel_size = 3
         n_colors = 3

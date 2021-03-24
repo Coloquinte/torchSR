@@ -8,15 +8,33 @@ It is heavily inspired by [torchvision](https://github.com/pytorch/vision) and [
 
 ```python
 from datasets import Div2K
+from models import edsr
 from transforms import Compose, RandomCrop, ColorJitter
+from torchvision.transforms.functional import to_pil_image, to_tensor
 
 # Div2K dataset, cropped to 256px with brightness jitter
 dataset = Div2K(root="./data", scale=2, download=False,
-                transform=Compose(RandomCrop(256), ColorJitter(brightness=0.2))
+                transform=Compose([
+		    RandomCrop(256, scales=[1, 2]),
+		    ColorJitter(brightness=0.2)
+		]))
+
+# Get the first image in the dataset (High-Res and Low-Res)
+hr, lr = dataset[0]
 
 # Show the first HR image
-hr, lr = dataset[0]
 hr.show()
+
+# Pretrained EDSR model
+model = edsr(scale=2, pretrained=True)
+
+# Run the Super-Resolution model
+lr_t = to_tensor(lr).unsqueeze(0)
+sr_t = model(lr_t)
+sr = to_pil_image(sr_t.squeeze(0))
+
+# Show the super-resolved image
+sr.show()
 ```
 
 
@@ -44,3 +62,13 @@ This repository defines several transforms that follow torchvision conventions:
 * ColorJitter
 * GaussianBlur
 * RandomHorizontalFlip/RandomVerticalFlip
+
+
+
+## Models
+
+The following models are available:
+* VDSR
+* EDSR (pretrained x2 x3 x4)
+* RDN
+* RCAN (pretrained x2 x3 x4 x8)
