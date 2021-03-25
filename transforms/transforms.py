@@ -63,7 +63,7 @@ def get_image_size(img):
     if isinstance(img, np.ndarray):
         if img.ndim != 3:
             raise ValueError("Unsupported numpy array (should have 3 dimensions)")
-        return (img.shape[1], img.shape[0])
+        return (int(img.shape[1]), int(img.shape[0]))
     raise ValueError("Unsupported image type")
 
 
@@ -120,8 +120,8 @@ def get_crop_params(x, scales):
             f"Scaled heights range from {min_height} to {max(scaled_heights)}. "
             f"This does not seem compatible")
     # Now find a size so that pixel-accurate cropping is possible for all images
-    pixels_x = functools.reduce(np.lcm, [sc[0] for sc in scales])
-    pixels_y = functools.reduce(np.lcm, [sc[1] for sc in scales])
+    pixels_x = int(functools.reduce(np.lcm, [sc[0] for sc in scales]))
+    pixels_y = int(functools.reduce(np.lcm, [sc[1] for sc in scales]))
     common_size = (min_width // pixels_x, min_height // pixels_y)
     size_ratios = [(pixels_x // sc[0], pixels_y // sc[1]) for sc in scales]
     return common_size, size_ratios
