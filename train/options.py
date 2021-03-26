@@ -69,6 +69,9 @@ train.add_argument('--batch-size', type=int, default=16,
                    help='batch size')
 train.add_argument('--epochs', type=int, default=6000,
                    help='number of epochs')
+train.add_argument('--loss', type=LossType, default=LossType.L1,
+                    choices=list(LossType),
+                    help='training loss')
 train.add_argument('--test-every', type=int, default=20,
                    help='number of training epochs between tests')
 train.add_argument('--lr', type=float, default=1e-4,
@@ -79,13 +82,12 @@ train.add_argument('--adam-epsilon', type=float, default=1e-8,
                     help='adam epsilon for stability')
 train.add_argument('--weight-decay', type=float, default=0.,
                     help='weight decay coefficient')
+train.add_argument('--gradient-clipping', type=float,
+                    help='clip the gradient values')
 train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[4000],
                     help='steps for learning rate decay')
 train.add_argument('--lr-decay-rate', type=float, default=10.0,
                     help='learning rate decay per step')
-train.add_argument('--loss', type=LossType, default=LossType.L1,
-                    choices=list(LossType),
-                    help='training loss')
 
 
 # Dataset specification

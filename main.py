@@ -33,6 +33,7 @@ class Trainer:
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
+        self.gradient_clipping = None
         self.loss_fn = loss_fn
         self.loader_train = loader_train
         self.loader_val = loader_val
@@ -53,6 +54,8 @@ class Trainer:
                 sr = self.model(lr)
                 loss = self.loss_fn(sr, hr)
                 loss.backward()
+                if self.gradient_clipping is not None:
+                    nn.utils.clip_grad_norm_(model.parameters(), self.gradient_clipping)
                 optimizer.step()
                 l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
                 l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
@@ -197,7 +200,7 @@ def get_loss():
     if args.loss == LossType.SmoothL1:
         return nn.SmoothL1Loss(beta=0.1)
     if args.loss == LossType.L2:
-        return nn.MseLoss()
+        return nn.MSELoss()
     raise ValueError("Unknown loss")
 
 
@@ -228,6 +231,7 @@ loss_fn = get_loss()
 load_checkpoint(args.load_checkpoint, model)
 
 trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device)
+trainer.gradient_clipping = args.gradient_clipping
 
 if args.evaluate:
     trainer.evaluate()
