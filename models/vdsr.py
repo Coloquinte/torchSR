@@ -39,7 +39,11 @@ class VDSR(nn.Module):
         conv=default_conv
 
         self.scale = scale
-        self.url = url['r{}f{}'.format(n_resblocks, n_feats)]
+        url_name = 'r{}f{}'.format(n_resblocks, n_feats)
+        if url_name in url:
+            self.url = url[url_name]
+        else:
+            self.url = None
         self.sub_mean = MeanShift(rgb_range)
         self.add_mean = MeanShift(rgb_range, sign=1)
 
@@ -53,6 +57,9 @@ class VDSR(nn.Module):
 
         self.body = nn.Sequential(*m_body)
 
+        if pretrained:
+            self.load_pretrained()
+
     def forward(self, x):
         x = nn.functional.interpolate(x, scale_factor=self.scale, mode='bicubic', align_corners=False)
         x = self.sub_mean(x)
@@ -60,6 +67,12 @@ class VDSR(nn.Module):
         res += x
         x = self.add_mean(res)
         return x 
+
+    def load_pretrained(self):
+        if self.url is None:
+            raise KeyError("No URL available for this model")
+        state_dict = load_state_dict_from_url(self.url, progress=True)
+        self.load_state_dict(state_dict)
 
 
 def vdsr_r20f64(scale, pretrained=False):
