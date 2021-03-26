@@ -4,6 +4,7 @@ This repository implements datasets and transforms to make Super-Resolution deve
 It is heavily inspired by [torchvision](https://github.com/pytorch/vision) and [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch).
 
 
+
 ## Usage
 
 ```python
@@ -18,24 +19,19 @@ dataset = Div2K(root="./data", scale=2, download=False,
 		    RandomCrop(256, scales=[1, 2]),
 		    ColorJitter(brightness=0.2)
 		]))
-
 # Get the first image in the dataset (High-Res and Low-Res)
 hr, lr = dataset[0]
 
-# Show the first HR image
-hr.show()
-
-# Pretrained EDSR model
+# Download a pretrained EDSR model
 model = edsr(scale=2, pretrained=True)
 
 # Run the Super-Resolution model
 lr_t = to_tensor(lr).unsqueeze(0)
 sr_t = model(lr_t)
 sr = to_pil_image(sr_t.squeeze(0))
-
-# Show the super-resolved image
 sr.show()
 ```
+
 
 
 ## Datasets
@@ -72,3 +68,6 @@ The following models are available:
 * EDSR (pretrained x2 x3 x4)
 * RDN
 * RCAN (pretrained x2 x3 x4 x8)
+
+
+
