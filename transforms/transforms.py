@@ -75,6 +75,12 @@ def crop(img, top, left, height, width):
     return F.crop(img, top, left, height, width)
 
 
+def rot90(img):
+    if isinstance(img, PIL.Image.Image):
+        return img.transpose(PIL.Image.ROTATE_90)
+    return torch.rot90(img)
+
+
 def random_uniform(minval, maxval):
     return float(torch.empty(1).uniform_(minval, maxval))
 
@@ -291,7 +297,7 @@ class RandomFlipTurn(nn.Module):
         if torch.rand(1) < 0.5:
             x = apply_all(x, F.hflip)
         if torch.rand(1) < 0.5:
-            x = apply_all(x, lambda y: F.rotate(y, 90))
+            x = apply_all(x, rot90)
         return x
 
 
