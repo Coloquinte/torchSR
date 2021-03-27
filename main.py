@@ -28,6 +28,14 @@ class AverageMeter:
         return self.sum / self.count
 
 
+def to_image(t):
+    """Workaround a bug in torchvision
+    The conversion of a tensor to a PIL image causes overflows, which result in huge errors"""
+    t = torch.round(255 * t) / 255
+    t = torch.clamp(t, 0, 1)
+    return F.to_pil_image(t.cpu())
+
+
 class Trainer:
     def __init__(self, model, optimizer, scheduler, loss_fn, loader_train, loader_val, device):
         self.model = model
@@ -77,8 +85,8 @@ class Trainer:
                 hr, lr = hr.to(self.device), lr.to(self.device)
                 sr = self.model(lr)
                 for i in range(sr.shape[0]):
-                    img_hr = np.array(F.to_pil_image(hr[i].cpu()))
-                    img_sr = np.array(F.to_pil_image(sr[i].cpu()))
+                    img_hr = np.array(to_image(hr[i]))
+                    img_sr = np.array(to_image(sr[i]))
                     psnr = skimage.metrics.peak_signal_noise_ratio(img_hr, img_sr)
                     ssim = skimage.metrics.structural_similarity(img_hr, img_sr, gaussian_weights=True, multichannel=True)
                     psnr_avg.update(psnr)
