@@ -218,6 +218,8 @@ def get_model():
 def get_device():
     if args.cpu:
         return 'cpu'
+    elif args.gpu is not None:
+        return 'cuda:{}'.format(args.gpu)
     else:
         return 'cuda'
 
