@@ -179,6 +179,8 @@ def get_datasets():
 
 
 def get_optimizer(model):
+    if args.evaluate:
+        return None
     return torch.optim.AdamW(
         model.parameters(),
         lr=args.lr,
@@ -189,6 +191,8 @@ def get_optimizer(model):
 
 
 def get_scheduler(optimizer):
+    if args.evaluate:
+        return None
     return torch.optim.lr_scheduler.MultiStepLR(
         optimizer, milestones=args.lr_decay_steps,
         gamma=1.0/args.lr_decay_rate)
