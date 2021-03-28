@@ -71,3 +71,14 @@ The following models are available:
 
 
 
+## Training
+
+
+A script is available to train the models from scratch:
+```bash
+python main.py -h
+python main.py --arch edsr_baseline --epochs 1000 --loss l1 --dataset-train div2k_bicubic
+python main.py --arch edsr_baseline --evaluate --download-pretrained
+```
+
+It carries additional dependencies: piq, tqdm
