@@ -6,11 +6,11 @@ import models
 
 import numpy as np
 import os
+import piq
 import torch
 import torch.nn as nn
 import torchvision.transforms.functional as F
 from tqdm import tqdm
-import skimage.metrics
 
 
 class AverageMeter:
@@ -83,12 +83,10 @@ class Trainer:
             ssim_avg = AverageMeter()
             for hr, lr in t:
                 hr, lr = hr.to(self.device), lr.to(self.device)
-                sr = self.model(lr)
+                sr = self.model(lr).clamp(0, 1)
                 for i in range(sr.shape[0]):
-                    img_hr = np.array(to_image(hr[i]))
-                    img_sr = np.array(to_image(sr[i]))
-                    psnr = skimage.metrics.peak_signal_noise_ratio(img_hr, img_sr)
-                    ssim = skimage.metrics.structural_similarity(img_hr, img_sr, gaussian_weights=True, multichannel=True)
+                    psnr = piq.psnr(hr[i], sr[i])
+                    ssim = piq.ssim(hr[i], sr[i])
                     psnr_avg.update(psnr)
                     ssim_avg.update(ssim)
                     t.set_postfix(PSNR=f'{psnr_avg.get():.2f}', SSIM=f'{ssim_avg.get():.4f}')
