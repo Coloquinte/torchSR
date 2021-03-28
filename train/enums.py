@@ -49,3 +49,7 @@ class LossType(CEnum):
     L1 = "l1"
     SmoothL1 = "smooth_l1"
     L2 = "l2"
+    SSIM = "ssim"
+    VIF = "vif"
+    LPIPS = "lpips"
+    DISTS = "dists"

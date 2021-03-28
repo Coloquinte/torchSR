@@ -54,6 +54,7 @@ class Trainer:
             self.model.train()
             t = tqdm(self.loader_train)
             t.set_description(f"Epoch {epoch} train ")
+            loss_avg = AverageMeter()
             l1_avg = AverageMeter()
             l2_avg = AverageMeter()
             for hr, lr in t:
@@ -69,7 +70,14 @@ class Trainer:
                 l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
                 l1_avg.update(l1_loss)
                 l2_avg.update(l2_loss)
-                t.set_postfix(L1=f'{l1_avg.get():.4f}', L2=f'{l2_avg.get():.4f}')
+                args_dic = {
+                    'L1' : f'{l1_avg.get():.4f}',
+                    'L2' : f'{l2_avg.get():.4f}'
+                }
+                if not isinstance(self.loss_fn, (nn.L1Loss, nn.MSELoss)):
+                    loss_avg.update(loss.item())
+                    args_dic['Loss'] = f'{loss_avg.get():.4f}'
+                t.set_postfix(**args_dic)
 
     def val_iter(self, epoch=None):
         with torch.no_grad():
@@ -204,6 +212,20 @@ def get_scheduler(optimizer):
         gamma=1.0/args.lr_decay_rate)
 
 
+class PIQLoss(nn.Module):
+    def __init__(self, loss, l1_epsilon=0.01):
+        super(PIQLoss, self).__init__()
+        self.l1_epsilon = l1_epsilon
+        self.loss = loss
+
+    def forward(self, input, target):
+        # Clamp the values to the acceptable range for PIQ
+        input_c = input.clamp(0, 1)
+        target_c = target.clamp(0, 1)
+        l1_loss = self.l1_epsilon * (input_c - input).abs().mean()
+        return self.loss(input_c, target_c) + l1_loss
+
+
 def get_loss():
     if args.loss == LossType.L1:
         return nn.L1Loss()
@@ -211,6 +233,14 @@ def get_loss():
         return nn.SmoothL1Loss(beta=0.1)
     if args.loss == LossType.L2:
         return nn.MSELoss()
+    if args.loss == LossType.SSIM:
+        return PIQLoss(piq.SSIMLoss())
+    if args.loss == LossType.VIF:
+        return PIQLoss(piq.VIFLoss())
+    if args.loss == LossType.LPIPS:
+        return PIQLoss(piq.LPIPS())
+    if args.loss == LossType.DISTS:
+        return PIQLoss(piq.DISTS())
     raise ValueError("Unknown loss")
 
 
