@@ -36,8 +36,14 @@ def to_image(t):
     return F.to_pil_image(t.cpu())
 
 
+def report_model(model, name):
+    n_parameters = 0
+    for p in model.parameters():
+        n_parameters += p.nelement()
+    print(f"Training model {name} with {n_parameters} parameters")
+
 class Trainer:
-    def __init__(self, model, optimizer, scheduler, loss_fn, loader_train, loader_val, device):
+    def __init__(self, model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
@@ -46,6 +52,7 @@ class Trainer:
         self.loader_train = loader_train
         self.loader_val = loader_val
         self.device = device
+        self.dtype = dtype
         self.best_psnr = None
         self.best_epoch = None
 
@@ -58,7 +65,7 @@ class Trainer:
             l1_avg = AverageMeter()
             l2_avg = AverageMeter()
             for hr, lr in t:
-                hr, lr = hr.to(self.device), lr.to(self.device)
+                hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
                 self.optimizer.zero_grad()
                 sr = self.model(lr)
                 loss = self.loss_fn(sr, hr)
@@ -90,7 +97,7 @@ class Trainer:
             psnr_avg = AverageMeter()
             ssim_avg = AverageMeter()
             for hr, lr in t:
-                hr, lr = hr.to(self.device), lr.to(self.device)
+                hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
                 sr = self.model(lr).clamp(0, 1)
                 for i in range(sr.shape[0]):
                     psnr = piq.psnr(hr[i], sr[i])
@@ -264,19 +271,30 @@ def get_device():
         return 'cuda'
 
 
+def get_dtype():
+    if args.datatype is DataType.FP16:
+        return torch.float16
+    elif args.datatype is DataType.BFLOAT:
+        return torch.bfloat16
+    else:
+        return torch.float32
+
+
 loader_train, loader_val = get_datasets()
 device = get_device()
-model = get_model().to(device)
+dtype = get_dtype()
+model = get_model().to(dtype).to(device)
 optimizer = get_optimizer(model)
 scheduler = get_scheduler(optimizer)
 loss_fn = get_loss()
 load_checkpoint(args.load_checkpoint, model)
 
-trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device)
+trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype)
 trainer.gradient_clipping = args.gradient_clipping
 
 if args.evaluate:
     trainer.evaluate()
 else:
+    report_model(model, args.arch)
     trainer.train()
 

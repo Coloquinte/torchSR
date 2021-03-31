@@ -114,6 +114,9 @@ data.add_argument('--preload-dataset', action='store_true',
 # Hardware specification
 hw.add_argument('--cpu', action='store_true', help='use CPU instead of GPU')
 hw.add_argument('--gpu', type=int, help='specify GPU id to use')
+hw.add_argument('--datatype', type=DataType, default=DataType.FP32,
+                choices=list(DataType),
+                help='specify floating-point format')
 hw.add_argument('--workers', type=int, default=0,
                 help='number of workers for data loaders')
 

@@ -53,3 +53,8 @@ class LossType(CEnum):
     VIF = "vif"
     LPIPS = "lpips"
     DISTS = "dists"
+
+class DataType(CEnum):
+    FP16 = "float16"
+    FP32 = "float32"
+    BFLOAT = "bfloat16"
