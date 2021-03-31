@@ -8,7 +8,9 @@ class CEnum(Enum):
 
     @classmethod
     def _missing_(cls, value):
-        return cls(value.lower())
+        for member in cls:
+            if member.value.lower() == value.lower():
+                return member
 
 
 class BlockType(CEnum):
