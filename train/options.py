@@ -103,7 +103,7 @@ data.add_argument('--dataset-train', nargs='+', default=[DatasetType.Div2KBicubi
 data.add_argument('--dataset-val', nargs='+', default=[DatasetType.Div2KBicubic],
                   type=DatasetType, choices=list(DatasetType),
                   help='Validation dataset')
-data.add_argument('--patch-size-train', type=int, default=192,
+data.add_argument('--patch-size-train', type=int, default=96,
                   help='image patch size for training (HR)')
 data.add_argument('--patch-size-val', type=int, default=384,
                   help='image patch size for validation (HR)')
