@@ -263,6 +263,8 @@ def get_model():
 
 
 def get_device():
+    if args.tune_backend:
+        torch.backends.cudnn.benchmark = True
     if args.cpu:
         return 'cpu'
     elif args.gpu is not None:
