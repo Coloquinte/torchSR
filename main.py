@@ -53,14 +53,15 @@ class Trainer:
         self.loader_val = loader_val
         self.device = device
         self.dtype = dtype
-        self.best_psnr = None
+        self.epoch = 0
+        self.best_loss = None
         self.best_epoch = None
 
-    def train_iter(self, epoch):
+    def train_iter(self):
         with torch.enable_grad():
             self.model.train()
             t = tqdm(self.loader_train)
-            t.set_description(f"Epoch {epoch} train ")
+            t.set_description(f"Epoch {self.epoch} train ")
             loss_avg = AverageMeter()
             l1_avg = AverageMeter()
             l2_avg = AverageMeter()
@@ -86,14 +87,14 @@ class Trainer:
                     args_dic['Loss'] = f'{loss_avg.get():.4f}'
                 t.set_postfix(**args_dic)
 
-    def val_iter(self, epoch=None):
+    def val_iter(self, final=True):
         with torch.no_grad():
             self.model.eval()
             t = tqdm(self.loader_val)
-            if epoch is None:
+            if final:
                 t.set_description("Validation")
             else:
-                t.set_description(f"Epoch {epoch} val   ")
+                t.set_description(f"Epoch {self.epoch} val   ")
             psnr_avg = AverageMeter()
             ssim_avg = AverageMeter()
             for hr, lr in t:
@@ -111,35 +112,51 @@ class Trainer:
         self.val_iter()
 
     def train(self):
-        t = tqdm(range(1, args.epochs+1))
+        t = tqdm(total=args.epochs, initial=self.epoch)
         t.set_description("Epochs")
-        for epoch in t:
-            self.train_iter(epoch)
-            if epoch % args.test_every == 0:
-                psnr, ssim = self.val_iter(epoch)
-                save_checkpoint(args.save_checkpoint, model)
-                if self.best_psnr is None or psnr > self.best_psnr:
-                    self.best_psnr = psnr
-                    self.best_epoch = epoch
-                    save_checkpoint(args.save_checkpoint, model, best=True)
-                    t.set_postfix(best=epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
+        while self.epoch < args.epochs:
+            self.epoch += 1
+            self.train_iter()
+            if self.epoch % args.test_every == 0:
+                psnr, ssim = self.val_iter(final=False)
+                is_best = self.best_loss is None or psnr > self.best_loss
+                if is_best:
+                    self.best_loss = psnr
+                    self.best_epoch = self.epoch
+                    t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
+                self.save_checkpoint(best=True)
             scheduler.step()
 
+    def load_checkpoint(self):
+        if args.load_checkpoint is None:
+            return
+        ckp = torch.load(args.load_checkpoint)
+        self.model.load_state_dict(ckp['state_dict'])
+        self.optimizer.load_state_dict(ckp['optimizer'])
+        self.scheduler.load_state_dict(ckp['scheduler'])
+        self.epoch = ckp['epoch']
+        self.best_epoch = ckp['best_epoch']
+        self.best_loss = ckp['best_loss']
 
-def load_checkpoint(path, model):
-    if path is None:
-        return
-    ckp = torch.load(path)
-    model.load_state_dict(ckp, strict=False)
-
-
-def save_checkpoint(path, model, best=False):
-    if path is None:
-        return
-    if best:
-        base, ext = os.path.splitext(path)
-        path = base + "_best" + ext
-    torch.save(model.state_dict(), path)
+    def save_checkpoint(self, best=False):
+        if args.save_checkpoint is None:
+            return
+        path = args.save_checkpoint
+        state = {
+            'state_dict' : self.model.state_dict(),
+            'optimizer' : self.optimizer.state_dict(),
+            'scheduler' : self.scheduler.state_dict(),
+            'epoch' : self.epoch,
+            'best_epoch' : self.best_epoch,
+            'best_loss' : self.best_loss,
+        }
+        torch.save(state, path)
+        if best:
+            base, ext = os.path.splitext(path)
+            best_path = base + "_best" + ext
+            torch.save(state, best_path)
+            model_path = base + "_model" + ext
+            torch.save(self.model.state_dict(), model_path)
 
 
 def name_to_dataset(name, split, transform):
@@ -180,7 +197,7 @@ def get_datasets():
     transform_train = Compose([
         RandomCrop(args.patch_size_train, scales=[1,]+args.scale),
         RandomFlipTurn(),
-        ColorJitter(brightness=0.2, contrast=0.05, saturation=0.05),
+        ColorJitter(brightness=0.1, contrast=0.05, saturation=0.05),
         ToTensor()
         ])
     transform_val = Compose([
@@ -291,9 +308,9 @@ model = get_model().to(dtype).to(device)
 optimizer = get_optimizer(model)
 scheduler = get_scheduler(optimizer)
 loss_fn = get_loss()
-load_checkpoint(args.load_checkpoint, model)
 
 trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype)
+trainer.load_checkpoint()
 
 if args.evaluate:
     trainer.evaluate()
