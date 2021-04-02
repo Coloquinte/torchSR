@@ -42,12 +42,12 @@ def report_model(model, name):
         n_parameters += p.nelement()
     print(f"Training model {name} with {n_parameters} parameters")
 
+
 class Trainer:
     def __init__(self, model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype):
         self.model = model
         self.optimizer = optimizer
         self.scheduler = scheduler
-        self.gradient_clipping = None
         self.loss_fn = loss_fn
         self.loader_train = loader_train
         self.loader_val = loader_val
@@ -70,8 +70,8 @@ class Trainer:
                 sr = self.model(lr)
                 loss = self.loss_fn(sr, hr)
                 loss.backward()
-                if self.gradient_clipping is not None:
-                    nn.utils.clip_grad_norm_(model.parameters(), self.gradient_clipping)
+                if args.gradient_clipping is not None:
+                    nn.utils.clip_grad_norm_(model.parameters(), args.gradient_clipping)
                 optimizer.step()
                 l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
                 l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
@@ -166,6 +166,7 @@ def name_to_dataset(name, split, transform):
         return Urban100(**kwargs)
     raise ValueError("Unknown dataset")
 
+
 def names_to_dataset(names, split, transform):
     datasets = []
     for d in names:
@@ -173,6 +174,7 @@ def names_to_dataset(names, split, transform):
     if len(datasets) == 0:
         return None
     return torch.utils.data.ConcatDataset(datasets)
+
 
 def get_datasets():
     transform_train = Compose([
@@ -237,7 +239,7 @@ def get_loss():
     if args.loss == LossType.L1:
         return nn.L1Loss()
     if args.loss == LossType.SmoothL1:
-        return nn.SmoothL1Loss(beta=0.1)
+        return nn.SmoothL1Loss(beta=0.01)
     if args.loss == LossType.L2:
         return nn.MSELoss()
     if args.loss == LossType.SSIM:
@@ -292,7 +294,6 @@ loss_fn = get_loss()
 load_checkpoint(args.load_checkpoint, model)
 
 trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype)
-trainer.gradient_clipping = args.gradient_clipping
 
 if args.evaluate:
     trainer.evaluate()
