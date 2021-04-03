@@ -131,12 +131,17 @@ class Trainer:
         if args.load_checkpoint is None:
             return
         ckp = torch.load(args.load_checkpoint)
-        self.model.load_state_dict(ckp['state_dict'])
-        self.optimizer.load_state_dict(ckp['optimizer'])
-        self.scheduler.load_state_dict(ckp['scheduler'])
-        self.epoch = ckp['epoch']
-        self.best_epoch = ckp['best_epoch']
-        self.best_loss = ckp['best_loss']
+        if 'state_dict' in ckp:
+            self.model.load_state_dict(ckp['state_dict'])
+            if self.optimizer is not None:
+                self.optimizer.load_state_dict(ckp['optimizer'])
+            if self.scheduler is not None:
+                self.scheduler.load_state_dict(ckp['scheduler'])
+            self.epoch = ckp['epoch']
+            self.best_epoch = ckp['best_epoch']
+            self.best_loss = ckp['best_loss']
+        else:
+            self.model.load_state_dict(ckp)
 
     def save_checkpoint(self, best=False):
         if args.save_checkpoint is None:
