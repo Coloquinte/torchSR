@@ -40,8 +40,11 @@ run.add_argument('--chop-overlap', type=int, default=10,
                  help='overlap between tiles when splitting (LR)')
 
 # Training specification
-train.add_argument('--scale', type=int, nargs='+', default=[2],
-                   help='upsampling scale')
+scales = train.add_mutually_exclusive_group(required=True)
+scales.add_argument('--scale', type=int, nargs='+',
+                    help='upsampling scale')
+scales.add_argument('--scale-range', type=float, nargs=2,
+                    help='upsampling scale')
 train.add_argument('--batch-size', type=int, default=16,
                    help='batch size')
 train.add_argument('--epochs', type=int, default=300,
