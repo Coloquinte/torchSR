@@ -68,7 +68,7 @@ def get_image_size(img):
 
 
 def crop(img, top, left, height, width):
-    """Torchvision crop + numpy ndarrau support
+    """Torchvision crop + numpy ndarray support
     """
     if isinstance(img, np.ndarray):
         return PIL.Image.fromarray(img[top:top+height, left:left+width])
@@ -167,6 +167,12 @@ class RandomCrop(nn.Module):
 
     The location is chosen so that all images are cropped at a pixel boundary,
     even if they have different resolutions.
+
+    Args:
+        size (int or tuple): Size to which the HR image will be cropped.
+        scales (list): Scales of the images received.
+        margin (float): Margin used to bias selection towards the borders of
+            the image.
     """
 
     def __init__(self,
@@ -206,6 +212,12 @@ class CenterCrop(nn.Module):
 
     The location is chosen so that all images are cropped at a pixel boundary,
     even if they have different resolutions.
+
+    Args:
+        size (int or tuple): Size to which the HR image will be cropped.
+        scales (list): Scales of the images received.
+        allow_smaller (boolean, optional): Do not error on images smaller
+            than the given size
     """
 
     def __init__(self,
@@ -226,10 +238,24 @@ class CenterCrop(nn.Module):
         common_crop_size = (self.size[0] // crop_ratio[0], self.size[1] // crop_ratio[1])
         w, h = common_size
         tw, th = common_crop_size
-        i = (h - th) // 2
-        j = (w - tw) // 2
+        # Check the size
+        if th > h:
+            if not self.allow_smaller:
+                raise ValueError("Required height for CenterCrop is larger than the image")
+            th = h
+            i = 0
+        else:
+            i = (h - th) // 2
+        if tw > w:
+            if not self.allow_smaller:
+                raise ValueError("Required height for CenterCrop is larger than the image")
+            tw = w
+            j = 0
+        else:
+            j = (w - tw) // 2
+        # Apply
         if not isinstance(x, (list, tuple)):
-            return crop(x, h, w, th, tw)
+            return crop(x, i, j, th, tw)
         ret = []
         for img, (rw, rh) in zip(x, size_ratios):
             ret.append(crop(img, i * rh, j * rw, th * rh, tw * rw))
