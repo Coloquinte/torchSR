@@ -22,8 +22,8 @@ dataset = Div2K(root="./data", scale=2, download=False,
 # Get the first image in the dataset (High-Res and Low-Res)
 hr, lr = dataset[0]
 
-# Download a pretrained EDSR model
-model = edsr(scale=2, pretrained=True)
+# Download a pretrained NinaSR model
+model = ninasr_b0(scale=2, pretrained=True)
 
 # Run the Super-Resolution model
 lr_t = to_tensor(lr).unsqueeze(0)
@@ -71,6 +71,7 @@ The following pretrained models are available:
 * [EDSR](https://arxiv.org/abs/1707.02921) (x2 x3 x4)
 * [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
 * [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
+* NinaSR, my own model for real-time super resolution (x2 x3 x4 x8)
 
 The following models are implemented without pretrained weights:
 * [VDSR](https://arxiv.org/abs/1511.04587)
