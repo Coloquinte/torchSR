@@ -125,6 +125,7 @@ class Trainer:
                     self.best_epoch = self.epoch
                     t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
                 self.save_checkpoint(best=True)
+            t.update(1)
             scheduler.step()
 
     def load_checkpoint(self):
