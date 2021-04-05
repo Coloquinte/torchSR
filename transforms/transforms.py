@@ -171,10 +171,12 @@ class RandomCrop(nn.Module):
 
     def __init__(self,
                  size: Union[int, Tuple[int, int]],
-                 scales: List[int]):
+                 scales: List[int],
+                 margin: float = 0.0):
         super(RandomCrop, self).__init__()
         self.size = to_tuple(size, 2, "RandomCrop.size")
         self.scales = [to_tuple(s, 2, "RandomCrop.scale") for s in scales]
+        self.margin = margin
         check_size_valid(self.size, self.scales, "RandomCrop.size")
         # TODO: other torchvision.transforms.RandomCrop options
 
@@ -185,8 +187,12 @@ class RandomCrop(nn.Module):
         common_crop_size = (self.size[0] // crop_ratio[0], self.size[1] // crop_ratio[1])
         w, h = common_size
         tw, th = common_crop_size
-        i = torch.randint(0, h - th + 1, size=(1, )).item()
-        j = torch.randint(0, w - tw + 1, size=(1, )).item()
+        margin_w = int(tw * self.margin)
+        margin_h = int(th * self.margin)
+        i = torch.randint(-margin_h, h - th + 1 + margin_h, size=(1, )).item()
+        j = torch.randint(-margin_w, w - tw + 1 + margin_w, size=(1, )).item()
+        i = np.clip(i, 0,  h - th)
+        j = np.clip(j, 0,  w - tw)
         if not isinstance(x, (list, tuple)):
             return crop(x, h, w, th, tw)
         ret = []

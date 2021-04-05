@@ -201,7 +201,7 @@ def names_to_dataset(names, split, transform):
 
 def get_datasets():
     transform_train = Compose([
-        RandomCrop(args.patch_size_train, scales=[1,]+args.scale),
+        RandomCrop(args.patch_size_train, scales=[1,]+args.scale, margin=0.5),
         RandomFlipTurn(),
         ColorJitter(brightness=0.1, contrast=0.05, saturation=0.05),
         ToTensor()
