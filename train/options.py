@@ -14,8 +14,11 @@ model.add_argument("--arch", type=str,
                    help='network architecture to use')
 model.add_argument('--download-pretrained', action='store_true',
                    help='download pretrained model')
-model.add_argument('--load-checkpoint', type=str,
-                   help='load model checkpoint')
+load_ckp = model.add_mutually_exclusive_group()
+load_ckp.add_argument('--load-checkpoint', type=str,
+                      help='load model checkpoint')
+load_ckp.add_argument('--load-pretrained', type=str,
+                      help='load pretrained model')
 model.add_argument('--save-checkpoint', type=str,
                    help='save model checkpoint')
 #model.add_argument('--network-width', type=int, default=64,

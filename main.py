@@ -56,6 +56,8 @@ class Trainer:
         self.epoch = 0
         self.best_loss = None
         self.best_epoch = None
+        self.load_checkpoint()
+        self.load_pretrained()
 
     def train_iter(self):
         with torch.enable_grad():
@@ -132,17 +134,20 @@ class Trainer:
         if args.load_checkpoint is None:
             return
         ckp = torch.load(args.load_checkpoint)
-        if 'state_dict' in ckp:
-            self.model.load_state_dict(ckp['state_dict'])
-            if self.optimizer is not None:
-                self.optimizer.load_state_dict(ckp['optimizer'])
-            if self.scheduler is not None:
-                self.scheduler.load_state_dict(ckp['scheduler'])
-            self.epoch = ckp['epoch']
-            self.best_epoch = ckp['best_epoch']
-            self.best_loss = ckp['best_loss']
-        else:
-            self.model.load_state_dict(ckp)
+        self.model.load_state_dict(ckp['state_dict'])
+        if self.optimizer is not None:
+            self.optimizer.load_state_dict(ckp['optimizer'])
+        if self.scheduler is not None:
+            self.scheduler.load_state_dict(ckp['scheduler'])
+        self.epoch = ckp['epoch']
+        self.best_epoch = ckp['best_epoch']
+        self.best_loss = ckp['best_loss']
+
+    def load_pretrained(self):
+        if args.load_pretrained is None:
+            return
+        ckp = torch.load(args.load_pretrained)
+        self.model.load_state_dict(ckp, strict=False)
 
     def save_checkpoint(self, best=False):
         if args.save_checkpoint is None:
@@ -316,7 +321,6 @@ scheduler = get_scheduler(optimizer)
 loss_fn = get_loss()
 
 trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype)
-trainer.load_checkpoint()
 
 if args.evaluate:
     trainer.evaluate()
