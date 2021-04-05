@@ -61,22 +61,23 @@ This repository defines several transforms that follow torchvision conventions:
 * RandomCrop
 * ColorJitter
 * GaussianBlur
-* RandomHorizontalFlip/RandomVerticalFlip
+* RandomHorizontalFlip/RandomVerticalFlip/RandomFlipTurn
 
 
 
 ## Models
 
-The following models are available:
-* VDSR
-* EDSR (pretrained x2 x3 x4)
-* RDN
-* RCAN (pretrained x2 x3 x4 x8)
+The following pretrained models are available:
+* [EDSR](https://arxiv.org/abs/1707.02921) (x2 x3 x4)
+* [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
+
+The following models are implemented without pretrained weights:
+* [VDSR](https://arxiv.org/abs/1511.04587)
+* [RDN](https://arxiv.org/abs/1802.08797)
 
 
 
 ## Training
-
 
 A script is available to train the models from scratch:
 ```bash
@@ -86,3 +87,10 @@ python main.py --arch edsr_baseline --evaluate --download-pretrained
 ```
 
 It carries additional dependencies: piq, tqdm
+
+
+
+# Contributions
+
+All contributions are welcome! Usability improvements, training improvements, new models, new transforms, ...
+Don't hesitate to contribute your own pretrained models too.
