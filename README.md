@@ -38,13 +38,17 @@ sr.show()
 
 Datasets return a list of images. The first image is the original one, and the next images are downscaled or degraded versions.
 
-The following datasets are available, and can be downloaded automatically:
+The following datasets are available:
 * [DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)
 * [Set5](http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html)
 * [Set14](https://paperswithcode.com/dataset/set14)
 * [B100](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/)
 * [Urban100](https://paperswithcode.com/dataset/urban100)
 
+They are downloaded and extracted automatically when using the `download=True` flag. For a faster download, consider using the script first:
+```bash
+./download_div2k.sh
+```
 
 
 ## Transforms

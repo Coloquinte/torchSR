@@ -1,3 +1,4 @@
+#!/bin/sh
 mkdir -p ./data/DIV2K
 # Training datasets
 wget -P ./data/DIV2K http://data.vision.ee.ethz.ch/cvl/DIV2K/DIV2K_train_HR.zip
@@ -33,4 +34,4 @@ wget -P ./data/DIV2K http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/
 
 mkdir -p ./data/SRBenchmarks
 # Benchmark datasets (Set5, Set14, B100, Urban100)
-wget -P ./data/SRBenchmarks https://cv.snu.ac.kr/research/EDSR/benchmark.tar
+wget -P ./data/SRBenchmarks http://cv.snu.ac.kr/research/EDSR/benchmark.tar
