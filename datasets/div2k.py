@@ -73,6 +73,7 @@ class FolderByDir(Folder):
     urls = {}
     track_dirs = {}
     extensions = ( '.bmp', '.jpg', '.jpeg', '.png', '.tif', '.tiff', '.webp' )
+    already_downloaded_urls = []
 
     def __init__(
             self,
@@ -148,7 +149,10 @@ class FolderByDir(Folder):
     def download(self):
         # We just always download everything: the X4/X8 datasets are not big anyway
         for url, md5sum in self.urls.items():
+            if (self.root, url) in self.already_downloaded_urls:
+                continue
             torchvision.datasets.utils.download_and_extract_archive(url, self.root, md5=md5sum)
+            self.already_downloaded_urls.append((self.root, url))
 
 
 class Div2K(FolderByDir):
