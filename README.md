@@ -69,11 +69,11 @@ This repository defines several transforms that follow torchvision conventions:
 
 The following pretrained models are available:
 * [EDSR](https://arxiv.org/abs/1707.02921) (x2 x3 x4)
+* [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
 * [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
 
 The following models are implemented without pretrained weights:
 * [VDSR](https://arxiv.org/abs/1511.04587)
-* [RDN](https://arxiv.org/abs/1802.08797)
 
 
 
