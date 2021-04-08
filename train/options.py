@@ -77,13 +77,14 @@ train.add_argument('--loss', type=LossType, default=LossType.L1,
                     help='training loss')
 train.add_argument('--test-every', type=int, default=20,
                    help='number of training epochs between tests')
+train.add_argument('--optimizer', type=OptimizerType, default=OptimizerType.ADAM,
+                    choices=list(OptimizerType),
+                    help='optimizer')
 train.add_argument('--lr', type=float, default=1e-4,
                     help='learning rate')
-train.add_argument('--adam-betas', type=float, nargs=2, default=[0.9, 0.999],
-                    help='adam momentum coefficients', metavar=("ADAM_BETA1", "ADAM_BETA2"))
-train.add_argument('--adam-epsilon', type=float, default=1e-8,
-                    help='adam epsilon for stability')
-train.add_argument('--weight-decay', type=float, default=0.,
+train.add_argument('--momentum', type=float, nargs='+',
+                    help='momentum or adam betas coefficients')
+train.add_argument('--weight-decay', type=float,
                     help='weight decay coefficient')
 train.add_argument('--gradient-clipping', type=float,
                     help='clip the gradient values')

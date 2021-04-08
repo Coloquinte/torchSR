@@ -208,7 +208,7 @@ def get_datasets():
     transform_train = Compose([
         RandomCrop(args.patch_size_train, scales=[1,]+args.scale, margin=0.5),
         RandomFlipTurn(),
-        ColorJitter(brightness=0.1, contrast=0.05, saturation=0.05),
+        #ColorJitter(brightness=0.1, contrast=0.05, saturation=0.05),
         ToTensor()
         ])
     transform_val = Compose([
@@ -232,13 +232,34 @@ def get_datasets():
 def get_optimizer(model):
     if args.evaluate:
         return None
-    return torch.optim.AdamW(
-        model.parameters(),
-        lr=args.lr,
-        betas=args.adam_betas,
-        eps=args.adam_epsilon,
-        weight_decay=args.weight_decay
-        )
+
+    kwargs = {}
+    kwargs['lr'] = args.lr
+    if args.weight_decay is not None:
+        kwargs['weight_decay'] = args.weight_decay
+
+    if args.optimizer in [OptimizerType.ADAM,
+                          OptimizerType.ADAMW,
+                          OptimizerType.ADAMAX]:
+        if args.momentum is not None:
+            if len(args.momentum) != 2:
+                raise ValueError("Adam optimizers require 2 momentum values")
+            kwargs['betas'] = args.momentum
+        if args.optimizer is OptimizerType.ADAM:
+            return torch.optim.Adam(model.parameters(), **kwargs)
+        if args.optimizer is OptimizerType.ADAMW:
+            return torch.optim.AdamW(model.parameters(), **kwargs)
+        if args.optimizer is OptimizerType.ADAMAX:
+            return torch.optim.Adamax(model.parameters(), **kwargs)
+    elif args.optimizer in [OptimizerType.SGD,
+                            OptimizerType.NESTEROV]:
+        if args.momentum is not None:
+            if len(args.momentum) != 1:
+                raise ValueError("SGD optimizers require 1 momentum value")
+            kwargs['momentum'] = args.momentum[0]
+        kwargs['nesterov'] = args.optimizer is OptimizerType.NESTEROV
+        return torch.optim.SGD(model.parameters(), **kwargs)
+    assert False
 
 
 def get_scheduler(optimizer):

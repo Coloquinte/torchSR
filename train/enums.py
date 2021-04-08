@@ -56,6 +56,13 @@ class LossType(CEnum):
     LPIPS = "lpips"
     DISTS = "dists"
 
+class OptimizerType(CEnum):
+    ADAM = "adam"
+    ADAMW = "adamw"
+    ADAMAX = "adamax"
+    SGD = "sgd"
+    NESTEROV = "nesterov"
+
 class DataType(CEnum):
     FP16 = "float16"
     FP32 = "float32"
