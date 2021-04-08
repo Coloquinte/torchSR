@@ -58,6 +58,15 @@ class Trainer:
         self.best_epoch = None
         self.load_checkpoint()
         self.load_pretrained()
+        self.writer = None
+        if not args.evaluate:
+            try:
+                # Only if tensorboard is present
+                from torch.utils.tensorboard import SummaryWriter
+                self.writer = SummaryWriter(args.log_dir, purge_step=self.epoch)
+            except ImportError:
+                if args.log_dir is not None:
+                    raise ImportError("tensorboard is required to use --log-dir")
 
     def train_iter(self):
         with torch.enable_grad():
@@ -88,6 +97,9 @@ class Trainer:
                     loss_avg.update(loss.item())
                     args_dic['Loss'] = f'{loss_avg.get():.4f}'
                 t.set_postfix(**args_dic)
+            if self.writer is not None:
+                self.writer.add_scalar('L1', l1_avg.get(), self.epoch)
+                self.writer.add_scalar('L2', l2_avg.get(), self.epoch)
 
     def val_iter(self, final=True):
         with torch.no_grad():
@@ -108,6 +120,9 @@ class Trainer:
                     psnr_avg.update(psnr)
                     ssim_avg.update(ssim)
                     t.set_postfix(PSNR=f'{psnr_avg.get():.2f}', SSIM=f'{ssim_avg.get():.4f}')
+            if self.writer is not None:
+                self.writer.add_scalar('PSNR', psnr_avg.get(), self.epoch)
+                self.writer.add_scalar('SSIM', ssim_avg.get(), self.epoch)
             return psnr_avg.get(), ssim_avg.get()
 
     def evaluate(self):
