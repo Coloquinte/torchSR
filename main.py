@@ -54,7 +54,8 @@ class Trainer:
         self.device = device
         self.dtype = dtype
         self.epoch = 0
-        self.best_loss = None
+        self.best_psnr = None
+        self.best_ssim = None
         self.best_epoch = None
         self.load_checkpoint()
         self.load_pretrained()
@@ -97,9 +98,6 @@ class Trainer:
                     loss_avg.update(loss.item())
                     args_dic['Loss'] = f'{loss_avg.get():.4f}'
                 t.set_postfix(**args_dic)
-            if self.writer is not None:
-                self.writer.add_scalar('L1', l1_avg.get(), self.epoch)
-                self.writer.add_scalar('L2', l2_avg.get(), self.epoch)
 
     def val_iter(self, final=True):
         with torch.no_grad():
@@ -111,18 +109,25 @@ class Trainer:
                 t.set_description(f"Epoch {self.epoch} val   ")
             psnr_avg = AverageMeter()
             ssim_avg = AverageMeter()
+            l1_avg = AverageMeter()
+            l2_avg = AverageMeter()
             for hr, lr in t:
                 hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
                 sr = self.model(lr).clamp(0, 1)
-                for i in range(sr.shape[0]):
-                    psnr = piq.psnr(hr[i], sr[i])
-                    ssim = piq.ssim(hr[i], sr[i])
-                    psnr_avg.update(psnr)
-                    ssim_avg.update(ssim)
-                    t.set_postfix(PSNR=f'{psnr_avg.get():.2f}', SSIM=f'{ssim_avg.get():.4f}')
+                l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
+                l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
+                psnr = piq.psnr(hr, sr)
+                ssim = piq.ssim(hr, sr)
+                l1_avg.update(l1_loss)
+                l2_avg.update(l2_loss)
+                psnr_avg.update(psnr)
+                ssim_avg.update(ssim)
+                t.set_postfix(PSNR=f'{psnr_avg.get():.2f}', SSIM=f'{ssim_avg.get():.4f}')
             if self.writer is not None:
                 self.writer.add_scalar('PSNR', psnr_avg.get(), self.epoch)
                 self.writer.add_scalar('SSIM', ssim_avg.get(), self.epoch)
+                self.writer.add_scalar('L1', l1_avg.get(), self.epoch)
+                self.writer.add_scalar('L2', l2_avg.get(), self.epoch)
             return psnr_avg.get(), ssim_avg.get()
 
     def evaluate(self):
@@ -131,14 +136,19 @@ class Trainer:
     def train(self):
         t = tqdm(total=args.epochs, initial=self.epoch)
         t.set_description("Epochs")
+        if self.best_epoch is not None and self.best_psnr is not None and self.best_ssim is not None:
+            t.set_postfix(best=self.best_epoch,
+                          PSNR=f'{self.best_psnr:.2f}',
+                          SSIM=f'{self.best_ssim:.4f}')
         while self.epoch < args.epochs:
             self.epoch += 1
             self.train_iter()
             if self.epoch % args.test_every == 0:
                 psnr, ssim = self.val_iter(final=False)
-                is_best = self.best_loss is None or psnr > self.best_loss
+                is_best = self.best_psnr is None or psnr > self.best_psnr
                 if is_best:
-                    self.best_loss = psnr
+                    self.best_psnr = psnr
+                    self.best_ssim = ssim
                     self.best_epoch = self.epoch
                     t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
                 self.save_checkpoint(best=True)
@@ -155,8 +165,12 @@ class Trainer:
         if self.scheduler is not None:
             self.scheduler.load_state_dict(ckp['scheduler'])
         self.epoch = ckp['epoch']
-        self.best_epoch = ckp['best_epoch']
-        self.best_loss = ckp['best_loss']
+        if 'best_epoch' in ckp:
+            self.best_epoch = ckp['best_epoch']
+        if 'best_psnr' in ckp:
+            self.best_psnr = ckp['best_psnr']
+        if 'best_ssim' in ckp:
+            self.best_ssim = ckp['best_ssim']
 
     def load_pretrained(self):
         if args.load_pretrained is None:
@@ -174,7 +188,8 @@ class Trainer:
             'scheduler' : self.scheduler.state_dict(),
             'epoch' : self.epoch,
             'best_epoch' : self.best_epoch,
-            'best_loss' : self.best_loss,
+            'best_psnr' : self.best_psnr,
+            'best_ssim' : self.best_ssim,
         }
         torch.save(state, path)
         if best:
