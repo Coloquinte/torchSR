@@ -14,18 +14,20 @@ from tqdm import tqdm
 
 
 class AverageMeter:
-    def __init__(self):
+    def __init__(self, smoothing=0.0):
         self.count = 0
-        self.sum = 0.0
+        self.avg = 0.0
+        self.smoothing = smoothing
 
-    def update(self, val):
-        self.sum += val
-        self.count += 1
+    def update(self, val, count=1):
+        self.count += count
+        alpha = max(count / self.count, self.smoothing)
+        self.avg = self.avg * (1.0 - alpha) + val * alpha
 
     def get(self):
         if self.count == 0:
             return 0.0
-        return self.sum / self.count
+        return self.avg
 
 
 def to_image(t):
@@ -75,8 +77,8 @@ class Trainer:
             t = tqdm(range(len(self.loader_train) * args.dataset_repeat))
             t.set_description(f"Epoch {self.epoch} train ")
             loss_avg = AverageMeter()
-            l1_avg = AverageMeter()
-            l2_avg = AverageMeter()
+            l1_avg = AverageMeter(0.05)
+            l2_avg = AverageMeter(0.05)
             for i in range(args.dataset_repeat):
                 for hr, lr in self.loader_train:
                     hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
