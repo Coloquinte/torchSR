@@ -34,6 +34,19 @@ sr.show()
 
 
 
+## Models
+
+The following pretrained models are available:
+* [EDSR](https://arxiv.org/abs/1707.02921) (x2 x3 x4)
+* [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
+* [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
+* NinaSR, my own model for real-time super resolution (x2 x3 x4 x8)
+
+The following models are implemented without pretrained weights:
+* [VDSR](https://arxiv.org/abs/1511.04587)
+
+
+
 ## Datasets
 
 Datasets return a list of images. The first image is the original one, and the next images are downscaled or degraded versions.
@@ -51,6 +64,7 @@ They are downloaded and extracted automatically when using the `download=True` f
 ```
 
 
+
 ## Transforms
 
 Transforms are used for preprocessing and data augmentation. They are applied identically to the original and downscaled image.
@@ -62,19 +76,6 @@ This repository defines several transforms that follow torchvision conventions:
 * ColorJitter
 * GaussianBlur
 * RandomHorizontalFlip/RandomVerticalFlip/RandomFlipTurn
-
-
-
-## Models
-
-The following pretrained models are available:
-* [EDSR](https://arxiv.org/abs/1707.02921) (x2 x3 x4)
-* [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
-* [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
-* NinaSR, my own model for real-time super resolution (x2 x3 x4 x8)
-
-The following models are implemented without pretrained weights:
-* [VDSR](https://arxiv.org/abs/1511.04587)
 
 
 
