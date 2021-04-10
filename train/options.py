@@ -70,13 +70,11 @@ train.add_argument('--scale', type=int, nargs='+', default=[2],
                    help='upsampling scale')
 train.add_argument('--batch-size', type=int, default=16,
                    help='batch size')
-train.add_argument('--epochs', type=int, default=6000,
+train.add_argument('--epochs', type=int, default=300,
                    help='number of epochs')
 train.add_argument('--loss', type=LossType, default=LossType.L1,
                     choices=list(LossType),
                     help='training loss')
-train.add_argument('--test-every', type=int, default=20,
-                   help='number of training epochs between tests')
 train.add_argument('--optimizer', type=OptimizerType, default=OptimizerType.ADAM,
                     choices=list(OptimizerType),
                     help='optimizer')
@@ -88,7 +86,7 @@ train.add_argument('--weight-decay', type=float,
                     help='weight decay coefficient')
 train.add_argument('--gradient-clipping', type=float,
                     help='clip the gradient values')
-train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[4000],
+train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[200],
                     help='steps for learning rate decay')
 train.add_argument('--lr-decay-rate', type=float, default=10.0,
                     help='learning rate decay per step')
@@ -111,6 +109,8 @@ data.add_argument('--dataset-val', nargs='+', default=[DatasetType.Div2KBicubic]
                   help='Validation dataset')
 data.add_argument('--patch-size-train', type=int, default=96,
                   help='image patch size for training (HR)')
+train.add_argument('--dataset-repeat', type=int, default=20,
+                   help='number of times to repeat the dataset per training epoch')
 data.add_argument('--patch-size-val', type=int, default=384,
                   help='image patch size for validation (HR)')
 data.add_argument('--preload-dataset', action='store_true',

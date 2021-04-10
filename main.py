@@ -72,32 +72,34 @@ class Trainer:
     def train_iter(self):
         with torch.enable_grad():
             self.model.train()
-            t = tqdm(self.loader_train)
+            t = tqdm(range(len(self.loader_train) * args.dataset_repeat))
             t.set_description(f"Epoch {self.epoch} train ")
             loss_avg = AverageMeter()
             l1_avg = AverageMeter()
             l2_avg = AverageMeter()
-            for hr, lr in t:
-                hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
-                self.optimizer.zero_grad()
-                sr = self.model(lr)
-                loss = self.loss_fn(sr, hr)
-                loss.backward()
-                if args.gradient_clipping is not None:
-                    nn.utils.clip_grad_norm_(model.parameters(), args.gradient_clipping)
-                optimizer.step()
-                l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
-                l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
-                l1_avg.update(l1_loss)
-                l2_avg.update(l2_loss)
-                args_dic = {
-                    'L1' : f'{l1_avg.get():.4f}',
-                    'L2' : f'{l2_avg.get():.4f}'
-                }
-                if not isinstance(self.loss_fn, (nn.L1Loss, nn.MSELoss)):
-                    loss_avg.update(loss.item())
-                    args_dic['Loss'] = f'{loss_avg.get():.4f}'
-                t.set_postfix(**args_dic)
+            for i in range(args.dataset_repeat):
+                for hr, lr in self.loader_train:
+                    hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
+                    self.optimizer.zero_grad()
+                    sr = self.model(lr)
+                    loss = self.loss_fn(sr, hr)
+                    loss.backward()
+                    if args.gradient_clipping is not None:
+                        nn.utils.clip_grad_norm_(model.parameters(), args.gradient_clipping)
+                    optimizer.step()
+                    l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
+                    l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
+                    l1_avg.update(l1_loss)
+                    l2_avg.update(l2_loss)
+                    args_dic = {
+                        'L1' : f'{l1_avg.get():.4f}',
+                        'L2' : f'{l2_avg.get():.4f}'
+                    }
+                    if not isinstance(self.loss_fn, (nn.L1Loss, nn.MSELoss)):
+                        loss_avg.update(loss.item())
+                        args_dic['Loss'] = f'{loss_avg.get():.4f}'
+                    t.update()
+                    t.set_postfix(**args_dic)
 
     def val_iter(self, final=True):
         with torch.no_grad():
@@ -143,15 +145,14 @@ class Trainer:
         while self.epoch < args.epochs:
             self.epoch += 1
             self.train_iter()
-            if self.epoch % args.test_every == 0:
-                psnr, ssim = self.val_iter(final=False)
-                is_best = self.best_psnr is None or psnr > self.best_psnr
-                if is_best:
-                    self.best_psnr = psnr
-                    self.best_ssim = ssim
-                    self.best_epoch = self.epoch
-                    t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
-                self.save_checkpoint(best=True)
+            psnr, ssim = self.val_iter(final=False)
+            is_best = self.best_psnr is None or psnr > self.best_psnr
+            if is_best:
+                self.best_psnr = psnr
+                self.best_ssim = ssim
+                self.best_epoch = self.epoch
+                t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
+            self.save_checkpoint(best=True)
             t.update(1)
             scheduler.step()
 
