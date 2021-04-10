@@ -80,8 +80,12 @@ train.add_argument('--optimizer', type=OptimizerType, default=OptimizerType.ADAM
                     help='optimizer')
 train.add_argument('--lr', type=float, default=1e-4,
                     help='learning rate')
-train.add_argument('--momentum', type=float, nargs='+',
-                    help='momentum or adam betas coefficients')
+train.add_argument('--momentum', type=float,
+                    help='momentum coefficient for SGD and RMSprop')
+train.add_argument('--rmsprop-alpha', type=float,
+                    help='smoothing coefficient for RMSprop')
+train.add_argument('--adam-betas', type=float, nargs=2,
+                    help='smoothing coefficients for Adam, AdamW and Adamax')
 train.add_argument('--weight-decay', type=float,
                     help='weight decay coefficient')
 train.add_argument('--gradient-clipping', type=float,

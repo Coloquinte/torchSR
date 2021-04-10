@@ -273,9 +273,9 @@ def get_optimizer(model):
                           OptimizerType.ADAMW,
                           OptimizerType.ADAMAX]:
         if args.momentum is not None:
-            if len(args.momentum) != 2:
-                raise ValueError("Adam optimizers require 2 momentum values")
-            kwargs['betas'] = args.momentum
+            raise ValueError("No momentum for Adam-like optimizers")
+        if args.adam_betas is not None:
+            kwargs['betas'] = args.adam_betas
         if args.optimizer is OptimizerType.ADAM:
             return torch.optim.Adam(model.parameters(), **kwargs)
         if args.optimizer is OptimizerType.ADAMW:
@@ -285,11 +285,15 @@ def get_optimizer(model):
     elif args.optimizer in [OptimizerType.SGD,
                             OptimizerType.NESTEROV]:
         if args.momentum is not None:
-            if len(args.momentum) != 1:
-                raise ValueError("SGD optimizers require 1 momentum value")
-            kwargs['momentum'] = args.momentum[0]
+            kwargs['momentum'] = args.momentum
         kwargs['nesterov'] = args.optimizer is OptimizerType.NESTEROV
         return torch.optim.SGD(model.parameters(), **kwargs)
+    elif args.optimizer is OptimizerType.RMSPROP:
+        if args.momentum is not None:
+            kwargs['momentum'] = args.momentum
+        if args.rmsprop_alpha is not None:
+            kwargs['alpha'] = args.rmsprop_alpha
+        return torch.optim.RMSprop(model.parameters(), **kwargs)
     assert False
 
 

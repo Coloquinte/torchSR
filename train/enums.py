@@ -60,6 +60,7 @@ class OptimizerType(CEnum):
     ADAM = "adam"
     ADAMW = "adamw"
     ADAMAX = "adamax"
+    RMSPROP = "rmsprop"
     SGD = "sgd"
     NESTEROV = "nesterov"
 
