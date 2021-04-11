@@ -263,8 +263,9 @@ def get_transform_train():
 
 def get_transform_val():
     transforms = []
-    # Full images are too big: only validate on a centered patch
-    transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, ]+args.scale))
+    if not args.evaluate:
+        # Full images are too big: only validate on a centered patch
+        transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, ]+args.scale))
     transforms.append(ToTensor())
     return Compose(transforms)
 
@@ -361,12 +362,10 @@ def get_loss():
 
 
 def get_model():
-    if args.arch is None:
-        raise ValueError("No model is specified")
     if args.arch not in models.__dict__:
         raise ValueError(f"Unknown model {args.arch}")
     if len(args.scale) != 1:
-        raise ValueError("Multiscale superresolution is not supported")
+        raise ValueError("Multiscale superresolution is not supported yet")
     model = models.__dict__[args.arch](scale=args.scale[0], pretrained=args.download_pretrained)
     return model
 

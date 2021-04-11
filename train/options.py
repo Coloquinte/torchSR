@@ -10,7 +10,7 @@ model = parser.add_argument_group('Model')
 
 
 # Model specification: network
-model.add_argument("--arch", type=str,
+model.add_argument("--arch", type=str, required=True,
                    help='network architecture to use')
 model.add_argument('--download-pretrained', action='store_true',
                    help='download pretrained model')

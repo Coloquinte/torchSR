@@ -81,14 +81,14 @@ This repository defines several transforms that follow torchvision conventions:
 
 ## Training
 
-A script is available to train the models from scratch:
+A script is available to train the models from scratch, evaluate them, and much more:
 ```bash
+pip install pip tqdm tensorboard  # Additional dependencies
 python main.py -h
-python main.py --arch edsr_baseline --epochs 1000 --loss l1 --dataset-train div2k_bicubic
+python main.py --arch edsr_baseline --download-pretrained --evaluate
+python main.py --arch edsr_baseline --epochs 300 --loss l1 --dataset-train div2k_bicubic
 python main.py --arch edsr_baseline --evaluate --download-pretrained
 ```
-
-It carries additional dependencies: piq, tqdm
 
 
 
