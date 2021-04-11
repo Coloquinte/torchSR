@@ -147,10 +147,20 @@ class FolderByDir(Folder):
 
     def download(self):
         # We just always download everything: the X4/X8 datasets are not big anyway
-        for url, md5sum in self.urls.items():
+        for data in self.urls:
+            filename = None
+            md5sum = None
+            if isinstance(data, str):
+                url = data
+            else:
+                url = data[0]
+                if len(data) > 1:
+                    md5sum = data[1]
+                if len(data) > 2:
+                    filename = data[2]
             if (self.root, url) in self.already_downloaded_urls:
                 continue
-            torchvision.datasets.utils.download_and_extract_archive(url, self.root, md5=md5sum)
+            torchvision.datasets.utils.download_and_extract_archive(url, self.root, filename=filename, md5=md5sum)
             self.already_downloaded_urls.append((self.root, url))
 
 

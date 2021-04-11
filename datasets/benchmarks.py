@@ -20,9 +20,9 @@ class Set5(FolderByDir):
         preload (boolean, optional): If true, load all images in memory
     """
 
-    urls = {
-        "https://cv.snu.ac.kr/research/EDSR/benchmark.tar" : "4ace41d33c2384b97e6b320cd0afd6ba"
-    }
+    urls = [
+        ("https://cv.snu.ac.kr/research/EDSR/benchmark.tar", "4ace41d33c2384b97e6b320cd0afd6ba")
+    ]
     
     track_dirs = {
         ('hr', 'val', 1) : os.path.join('benchmark', 'Set5', 'HR')
@@ -62,9 +62,9 @@ class Set14(FolderByDir):
         preload (boolean, optional): If true, load all images in memory
     """
 
-    urls = {
-        "https://cv.snu.ac.kr/research/EDSR/benchmark.tar" : "4ace41d33c2384b97e6b320cd0afd6ba"
-    }
+    urls = [
+        ("https://cv.snu.ac.kr/research/EDSR/benchmark.tar", "4ace41d33c2384b97e6b320cd0afd6ba")
+    ]
     
     track_dirs = {
         ('hr', 'val', 1) : os.path.join('benchmark', 'Set14', 'HR')
@@ -104,9 +104,9 @@ class B100(FolderByDir):
         preload (boolean, optional): If true, load all images in memory
     """
 
-    urls = {
-        "https://cv.snu.ac.kr/research/EDSR/benchmark.tar" : "4ace41d33c2384b97e6b320cd0afd6ba"
-    }
+    urls = [
+        ("https://cv.snu.ac.kr/research/EDSR/benchmark.tar", "4ace41d33c2384b97e6b320cd0afd6ba")
+    ]
     
     track_dirs = {
         ('hr', 'val', 1) : os.path.join('benchmark', 'B100', 'HR')
@@ -145,9 +145,9 @@ class Urban100(FolderByDir):
         preload (boolean, optional): If true, load all images in memory
     """
 
-    urls = {
-        "https://cv.snu.ac.kr/research/EDSR/benchmark.tar" : "4ace41d33c2384b97e6b320cd0afd6ba"
-    }
+    urls = [
+        ("https://cv.snu.ac.kr/research/EDSR/benchmark.tar", "4ace41d33c2384b97e6b320cd0afd6ba")
+    ]
     
     track_dirs = {
         ('hr', 'val', 1) : os.path.join('benchmark', 'Urban100', 'HR')
