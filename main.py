@@ -237,22 +237,42 @@ def names_to_dataset(names, split, transform):
     return torch.utils.data.ConcatDataset(datasets)
 
 
+def get_transform_train():
+    transforms = []
+    transforms.append(RandomCrop(args.patch_size_train, scales=[1,]+args.scale, margin=0.5))
+    if DataAugmentationType.FlipTurn in args.augment:
+        transforms.append(RandomFlipTurn())
+    else:
+        if DataAugmentationType.VFlip in args.augment:
+            transforms.append(RandomVerticalFlip())
+        if DataAugmentationType.HFlip in args.augment:
+            transforms.append(RandomHorizontalFlip())
+    transforms.append(ToTensor())
+    brightness = DataAugmentationType.BrightnessJitter in args.augment
+    contrast = DataAugmentationType.ContrastJitter in args.augment
+    saturation = DataAugmentationType.SaturationJitter in args.augment
+    if brightness or contrast or saturation:
+        transforms.append(ColorJitter(
+            brightness=0.2 if brightness else 0,
+            contrast=0.1 if contrast else 0,
+            saturation=0.1 if saturation else 0
+        ))
+    return Compose(transforms)
+
+
+def get_transform_val():
+    transforms = []
+    # Full images are too big: only validate on a centered patch
+    transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1,]+args.scale))
+    transforms.append(ToTensor())
+    return Compose(transforms)
+
+
 def get_datasets():
-    transform_train = Compose([
-        RandomCrop(args.patch_size_train, scales=[1,]+args.scale, margin=0.5),
-        RandomFlipTurn(),
-        #ColorJitter(brightness=0.1, contrast=0.05, saturation=0.05),
-        ToTensor()
-        ])
-    transform_val = Compose([
-        # Full images are too big: only validate on a centered patch
-        CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1,]+args.scale),
-        ToTensor()
-        ])
     dataset_train = names_to_dataset(args.dataset_train, 'train',
-        transform=transform_train)
+        transform=get_transform_train())
     dataset_val = names_to_dataset(args.dataset_val, 'val',
-        transform=transform_val)
+        transform=get_transform_val())
     loader_train = torch.utils.data.DataLoader(
         dataset_train, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=not args.cpu)

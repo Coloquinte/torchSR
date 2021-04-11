@@ -47,6 +47,14 @@ class DatasetType(CEnum):
     B100 = 'b100'
     Urban100 = 'urban100'
 
+class DataAugmentationType(CEnum):
+    HFlip = "hflip"
+    VFlip = "vflip"
+    FlipTurn = "flip_turn"
+    BrightnessJitter = "brightness_jitter"
+    ContrastJitter = "contrast_jitter"
+    SaturationJitter = "saturation_jitter"
+
 class LossType(CEnum):
     L1 = "l1"
     SmoothL1 = "smooth_l1"

@@ -111,10 +111,13 @@ data.add_argument('--dataset-train', nargs='+', default=[DatasetType.Div2KBicubi
 data.add_argument('--dataset-val', nargs='+', default=[DatasetType.Div2KBicubic],
                   type=DatasetType, choices=list(DatasetType),
                   help='Validation dataset')
+data.add_argument('--dataset-repeat', type=int, default=20,
+                   help='number of times to repeat the dataset per training epoch')
+data.add_argument('--augment', nargs='*', default=[DataAugmentationType.FlipTurn],
+                  type=DataAugmentationType, choices=list(DataAugmentationType),
+                  help='Data augmentation')
 data.add_argument('--patch-size-train', type=int, default=96,
                   help='image patch size for training (HR)')
-train.add_argument('--dataset-repeat', type=int, default=20,
-                   help='number of times to repeat the dataset per training epoch')
 data.add_argument('--patch-size-val', type=int, default=384,
                   help='image patch size for validation (HR)')
 data.add_argument('--preload-dataset', action='store_true',
