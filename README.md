@@ -56,10 +56,7 @@ The following datasets are available:
 * [RealSR](https://github.com/csjcai/RealSR)
 * [Set5](http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html), [Set14](https://paperswithcode.com/dataset/set14), [B100](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/), [Urban100](https://paperswithcode.com/dataset/urban100)
 
-They are downloaded and extracted automatically when using the `download=True` flag. For a faster download, consider using the script first:
-```bash
-./scripts/download_div2k.sh
-```
+They are downloaded automatically when using the `download=True` flag, or by running the corresponding script i.e. `./scripts/download_div2k.sh`.
 
 
 
@@ -68,12 +65,12 @@ They are downloaded and extracted automatically when using the `download=True` f
 Transforms are used for preprocessing and data augmentation. They are applied identically to the original and downscaled image.
 
 This repository defines several transforms that follow torchvision conventions:
-* ToTensor/ToPILImage
+* ToTensor, ToPILImage
 * Compose
 * RandomCrop
 * ColorJitter
 * GaussianBlur
-* RandomHorizontalFlip/RandomVerticalFlip/RandomFlipTurn
+* RandomHorizontalFlip, RandomVerticalFlip, RandomFlipTurn
 
 
 
