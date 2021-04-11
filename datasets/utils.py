@@ -140,7 +140,7 @@ class FolderByDir(Folder):
             samples.append(self.list_samples(track, self.split, scale))
         for i, s in enumerate(samples[1:]):
             if len(s) != len(samples[0]):
-                raise ValueError(f"Number of files for {self.tracks[i]}X{self.scales[i]} does not match HR")
+                raise ValueError(f"Number of files for {self.tracks[i]}X{self.scales[i]} {self.split} does not match HR")
         self.samples = []
         for i in range(len(samples[0])):
             self.samples.append([s[i] for s in samples])
