@@ -60,7 +60,7 @@ The following datasets are available:
 
 They are downloaded and extracted automatically when using the `download=True` flag. For a faster download, consider using the script first:
 ```bash
-./download_div2k.sh
+./scripts/download_div2k.sh
 ```
 
 
