@@ -18,19 +18,23 @@ class BlockType(CEnum):
     Dense = 'dense'
     MBConv = 'mbconv'
 
+
 class BackboneType(CEnum):
     Sequential = 'sequential'
     Dense = 'dense'
+
 
 class UpsamplerType(CEnum):
     Direct = 'direct'
     Conv = 'conv'
     ShortConv = 'sconv'
 
+
 class ActivationType(CEnum):
     ReLU = 'relu'
     LeakyReLU = 'leaky'
     SiLU = 'silu'
+
 
 class SkipConnectionType(CEnum):
     No = 'no'
@@ -38,6 +42,7 @@ class SkipConnectionType(CEnum):
     Nearest = 'nearest'
     Linear = 'linear'
     Bicubic = 'bicubic'
+
 
 class DatasetType(CEnum):
     Div2KBicubic = 'div2k_bicubic'
@@ -47,6 +52,7 @@ class DatasetType(CEnum):
     B100 = 'b100'
     Urban100 = 'urban100'
 
+
 class DataAugmentationType(CEnum):
     HFlip = "hflip"
     VFlip = "vflip"
@@ -54,6 +60,7 @@ class DataAugmentationType(CEnum):
     BrightnessJitter = "brightness_jitter"
     ContrastJitter = "contrast_jitter"
     SaturationJitter = "saturation_jitter"
+
 
 class LossType(CEnum):
     L1 = "l1"
@@ -64,6 +71,7 @@ class LossType(CEnum):
     LPIPS = "lpips"
     DISTS = "dists"
 
+
 class OptimizerType(CEnum):
     ADAM = "adam"
     ADAMW = "adamw"
@@ -71,6 +79,7 @@ class OptimizerType(CEnum):
     RMSPROP = "rmsprop"
     SGD = "sgd"
     NESTEROV = "nesterov"
+
 
 class DataType(CEnum):
     FP16 = "float16"

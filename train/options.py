@@ -9,6 +9,7 @@ data = parser.add_argument_group('Data')
 hw = parser.add_argument_group('Harware')
 model = parser.add_argument_group('Model')
 
+
 # Model specification: network
 model.add_argument("--arch", type=str,
                    help='network architecture to use')
@@ -21,48 +22,6 @@ load_ckp.add_argument('--load-pretrained', type=str,
                       help='load pretrained model')
 model.add_argument('--save-checkpoint', type=str,
                    help='save model checkpoint')
-#model.add_argument('--network-width', type=int, default=64,
-#                   help='number of feature maps')
-#model.add_argument('--network-depth', type=int, default=16,
-#                   help='number of blocks')
-#model.add_argument('--kernel-size', type=int, default=3,
-#                   help='size of the convolution kernels')
-#
-## Model specification: structure
-#model.add_argument('--upsampler', type=UpsamplerType, default=UpsamplerType.Conv,
-#                   choices=list(UpsamplerType),
-#                   help='upsampler type')
-#model.add_argument('--skip-connection', type=SkipConnectionType, default=SkipConnectionType.Features,
-#                   choices=list(SkipConnectionType),
-#                   help='type of skip connection')
-#
-## Model specification: block
-#model.add_argument('--block-type', type=BlockType, default=BlockType.Residual,
-#                   choices=list(BlockType),
-#                   help='block type')
-#model.add_argument('--block-depth', type=int, default=2,
-#                   help='depth of the block')
-#model.add_argument('--block-expansion', type=float, default=1.0,
-#                   help='block expansion ratio')
-#model.add_argument('--block-scale-in', type=float, default=1.0,
-#                   help='residual scaling (block input)')
-#model.add_argument('--block-scale-out', type=float, default=1.0,
-#                   help='residual scaling (block output)')
-#
-## Model specification: activation/normalization
-#model.add_argument('--activation', type=ActivationType, default=ActivationType.ReLU,
-#                   choices=list(ActivationType),
-#                   help='activation function')
-#model.add_argument('--batch-norm', action='store_true',
-#                   help='use batch normalization')
-#
-## Model specification: attention
-#model.add_argument('--attention', action='store_true',
-#                   help='use channel attention')
-#model.add_argument('--attention-field', type=int,
-#                   help='attention field of view')
-#model.add_argument('--attention-squeeze', type=float,
-#                   help='attention squeeze factor')
 
 
 # Training specification
@@ -73,27 +32,27 @@ train.add_argument('--batch-size', type=int, default=16,
 train.add_argument('--epochs', type=int, default=300,
                    help='number of epochs')
 train.add_argument('--loss', type=LossType, default=LossType.L1,
-                    choices=list(LossType),
-                    help='training loss')
+                   choices=list(LossType),
+                   help='training loss')
 train.add_argument('--optimizer', type=OptimizerType, default=OptimizerType.ADAM,
-                    choices=list(OptimizerType),
-                    help='optimizer')
+                   choices=list(OptimizerType),
+                   help='optimizer')
 train.add_argument('--lr', type=float, default=1e-4,
-                    help='learning rate')
+                   help='learning rate')
 train.add_argument('--momentum', type=float,
-                    help='momentum coefficient for SGD and RMSprop')
+                   help='momentum coefficient for SGD and RMSprop')
 train.add_argument('--rmsprop-alpha', type=float,
-                    help='smoothing coefficient for RMSprop')
+                   help='smoothing coefficient for RMSprop')
 train.add_argument('--adam-betas', type=float, nargs=2,
-                    help='smoothing coefficients for Adam, AdamW and Adamax')
+                   help='smoothing coefficients for Adam, AdamW and Adamax')
 train.add_argument('--weight-decay', type=float,
-                    help='weight decay coefficient')
+                   help='weight decay coefficient')
 train.add_argument('--gradient-clipping', type=float,
-                    help='clip the gradient values')
+                   help='clip the gradient values')
 train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[200],
-                    help='steps for learning rate decay')
+                   help='steps for learning rate decay')
 train.add_argument('--lr-decay-rate', type=float, default=10.0,
-                    help='learning rate decay per step')
+                   help='learning rate decay per step')
 train.add_argument('--log-dir', type=str,
                    help='log directory for tensorboard')
 
@@ -112,7 +71,7 @@ data.add_argument('--dataset-val', nargs='+', default=[DatasetType.Div2KBicubic]
                   type=DatasetType, choices=list(DatasetType),
                   help='Validation dataset')
 data.add_argument('--dataset-repeat', type=int, default=20,
-                   help='number of times to repeat the dataset per training epoch')
+                  help='number of times to repeat the dataset per training epoch')
 data.add_argument('--augment', nargs='*', default=[DataAugmentationType.FlipTurn],
                   type=DataAugmentationType, choices=list(DataAugmentationType),
                   help='Data augmentation')
@@ -139,4 +98,3 @@ args = parser.parse_args()
 if args.workers != 0 and args.preload_dataset:
     raise ValueError("Dataset preloading is incompatible with multiprocessing. "
                      "--worker argument cannot be given with --preload-dataset")
-

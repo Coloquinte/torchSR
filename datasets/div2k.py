@@ -96,7 +96,7 @@ class Div2K(FolderByDir):
             track: Union[str, List[str]] = 'bicubic',
             split: str = 'train',
             transform: Optional[Callable] = None,
-            loader = pil_loader,
+            loader: Callable = pil_loader,
             download: bool = False,
             predecode: bool = False,
             preload: bool = False):

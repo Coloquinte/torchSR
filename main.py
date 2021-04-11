@@ -94,8 +94,8 @@ class Trainer:
                     l1_avg.update(l1_loss)
                     l2_avg.update(l2_loss)
                     args_dic = {
-                        'L1' : f'{l1_avg.get():.4f}',
-                        'L2' : f'{l2_avg.get():.4f}'
+                        'L1': f'{l1_avg.get():.4f}',
+                        'L2': f'{l2_avg.get():.4f}'
                     }
                     if not isinstance(self.loss_fn, (nn.L1Loss, nn.MSELoss)):
                         loss_avg.update(loss.item())
@@ -186,13 +186,13 @@ class Trainer:
             return
         path = args.save_checkpoint
         state = {
-            'state_dict' : self.model.state_dict(),
-            'optimizer' : self.optimizer.state_dict(),
-            'scheduler' : self.scheduler.state_dict(),
-            'epoch' : self.epoch,
-            'best_epoch' : self.best_epoch,
-            'best_psnr' : self.best_psnr,
-            'best_ssim' : self.best_ssim,
+            'state_dict': self.model.state_dict(),
+            'optimizer': self.optimizer.state_dict(),
+            'scheduler': self.scheduler.state_dict(),
+            'epoch': self.epoch,
+            'best_epoch': self.best_epoch,
+            'best_psnr': self.best_psnr,
+            'best_ssim': self.best_ssim,
         }
         torch.save(state, path)
         if best:
@@ -205,14 +205,14 @@ class Trainer:
 
 def name_to_dataset(name, split, transform):
     kwargs = {
-        'root' : args.dataset_root,
-        'scale' : args.scale,
-        'split' : split,
-        'transform' : transform,
-        'download' : args.download_dataset,
-        'predecode' : not args.preload_dataset,
-        'preload' : args.preload_dataset,
-        }
+        'root': args.dataset_root,
+        'scale': args.scale,
+        'split': split,
+        'transform': transform,
+        'download': args.download_dataset,
+        'predecode': not args.preload_dataset,
+        'preload': args.preload_dataset,
+    }
     if name == DatasetType.Div2KBicubic:
         return Div2K(**kwargs, track='bicubic')
     if name == DatasetType.Div2KUnknown:
@@ -239,7 +239,7 @@ def names_to_dataset(names, split, transform):
 
 def get_transform_train():
     transforms = []
-    transforms.append(RandomCrop(args.patch_size_train, scales=[1,]+args.scale, margin=0.5))
+    transforms.append(RandomCrop(args.patch_size_train, scales=[1, ]+args.scale, margin=0.5))
     if DataAugmentationType.FlipTurn in args.augment:
         transforms.append(RandomFlipTurn())
     else:
@@ -263,16 +263,16 @@ def get_transform_train():
 def get_transform_val():
     transforms = []
     # Full images are too big: only validate on a centered patch
-    transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1,]+args.scale))
+    transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, ]+args.scale))
     transforms.append(ToTensor())
     return Compose(transforms)
 
 
 def get_datasets():
     dataset_train = names_to_dataset(args.dataset_train, 'train',
-        transform=get_transform_train())
+                                     transform=get_transform_train())
     dataset_val = names_to_dataset(args.dataset_val, 'val',
-        transform=get_transform_val())
+                                   transform=get_transform_val())
     loader_train = torch.utils.data.DataLoader(
         dataset_train, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=not args.cpu)
@@ -405,4 +405,3 @@ if args.evaluate:
 else:
     report_model(model, args.arch)
     trainer.train()
-

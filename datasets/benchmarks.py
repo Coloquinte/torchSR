@@ -37,7 +37,7 @@ class Set5(FolderByDir):
             scale: Union[int, List[int]] = 2,
             split: str = 'val',
             transform: Optional[Callable] = None,
-            loader = pil_loader,
+            loader: Callable = pil_loader,
             download: bool = False,
             predecode: bool = False,
             preload: bool = False):
@@ -79,7 +79,7 @@ class Set14(FolderByDir):
             scale: Union[int, List[int]] = 2,
             split: str = 'val',
             transform: Optional[Callable] = None,
-            loader = pil_loader,
+            loader: Callable = pil_loader,
             download: bool = False,
             predecode: bool = False,
             preload: bool = False):
@@ -121,7 +121,7 @@ class B100(FolderByDir):
             scale: Union[int, List[int]] = 2,
             split: str = 'val',
             transform: Optional[Callable] = None,
-            loader = pil_loader,
+            loader: Callable = pil_loader,
             download: bool = False,
             predecode: bool = False,
             preload: bool = False):
@@ -162,7 +162,7 @@ class Urban100(FolderByDir):
             scale: Union[int, List[int]] = 2,
             split: str = 'val',
             transform: Optional[Callable] = None,
-            loader = pil_loader,
+            loader: Callable = pil_loader,
             download: bool = False,
             predecode: bool = False,
             preload: bool = False):

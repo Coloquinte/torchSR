@@ -11,7 +11,8 @@ import numbers
 from typing import List, Tuple, Union
 
 
-__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomFlipTurn', 'RandomCrop', 'CenterCrop', 'ColorJitter', 'GaussianBlur')
+__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip',
+           'RandomFlipTurn', 'RandomCrop', 'CenterCrop', 'ColorJitter', 'GaussianBlur')
 
 
 def apply_all(x, func):
@@ -121,7 +122,7 @@ def get_crop_params(x, scales):
         raise ValueError(
             f"Scaled widths range from {min_width} to {max(scaled_widths)}. "
             f"This does not seem compatible")
-    if max(scaled_heights) > min_height* 1.05:
+    if max(scaled_heights) > min_height * 1.05:
         raise ValueError(
             f"Scaled heights range from {min_height} to {max(scaled_heights)}. "
             f"This does not seem compatible")
@@ -356,6 +357,3 @@ class GaussianBlur(nn.Module):
             k_y = max(2*int(math.ceil(3*sigma_y))+1, 3)
             kernel_size = (k_x, k_y)
         return apply_all(x, lambda y: F.gaussian_blur(y, kernel_size, sigma))
-
-
-
