@@ -1,7 +1,7 @@
-from .utils import pil_loader, FolderByDir
-
 import os
 from typing import Callable, List, Optional, Tuple, Union
+
+from .utils import FolderByDir, pil_loader
 
 
 class Set5(FolderByDir):

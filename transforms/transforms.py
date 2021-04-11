@@ -1,15 +1,14 @@
 import functools
+import math
+import numbers
+from typing import List, Tuple, Union
+
 import numpy as np
+import PIL
 import torch
 import torch.nn as nn
 import torchvision
 import torchvision.transforms.functional as F
-import math
-import PIL
-import numbers
-
-from typing import List, Tuple, Union
-
 
 __all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip',
            'RandomFlipTurn', 'RandomCrop', 'CenterCrop', 'ColorJitter', 'GaussianBlur')

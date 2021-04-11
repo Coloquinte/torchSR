@@ -2,7 +2,6 @@ import argparse
 
 from .enums import *
 
-
 parser = argparse.ArgumentParser(description='Super-Resolution networks')
 train = parser.add_argument_group('Training')
 data = parser.add_argument_group('Data')
