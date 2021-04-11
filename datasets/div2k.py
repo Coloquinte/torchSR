@@ -8,7 +8,7 @@ class Div2K(FolderByDir):
     """`DIV2K <https://data.vision.ee.ethz.ch/cvl/DIV2K/>` Superresolution Dataset
 
     Args:
-        root (string): Root directory of the DIV2K Dataset.
+        root (string): Root directory for the dataset.
         scale (int, optional): The upsampling ratio: 2, 3, 4 or 8.
         track (str, optional): The downscaling method: bicubic, unknown, real_mild,
             real_difficult, real_wild.

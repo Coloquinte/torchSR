@@ -8,8 +8,8 @@ class Set5(FolderByDir):
     """`Set5 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
 
     Args:
-        root (string): Root directory of the DIV2K Dataset.
-        scale (int, optional): The upsampling ratio: 2, 3, 4 or 8.
+        root (string): Root directory for the dataset.
+        scale (int, optional): The upsampling ratio: 2, 3 or 4.
         transform (callable, optional): A function/transform that takes in several PIL images
             and returns a transformed version. It is not a torchvision transform!
         loader (callable, optional): A function to load an image given its path.
@@ -50,8 +50,8 @@ class Set14(FolderByDir):
     """`Set14 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
 
     Args:
-        root (string): Root directory of the DIV2K Dataset.
-        scale (int, optional): The upsampling ratio: 2, 3, 4 or 8.
+        root (string): Root directory for the dataset.
+        scale (int, optional): The upsampling ratio: 2, 3 or 4.
         transform (callable, optional): A function/transform that takes in several PIL images
             and returns a transformed version. It is not a torchvision transform!
         loader (callable, optional): A function to load an image given its path.
@@ -92,8 +92,8 @@ class B100(FolderByDir):
     """`B100 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
 
     Args:
-        root (string): Root directory of the DIV2K Dataset.
-        scale (int, optional): The upsampling ratio: 2, 3, 4 or 8.
+        root (string): Root directory for the dataset.
+        scale (int, optional): The upsampling ratio: 2, 3 or 4.
         transform (callable, optional): A function/transform that takes in several PIL images
             and returns a transformed version. It is not a torchvision transform!
         loader (callable, optional): A function to load an image given its path.
@@ -133,8 +133,8 @@ class Urban100(FolderByDir):
     """`Urban100 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
 
     Args:
-        root (string): Root directory of the DIV2K Dataset.
-        scale (int, optional): The upsampling ratio: 2, 3, 4 or 8.
+        root (string): Root directory for the dataset.
+        scale (int, optional): The upsampling ratio: 2, 3 or 4.
         transform (callable, optional): A function/transform that takes in several PIL images
             and returns a transformed version. It is not a torchvision transform!
         loader (callable, optional): A function to load an image given its path.
