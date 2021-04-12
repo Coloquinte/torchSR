@@ -124,9 +124,13 @@ class FolderByDir(Folder):
 
     def list_samples(self, track, split, scale):
         track_dir = self.get_dir(track, split, scale)
-        all_samples = sorted(os.listdir(track_dir))
+        if not os.path.isdir(track_dir):
+            raise RuntimeError(f"Dataset directory {track_dir} does not exist")
+        all_samples = sorted([os.path.join(root, name) for root, _, names in os.walk(track_dir) for name in names])
         all_samples = [s for s in all_samples if s.lower().endswith(self.extensions)]
-        return [os.path.join(track_dir, s) for s in all_samples]
+        if len(all_samples) == 0:
+            raise RuntimeError(f"No samples were found in directory {track_dir}")
+        return all_samples
 
     def init_samples(self):
         if ('hr', self.split, 1) in self.track_dirs:
