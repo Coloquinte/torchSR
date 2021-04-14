@@ -4,13 +4,9 @@ import torch
 import torch.nn as nn
 from torchvision.models.utils import load_state_dict_from_url
 
-__all__ = [ 'ninasr_b0', ]
+__all__ = [ 'ninasr_b0', 'ninasr_b1', 'ninasr_b2' ]
 
 url = {
-    'r10f16x2': 'https://drive.google.com/uc?export=download&id=1WuR2uehZlTrp2Jv6KJxv1UWpTGOrX5sR',
-    'r10f16x3': 'https://drive.google.com/uc?export=download&id=1YlfujNRg4Cw2A6FNmtEa2B6weK59o2TW',
-    'r10f16x4': 'https://drive.google.com/uc?export=download&id=1EPUERFrR0eluSQflv73cFJ0XmpAQMF7e',
-    'r10f16x8': 'https://drive.google.com/uc?export=download&id=1I-qS7fDGGBgpuA6TNz_eBvSKf5AWGfyI',
 }
 
 class AttentionBlock(nn.Module):
@@ -19,14 +15,14 @@ class AttentionBlock(nn.Module):
     """
     def __init__(self, n_feats, reduction=4, stride=8):
         super(AttentionBlock, self).__init__()
-        m = []
-        m.append(nn.AvgPool2d(2*stride-1, stride=stride, padding=stride-1, count_include_pad=False))
-        m.append(nn.Conv2d(n_feats, n_feats//reduction, 1, bias=True))
-        m.append(nn.ReLU(True))
-        m.append(nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True))
-        m.append(nn.Sigmoid())
-        m.append(nn.Upsample(scale_factor=stride, mode='nearest'))
-        self.body = nn.Sequential(*m)
+        self.body = nn.Sequential(
+            nn.AvgPool2d(2*stride-1, stride=stride, padding=stride-1, count_include_pad=False),
+            nn.Conv2d(n_feats, n_feats//reduction, 1, bias=True),
+            nn.ReLU(True),
+            nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True),
+            nn.Sigmoid(),
+            nn.Upsample(scale_factor=stride, mode='nearest')
+        )
 
     def forward(self, x):
         res = self.body(x)
@@ -36,18 +32,27 @@ class AttentionBlock(nn.Module):
 
 
 class ResBlock(nn.Module):
-    def __init__(self, n_feats, mid_feats):
+    def __init__(self, n_feats, mid_feats, in_scale, out_scale):
         super(ResBlock, self).__init__()
 
+        self.in_scale = in_scale
+        self.out_scale = out_scale
+
         m = []
-        m.append(nn.Conv2d(n_feats, mid_feats, 3, bias=True, padding=1))
+        conv1 = nn.Conv2d(n_feats, mid_feats, 3, padding=1, bias=True)
+        nn.init.kaiming_normal_(conv1.weight)
+        nn.init.zeros_(conv1.bias)
+        m.append(conv1)
         m.append(nn.ReLU(True))
         m.append(AttentionBlock(mid_feats))
-        m.append(nn.Conv2d(mid_feats, n_feats, 3, bias=True, padding=1))
+        conv2 = nn.Conv2d(mid_feats, n_feats, 3, padding=1, bias=False)
+        nn.init.zeros_(conv2.weight)
+        m.append(conv2)
+
         self.body = nn.Sequential(*m)
 
     def forward(self, x):
-        res = self.body(x)
+        res = self.body(x * self.in_scale) * (2*self.out_scale)
         res += x
         return res
 
@@ -64,7 +69,7 @@ class Rescale(nn.Module):
 
 
 class NinaSR(nn.Module):
-    def __init__(self, n_resblocks, n_feats, expansion, scale, pretrained=False):
+    def __init__(self, n_resblocks, n_feats, scale, pretrained=False, expansion=2.0):
         super(NinaSR, self).__init__()
 
         url_name = 'r{}f{}x{}'.format(n_resblocks, n_feats, scale)
@@ -93,10 +98,13 @@ class NinaSR(nn.Module):
     @staticmethod
     def make_body(n_resblocks, n_feats, expansion):
         mid_feats = int(n_feats*expansion)
-        m_body = [
-            ResBlock(n_feats, mid_feats)
-            for i in range(n_resblocks)
-        ]
+        out_scale = 4 / n_resblocks
+        expected_variance = 1.0
+        m_body = []
+        for i in range(n_resblocks):
+            in_scale = 1.0/math.sqrt(expected_variance)
+            m_body.append(ResBlock(n_feats, mid_feats, in_scale, out_scale))
+            expected_variance += out_scale ** 2
         return nn.Sequential(*m_body)
 
     @staticmethod
@@ -123,6 +131,14 @@ class NinaSR(nn.Module):
 
 
 def ninasr_b0(scale, pretrained=False):
-    model = NinaSR(10, 16, 2.0, scale, pretrained)
+    model = NinaSR(10, 16, scale, pretrained)
+    return model
+
+def ninasr_b1(scale, pretrained=False):
+    model = NinaSR(26, 32, scale, pretrained)
+    return model
+
+def ninasr_b2(scale, pretrained=False):
+    model = NinaSR(84, 56, scale, pretrained)
     return model
 
