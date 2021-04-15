@@ -54,6 +54,7 @@ Datasets return a list of images. The first image is the original one, and the n
 The following datasets are available:
 * [DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)
 * [RealSR](https://github.com/csjcai/RealSR)
+* [Flicr2K](https://github.com/limbee/NTIRE2017)
 * [REDS](https://seungjunnah.github.io/Datasets/reds)
 * [Set5](http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html), [Set14](https://paperswithcode.com/dataset/set14), [B100](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/), [Urban100](https://paperswithcode.com/dataset/urban100)
 
