@@ -52,6 +52,8 @@ train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[200],
                    help='steps for learning rate decay')
 train.add_argument('--lr-decay-rate', type=float, default=10.0,
                    help='learning rate decay per step')
+train.add_argument('--freeze-backbone', action='store_true',
+                   help='freeze the model, except the upsampler')
 train.add_argument('--log-dir', type=str,
                    help='log directory for tensorboard')
 

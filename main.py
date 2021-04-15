@@ -367,6 +367,19 @@ def get_model():
     if len(args.scale) != 1:
         raise ValueError("Multiscale superresolution is not supported yet")
     model = models.__dict__[args.arch](scale=args.scale[0], pretrained=args.download_pretrained)
+    if args.freeze_backbone:
+        if args.download_pretrained is None and args.load_checkpoint is None and args.load_pretrained is None:
+            raise ValueError("A pretrained model is required to freeze the backbone")
+        for p in model.parameters():
+            p.requires_grad = False
+        if hasattr(model, 'upsampler'):
+            for p in model.upsampler.parameters():
+                p.requires_grad = True
+        elif hasattr(model, 'tail'):
+            for p in model.tail.parameters():
+                p.requires_grad = True
+        else:
+            raise ValueError("The model has no known upsampling module to unfreeze")
     return model
 
 
