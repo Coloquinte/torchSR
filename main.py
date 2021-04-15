@@ -180,7 +180,17 @@ class Trainer:
         if args.load_pretrained is None:
             return
         ckp = torch.load(args.load_pretrained)
-        self.model.load_state_dict(ckp, strict=False)
+        state = self.model.state_dict()
+        for name, param in ckp.items():
+            if name in state:
+                try:
+                    state[name].copy_(param)
+                except Exception as e:
+                    if 'tail' not in name and 'upsampler' not in name:
+                        raise e
+            else:
+                if 'tail' not in name and 'upsampler' not in name:
+                    raise KeyError(f'Unexpected key "{name}" in state_dict')
 
     def save_checkpoint(self, best=False):
         if args.save_checkpoint is None:
