@@ -1,4 +1,5 @@
 import argparse
+import platform
 
 from .enums import *
 
@@ -93,7 +94,7 @@ hw.add_argument('--tune-backend', action='store_true',
 hw.add_argument('--datatype', type=DataType, default=DataType.FP32,
                 choices=list(DataType),
                 help='specify floating-point format')
-hw.add_argument('--workers', type=int, default=0,
+hw.add_argument('--workers', type=int, default=0 if platform.system() == 'Windows' else 2,
                 help='number of workers for data loaders')
 
 args = parser.parse_args()
