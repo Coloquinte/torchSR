@@ -31,7 +31,7 @@ class AttentionBlock(nn.Module):
     def forward(self, x):
         res = self.body(x)
         if res.shape != x.shape:
-            res = res[:, :, x.shape[2], x.shape[3]]
+            res = res[:, :, :x.shape[2], :x.shape[3]]
         return res * x
 
 
