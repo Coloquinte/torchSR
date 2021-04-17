@@ -82,9 +82,9 @@ A script is available to train the models from scratch, evaluate them, and much 
 ```bash
 pip install pip tqdm tensorboard  # Additional dependencies
 python main.py -h
+python main.py --arch edsr_baseline --download-pretrained --images test/butterfly.png --destination results/
 python main.py --arch edsr_baseline --download-pretrained --validation-only
 python main.py --arch edsr_baseline --epochs 300 --loss l1 --dataset-train div2k_bicubic
-python main.py --arch edsr_baseline --validation-only --download-pretrained
 ```
 
 

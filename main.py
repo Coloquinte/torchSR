@@ -6,6 +6,7 @@ import torch
 import torch.nn as nn
 import torchvision.transforms.functional as F
 from tqdm import tqdm
+from PIL import Image
 
 import models
 from datasets import *
@@ -31,9 +32,17 @@ class AverageMeter:
         return self.avg
 
 
+def to_tensor(img):
+    t = F.to_tensor(img)
+    if t.ndim == 3:
+        t = t.unsqueeze(0)
+    return t
+
 def to_image(t):
     """Workaround a bug in torchvision
     The conversion of a tensor to a PIL image causes overflows, which result in huge errors"""
+    if t.ndim == 4:
+        t = t.squeeze(0)
     t = torch.round(255 * t) / 255
     t = torch.clamp(t, 0, 1)
     return F.to_pil_image(t.cpu())
@@ -137,6 +146,39 @@ class Trainer:
 
     def validation(self):
         self.val_iter()
+
+    def run_model(self):
+        if len(args.scale) != 1:
+            raise ValueError("Multiscale is not supported")
+        scale = args.scale[0]
+        with torch.no_grad():
+            self.model.eval()
+            input_images = []
+            for f in args.images:
+                if os.path.isdir(f):
+                    for g in os.listdir(f):
+                        n = os.path.join(f, g)
+                        if os.path.isfile(n):
+                            input_images.append(n)
+                else:
+                    input_images.append(f)
+            if args.destination is None:
+                raise ValueError("You should specify a destination directory")
+            os.makedirs(args.destination, exist_ok=True)
+            t = tqdm(input_images)
+            t.set_description("Run")
+            for filename in t:
+                try:
+                    img = Image.open(filename)
+                    img.load()
+                except:
+                    print(f"Could not open {filename}")
+                    continue
+                img = to_tensor(img).to(self.device)
+                sr_img = model(img)
+                sr_img = to_image(sr_img)
+                destname = os.path.splitext(os.path.basename(filename))[0] + f"_x{scale}.png"
+                sr_img.save(os.path.join(args.destination, destname))
 
     def train(self):
         t = tqdm(total=args.epochs, initial=self.epoch)
@@ -281,6 +323,8 @@ def get_transform_val():
 
 
 def get_datasets():
+    if args.images is not None:
+        return None, None
     dataset_train = names_to_dataset(args.dataset_train, 'train',
                                      transform=get_transform_train())
     dataset_val = names_to_dataset(args.dataset_val, 'val',
@@ -423,10 +467,13 @@ loss_fn = get_loss()
 
 trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype)
 
-if args.validation_only:
-    if args.load_pretrained is None and args.download_pretrained is None and args.load_checkpoint is None:
+if args.validation_only or args.images:
+    if args.load_pretrained is None and args.load_checkpoint is None and not args.download_pretrained:
         raise ValueError("For validation, please use --load-pretrained CHECKPOINT or --download-pretrained")
-    trainer.validation()
+    if args.images:
+        trainer.run_model()
+    else:
+        trainer.validation()
 else:
     report_model(model, args.arch)
     trainer.train()

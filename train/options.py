@@ -63,6 +63,10 @@ train.add_argument('--log-dir', type=str,
 # Dataset specification
 data.add_argument('--validation-only', action='store_true',
                   help='only run the validation (no training)')
+data.add_argument('--images', type=str, nargs="+",
+                  help='run on the given images')
+data.add_argument('--destination', type=str,
+                  help='directory to output SR images')
 data.add_argument('--download-dataset', action='store_true',
                   help='download the dataset')
 data.add_argument('--dataset-root', type=str, default='./data',
