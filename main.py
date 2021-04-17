@@ -63,7 +63,7 @@ class Trainer:
         self.load_checkpoint()
         self.load_pretrained()
         self.writer = None
-        if not args.evaluate:
+        if not args.validation_only:
             try:
                 # Only if tensorboard is present
                 from torch.utils.tensorboard import SummaryWriter
@@ -135,7 +135,7 @@ class Trainer:
                 self.writer.add_scalar('L2', l2_avg.get(), self.epoch)
             return psnr_avg.get(), ssim_avg.get()
 
-    def evaluate(self):
+    def validation(self):
         self.val_iter()
 
     def train(self):
@@ -273,7 +273,7 @@ def get_transform_train():
 
 def get_transform_val():
     transforms = []
-    if not args.evaluate:
+    if not args.validation_only:
         # Full images are too big: only validate on a centered patch
         transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, ]+args.scale))
     transforms.append(ToTensor())
@@ -295,7 +295,7 @@ def get_datasets():
 
 
 def get_optimizer(model):
-    if args.evaluate:
+    if args.validation_only:
         return None
 
     kwargs = {}
@@ -332,7 +332,7 @@ def get_optimizer(model):
 
 
 def get_scheduler(optimizer):
-    if args.evaluate:
+    if args.validation_only:
         return None
     return torch.optim.lr_scheduler.MultiStepLR(
         optimizer, milestones=args.lr_decay_steps,
@@ -423,8 +423,10 @@ loss_fn = get_loss()
 
 trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype)
 
-if args.evaluate:
-    trainer.evaluate()
+if args.validation_only:
+    if args.load_pretrained is None and args.download_pretrained is None and args.load_checkpoint is None:
+        raise ValueError("For validation, please use --load-pretrained CHECKPOINT or --download-pretrained")
+    trainer.validation()
 else:
     report_model(model, args.arch)
     trainer.train()

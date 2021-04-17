@@ -61,8 +61,8 @@ train.add_argument('--log-dir', type=str,
 
 
 # Dataset specification
-data.add_argument('--evaluate', action='store_true',
-                  help='only evaluate the model')
+data.add_argument('--validation-only', action='store_true',
+                  help='only run the validation (no training)')
 data.add_argument('--download-dataset', action='store_true',
                   help='download the dataset')
 data.add_argument('--dataset-root', type=str, default='./data',
