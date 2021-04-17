@@ -1,7 +1,11 @@
 # Super-Resolution datasets for Pytorch
 
 This repository implements datasets and transforms to make Super-Resolution development easy.
-It is heavily inspired by [torchvision](https://github.com/pytorch/vision) and [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch).
+
+In this repository, you will find:
+* the popular super-resolution models, with pretrained checkpoints
+* common super-resolution datasets
+* a unified training script for all models
 
 
 
@@ -93,3 +97,6 @@ python main.py --arch edsr_baseline --epochs 300 --loss l1 --dataset-train div2k
 
 All contributions are welcome! Usability improvements, training improvements, new models, new transforms, ...
 Don't hesitate to contribute your own pretrained models too.
+
+Thanks to the people behind [torchvision](https://github.com/pytorch/vision) and [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch), who inspired this repository.
+Some of the models come from [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch).
