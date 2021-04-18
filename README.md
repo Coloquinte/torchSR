@@ -1,9 +1,10 @@
-# Super-Resolution datasets for Pytorch
+# Super-Resolution Datasets for Pytorch
 
-This repository implements datasets and transforms to make Super-Resolution development easy.
+Super-resolution is a process that increases the resolution of an image, adding additional details.
+Neural networks are the go-to method for accurate or realistic super-resolution.
 
 In this repository, you will find:
-* the popular super-resolution models, with pretrained checkpoints
+* the popular super-resolution networks, pretrained
 * common super-resolution datasets
 * a unified training script for all models
 
@@ -44,7 +45,7 @@ The following pretrained models are available:
 * [EDSR](https://arxiv.org/abs/1707.02921) (x2 x3 x4)
 * [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
 * [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
-* NinaSR, my own model for real-time super resolution (x2 x3 x4 x8)
+* [NinaSR](NinaSR.md), my own model for real-time super resolution (x2 x3 x4 x8)
 
 The following models are implemented without pretrained weights:
 * [VDSR](https://arxiv.org/abs/1511.04587)
