@@ -7,6 +7,10 @@ from torchvision.models.utils import load_state_dict_from_url
 __all__ = [ 'ninasr_b0', 'ninasr_b1', 'ninasr_b2' ]
 
 url = {
+    'r10f16x2': 'https://drive.google.com/uc?export=download&id=1WuR2uehZlTrp2Jv6KJxv1UWpTGOrX5sR',
+    'r10f16x3': 'https://drive.google.com/uc?export=download&id=1YlfujNRg4Cw2A6FNmtEa2B6weK59o2TW',
+    'r10f16x4': 'https://drive.google.com/uc?export=download&id=1EPUERFrR0eluSQflv73cFJ0XmpAQMF7e',
+    'r10f16x8': 'https://drive.google.com/uc?export=download&id=1I-qS7fDGGBgpuA6TNz_eBvSKf5AWGfyI',
 }
 
 class AttentionBlock(nn.Module):
