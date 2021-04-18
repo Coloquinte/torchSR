@@ -86,6 +86,10 @@ data.add_argument('--patch-size-train', type=int, default=96,
                   help='image patch size for training (HR)')
 data.add_argument('--patch-size-val', type=int, default=384,
                   help='image patch size for validation (HR)')
+data.add_argument('--chop-size', type=int,
+                  help='split the image below this size (LR)')
+data.add_argument('--chop-overlap', type=int, default=10,
+                  help='overlap between tiles when splitting (LR)')
 data.add_argument('--preload-dataset', action='store_true',
                   help='load the whole dataset in memory')
 

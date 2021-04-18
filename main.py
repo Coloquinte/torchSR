@@ -434,6 +434,8 @@ def get_model():
                 p.requires_grad = True
         else:
             raise ValueError("The model has no known upsampling module to unfreeze")
+    if args.chop_size is not None:
+        model = models.utils.ChoppedModel(model, args.scale[0], args.chop_size, args.chop_overlap)
     return model
 
 
