@@ -3,9 +3,10 @@ import torch.nn as nn
 
 __all__ = [ 'ChoppedModel' ]
 
-def get_windows(size, stride):
-    starts = list(range(0, size, stride))
-    starts[-1] = min(starts[-1], size - stride)
+def get_windows(tot_size, chop_size, chop_overlap):
+    stride = chop_size - chop_overlap
+    starts = list(range(0, tot_size - chop_overlap, stride))
+    starts[-1] = min(starts[-1], tot_size - stride)
     return starts
 
 
@@ -18,9 +19,8 @@ def chop_and_forward(model, x, scale, chop_size, chop_overlap):
         raise ValueError(f"Chop size {chop_size} is too small for overlap {chop_overlap}")
     if width <= chop_size and height <= chop_size:
         return model(x)
-    stride = chop_size - chop_overlap
-    x_starts = get_windows(width, stride)
-    y_starts = get_windows(height, stride)
+    x_starts = get_windows(width, chop_size, chop_overlap)
+    y_starts = get_windows(height, chop_size, chop_overlap)
     result_shape = (x.shape[0], x.shape[1], scale*x.shape[2], scale*x.shape[3])
     result = torch.zeros(result_shape, device=x.device)
     for i, x_s in enumerate(x_starts):
@@ -44,6 +44,7 @@ def chop_and_forward(model, x, scale, chop_size, chop_overlap):
             y_a = scale*y_s + b_margin
             y_b = scale*y_e - t_margin
             # Update the result
+            assert x_b > x_a and y_b > y_a
             r_margin = None if r_margin == 0 else -r_margin
             t_margin = None if t_margin == 0 else -t_margin
             tile = out[:, :, l_margin:r_margin, b_margin:t_margin]
