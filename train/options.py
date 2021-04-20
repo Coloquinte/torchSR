@@ -4,18 +4,19 @@ import platform
 from .enums import *
 
 parser = argparse.ArgumentParser(description='Super-Resolution networks')
+model = parser.add_argument_group('Model')
+run = parser.add_argument_group('Run')
 train = parser.add_argument_group('Training')
 data = parser.add_argument_group('Data')
 hw = parser.add_argument_group('Harware')
-model = parser.add_argument_group('Model')
 
 
 # Model specification: network
 model.add_argument("--arch", type=str, required=True,
                    help='network architecture to use')
-model.add_argument('--download-pretrained', action='store_true',
-                   help='download pretrained model')
 load_ckp = model.add_mutually_exclusive_group()
+load_ckp.add_argument('--download-pretrained', action='store_const', const='do',
+                      help='download pretrained model')
 load_ckp.add_argument('--load-checkpoint', type=str,
                       help='load model checkpoint')
 load_ckp.add_argument('--load-pretrained', type=str,
@@ -23,6 +24,20 @@ load_ckp.add_argument('--load-pretrained', type=str,
 model.add_argument('--save-checkpoint', type=str,
                    help='save model checkpoint')
 
+# Run specification
+val = run.add_mutually_exclusive_group()
+val.add_argument('--validation-only', action='store_const', const='do',
+                 help='only run the validation (no training)')
+val.add_argument('--images', type=str, nargs="+",
+                 help='run on the given images')
+run.add_argument('--destination', type=str,
+                 help='directory to output SR images')
+run.add_argument('--self-ensemble', action='store_const', const='do',
+                 help='use self-ensemble method for better accuracy (8x slower)')
+run.add_argument('--chop-size', type=int,
+                 help='split the image below this size (LR)')
+run.add_argument('--chop-overlap', type=int, default=10,
+                 help='overlap between tiles when splitting (LR)')
 
 # Training specification
 train.add_argument('--scale', type=int, nargs='+', default=[2],
@@ -61,12 +76,6 @@ train.add_argument('--log-dir', type=str,
 
 
 # Dataset specification
-data.add_argument('--validation-only', action='store_true',
-                  help='only run the validation (no training)')
-data.add_argument('--images', type=str, nargs="+",
-                  help='run on the given images')
-data.add_argument('--destination', type=str,
-                  help='directory to output SR images')
 data.add_argument('--download-dataset', action='store_true',
                   help='download the dataset')
 data.add_argument('--dataset-root', type=str, default='./data',
@@ -86,10 +95,6 @@ data.add_argument('--patch-size-train', type=int, default=96,
                   help='image patch size for training (HR)')
 data.add_argument('--patch-size-val', type=int, default=384,
                   help='image patch size for validation (HR)')
-data.add_argument('--chop-size', type=int,
-                  help='split the image below this size (LR)')
-data.add_argument('--chop-overlap', type=int, default=10,
-                  help='overlap between tiles when splitting (LR)')
 data.add_argument('--preload-dataset', action='store_true',
                   help='load the whole dataset in memory')
 

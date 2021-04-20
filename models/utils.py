@@ -66,3 +66,40 @@ class ChoppedModel(nn.Module):
     def forward(self, x):
         return chop_and_forward(self.model, x, self.scale, self.chop_size, self.chop_overlap)
 
+
+class SelfEnsembleModel(nn.Module):
+    """
+    Wrapper to run a model with the self-ensemble method
+    """
+    def __init__(self, model, median=False):
+        super(SelfEnsembleModel, self).__init__()
+        self.model = model
+        self.median = median
+
+    def forward_transformed(self, x, hflip, vflip, rotate):
+        if hflip:
+            x = torch.flip(x, (-2,))
+        if vflip:
+            x = torch.flip(x, (-1,))
+        if rotate:
+            x = torch.rot90(x, dims=(-2, -1))
+        x = self.model(x)
+        if rotate:
+            x = torch.rot90(x, dims=(-2, -1), k=3)
+        if vflip:
+            x = torch.flip(x, (-1,))
+        if hflip:
+            x = torch.flip(x, (-2,))
+        return x
+
+    def forward(self, x):
+        t = []
+        for hflip in [False, True]:
+            for vflip in [False, True]:
+                for rot in [False, True]:
+                    t.append(self.forward_transformed(x, hflip, vflip, rot))
+        t = torch.stack(t)
+        if self.median:
+            return torch.quantile(t, 0.5, dim=0)
+        else:
+            return torch.mean(t, dim=0)
