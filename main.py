@@ -145,7 +145,8 @@ class Trainer:
             return psnr_avg.get(), ssim_avg.get()
 
     def validation(self):
-        self.val_iter()
+        psnr, ssim = self.val_iter()
+        print(f"PSNR: {psnr:.2f}, SSIM: {ssim:.4f}")
 
     def run_model(self):
         if len(args.scale) != 1:
