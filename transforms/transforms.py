@@ -78,7 +78,7 @@ def crop(img, top, left, height, width):
 def rot90(img):
     if isinstance(img, PIL.Image.Image):
         return img.transpose(PIL.Image.ROTATE_90)
-    return torch.rot90(img)
+    return torch.rot90(img, dims=(-2, -1))
 
 
 def random_uniform(minval, maxval):
