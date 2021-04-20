@@ -66,6 +66,12 @@ class ChoppedModel(nn.Module):
     def forward(self, x):
         return chop_and_forward(self.model, x, self.scale, self.chop_size, self.chop_overlap)
 
+    def state_dict(self):
+        return self.model.state_dict()
+
+    def load_state_dict(self, state_dict, strict=True):
+        return self.model.load_state_dict(state_dict, strict)
+
 
 class SelfEnsembleModel(nn.Module):
     """
@@ -103,3 +109,9 @@ class SelfEnsembleModel(nn.Module):
             return torch.quantile(t, 0.5, dim=0)
         else:
             return torch.mean(t, dim=0)
+
+    def state_dict(self):
+        return self.model.state_dict()
+
+    def load_state_dict(self, state_dict, strict=True):
+        return self.model.load_state_dict(state_dict, strict)
