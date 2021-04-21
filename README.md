@@ -99,5 +99,10 @@ python main.py --arch edsr_baseline --epochs 300 --loss l1 --dataset-train div2k
 All contributions are welcome! Usability improvements, training improvements, new models, new transforms, ...
 Don't hesitate to contribute your own pretrained models too.
 
-Thanks to the people behind [torchvision](https://github.com/pytorch/vision) and [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch), who inspired this repository.
-Some of the models come from [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch).
+
+
+# Acknowledgements
+
+Thanks to the people behind [torchvision](https://github.com/pytorch/vision) and [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch), whose work inspired this repository.
+
+Some of the models used here come from [EDSR-PyTorch](https://github.com/zhouhuanxiang/EDSR-PyTorch).
