@@ -11,10 +11,10 @@ from torchvision.models.utils import load_state_dict_from_url
 __all__ = [ 'rcan', 'rcan_g10r20f64', ]
 
 url = {
-    'g10r20f64x2': 'https://drive.google.com/uc?export=download&id=1aV7M0vaj0tmPHGFolXo6h23qXPPNIBgD',
-    'g10r20f64x3': 'https://drive.google.com/uc?export=download&id=1NfR1eqswNYMtegt5Et0I__L_2-MT2MXB',
-    'g10r20f64x4': 'https://drive.google.com/uc?export=download&id=1hMrnDTOTMOYHr-L9puMBqjqDkjeqKIbD',
-    'g10r20f64x8': 'https://drive.google.com/uc?export=download&id=1ovRngDYVTaOTp69TZb6nB-hT8ihyJFJo',
+    'g10r20f64x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rcan_x2.pt',
+    'g10r20f64x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rcan_x3.pt',
+    'g10r20f64x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rcan_x4.pt',
+    'g10r20f64x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rcan_x8.pt',
 }
 
 def default_conv(in_channels, out_channels, kernel_size, bias=True):
@@ -140,7 +140,6 @@ class RCAN(nn.Module):
             self.url = url[url_name]
         else:
             self.url = None
-        self.filename = f"rcan_{url_name}.pt"
         
         # RGB mean for DIV2K
         self.sub_mean = MeanShift(rgb_range)
@@ -185,7 +184,7 @@ class RCAN(nn.Module):
     def load_pretrained(self):
         if self.url is None:
             raise KeyError("No URL available for this model")
-        state_dict = load_state_dict_from_url(self.url, progress=True, file_name=self.filename)
+        state_dict = load_state_dict_from_url(self.url, progress=True)
         self.load_state_dict(state_dict)
 
 

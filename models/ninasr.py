@@ -7,18 +7,18 @@ from torchvision.models.utils import load_state_dict_from_url
 __all__ = [ 'ninasr_b0', 'ninasr_b1', 'ninasr_b2' ]
 
 url = {
-    'r10f16x2': 'https://drive.google.com/uc?export=download&id=1WuR2uehZlTrp2Jv6KJxv1UWpTGOrX5sR',
-    'r10f16x3': 'https://drive.google.com/uc?export=download&id=1YlfujNRg4Cw2A6FNmtEa2B6weK59o2TW',
-    'r10f16x4': 'https://drive.google.com/uc?export=download&id=1EPUERFrR0eluSQflv73cFJ0XmpAQMF7e',
-    'r10f16x8': 'https://drive.google.com/uc?export=download&id=1I-qS7fDGGBgpuA6TNz_eBvSKf5AWGfyI',
-    'r26f32x2': 'https://drive.google.com/uc?export=download&id=1gGxZ8fNADyFGyBenV7JjZJDLswtA4AcG',
-    'r26f32x3': 'https://drive.google.com/uc?export=download&id=1KT_XFz-3_cflB8hogyZS0lKEsUZb3ALX',
-    'r26f32x4': 'https://drive.google.com/uc?export=download&id=16gmbzKQ7y2niygJSFAyXwv7JFFQDymOs',
-    'r26f32x8': 'https://drive.google.com/uc?export=download&id=1uj4ZEgEE9ToCORCmkk1_v8oztMC-Q5kS',
-    'r84f56x2': 'https://drive.google.com/uc?export=download&id=1IJCejqGBEM0StvEculAYTskgTifOoPHE',
-    'r84f56x3': 'https://drive.google.com/uc?export=download&id=1xbk5RhF-2UcPknoGtWFH5NZwOQAs7ujy',
-    'r84f56x4': 'https://drive.google.com/uc?export=download&id=1ZPDpZsktceZiWUXq2UYfBUbcyDEoxR0D',
-    'r84f56x8': 'https://drive.google.com/uc?export=download&id=1sHmwSKzXKJzM9iw2AVm_19JUrru4gzj3',
+    'r10f16x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b0_x2.pt',
+    'r10f16x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b0_x3.pt',
+    'r10f16x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b0_x4.pt',
+    'r10f16x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b0_x8.pt',
+    'r26f32x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b1_x2.pt',
+    'r26f32x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b1_x3.pt',
+    'r26f32x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b1_x4.pt',
+    'r26f32x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b1_x8.pt',
+    'r84f56x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b2_x2.pt',
+    'r84f56x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b2_x3.pt',
+    'r84f56x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b2_x4.pt',
+    'r84f56x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/ninasr_b2_x8.pt',
 }
 
 class AttentionBlock(nn.Module):
@@ -89,7 +89,6 @@ class NinaSR(nn.Module):
             self.url = url[url_name]
         else:
             self.url = None
-        self.filename = f"ninasr_{url_name}.pt"
 
         n_colors = 3
         self.head = NinaSR.make_head(n_colors, n_feats)
@@ -138,7 +137,7 @@ class NinaSR(nn.Module):
     def load_pretrained(self):
         if self.url is None:
             raise KeyError("No URL available for this model")
-        state_dict = load_state_dict_from_url(self.url, progress=True, file_name=self.filename)
+        state_dict = load_state_dict_from_url(self.url, progress=True)
         self.load_state_dict(state_dict)
 
 

@@ -10,9 +10,9 @@ from torchvision.models.utils import load_state_dict_from_url
 __all__ = [ 'rdn', 'rdn_a', 'rdn_b', ]
 
 url = {
-    'g64go64d16c8x2': 'https://drive.google.com/uc?export=download&id=13IUDzmYLdFLIiCnDlGKlwNaAQgCWfsSe',
-    'g64go64d16c8x3': 'https://drive.google.com/uc?export=download&id=1743F8a56Rn3OYxiwoz2ACUi1e9O1k9_f',
-    'g64go64d16c8x4': 'https://drive.google.com/uc?export=download&id=17LrsZDcBeMiEICv9iCR1cTtXcDpl7X79',
+    'g64go64d16c8x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rdn_x2.pth',
+    'g64go64d16c8x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rdn_x3.pth',
+    'g64go64d16c8x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rdn_x4.pth',
 }
 
 class RDB_Conv(nn.Module):
@@ -55,7 +55,6 @@ class RDN(nn.Module):
             self.url = url[url_name]
         else:
             self.url = None
-        self.filename = f"rdn_{url_name}.pt"
 
         r = scale
         kSize = 3
@@ -116,7 +115,7 @@ class RDN(nn.Module):
     def load_pretrained(self):
         if self.url is None:
             raise KeyError("No URL available for this model")
-        state_dict = load_state_dict_from_url(self.url, progress=True, file_name=self.filename)
+        state_dict = load_state_dict_from_url(self.url, progress=True)
         self.load_state_dict(state_dict)
 
 
