@@ -6,7 +6,8 @@ __all__ = [ 'ChoppedModel' ]
 def get_windows(tot_size, chop_size, chop_overlap):
     stride = chop_size - chop_overlap
     starts = list(range(0, tot_size - chop_overlap, stride))
-    starts[-1] = min(starts[-1], tot_size - stride)
+    starts[-1] = min(starts[-1], tot_size - stride)  # Right-side
+    starts[-1] = max(starts[-1], 0)  # Left-side, if there's only one element
     return starts
 
 
@@ -25,8 +26,9 @@ def chop_and_forward(model, x, scale, chop_size, chop_overlap):
     result = torch.zeros(result_shape, device=x.device)
     for i, x_s in enumerate(x_starts):
         for j, y_s in enumerate(y_starts):
-            x_e = x_s + chop_size
-            y_e = y_s + chop_size
+            # Range (saturated for when only one tile fits)
+            x_e = min(x_s + chop_size, width)
+            y_e = min(y_s + chop_size, height)
             # Run model on the tile
             out = model(x[:, :, x_s:x_e, y_s:y_e])
             # Compute margins
