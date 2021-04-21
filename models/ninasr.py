@@ -15,6 +15,10 @@ url = {
     'r26f32x3': 'https://drive.google.com/uc?export=download&id=1KT_XFz-3_cflB8hogyZS0lKEsUZb3ALX',
     'r26f32x4': 'https://drive.google.com/uc?export=download&id=16gmbzKQ7y2niygJSFAyXwv7JFFQDymOs',
     'r26f32x8': 'https://drive.google.com/uc?export=download&id=1uj4ZEgEE9ToCORCmkk1_v8oztMC-Q5kS',
+    'r84f56x2': 'https://drive.google.com/uc?export=download&id=1IJCejqGBEM0StvEculAYTskgTifOoPHE',
+    'r84f56x3': 'https://drive.google.com/uc?export=download&id=1xbk5RhF-2UcPknoGtWFH5NZwOQAs7ujy',
+    'r84f56x4': 'https://drive.google.com/uc?export=download&id=1ZPDpZsktceZiWUXq2UYfBUbcyDEoxR0D',
+    'r84f56x8': 'https://drive.google.com/uc?export=download&id=1sHmwSKzXKJzM9iw2AVm_19JUrru4gzj3',
 }
 
 class AttentionBlock(nn.Module):
