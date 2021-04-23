@@ -39,7 +39,7 @@ class Flickr2K(FolderByDir):
     def __init__(
             self,
             root: str,
-            scale: Union[int, List[int]] = 2,
+            scale: Union[int, List[int], None] = None,
             track: Union[str, List[str]] = 'bicubic',
             transform: Optional[Callable] = None,
             loader: Callable = pil_loader,

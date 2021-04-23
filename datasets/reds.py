@@ -54,11 +54,6 @@ class REDS(FolderByDir):
             download: bool = False,
             predecode: bool = False,
             preload: bool = False):
-        if scale is None:
-            if 'bicubic' in track:
-                scale = 4
-            else:
-                scale = 1
         super(REDS, self).__init__(os.path.join(root, 'REDS'),
                                     scale, track, split, transform,
                                     loader, download, predecode, preload)

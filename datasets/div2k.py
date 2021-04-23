@@ -92,7 +92,7 @@ class Div2K(FolderByDir):
     def __init__(
             self,
             root: str,
-            scale: Union[int, List[int]] = 2,
+            scale: Union[int, List[int], None] = None,
             track: Union[str, List[str]] = 'bicubic',
             split: str = 'train',
             transform: Optional[Callable] = None,

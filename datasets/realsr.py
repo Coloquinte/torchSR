@@ -53,6 +53,8 @@ class RealSRv3(FolderByDir):
             download: bool = False,
             predecode: bool = False,
             preload: bool = False):
+        if scale is None:
+            raise ValueError("RealSR dataset does not support getting HR images only")
         super(RealSRv3, self).__init__(os.path.join(root, 'RealSR'),
                                      scale, track, split, transform,
                                      loader, download, predecode, preload)

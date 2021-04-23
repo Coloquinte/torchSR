@@ -34,7 +34,7 @@ class Set5(FolderByDir):
     def __init__(
             self,
             root: str,
-            scale: Union[int, List[int]] = 2,
+            scale: Union[int, List[int], None] = None,
             split: str = 'val',
             transform: Optional[Callable] = None,
             loader: Callable = pil_loader,
@@ -76,7 +76,7 @@ class Set14(FolderByDir):
     def __init__(
             self,
             root: str,
-            scale: Union[int, List[int]] = 2,
+            scale: Union[int, List[int], None] = None,
             split: str = 'val',
             transform: Optional[Callable] = None,
             loader: Callable = pil_loader,
@@ -118,7 +118,7 @@ class B100(FolderByDir):
     def __init__(
             self,
             root: str,
-            scale: Union[int, List[int]] = 2,
+            scale: Union[int, List[int], None] = None,
             split: str = 'val',
             transform: Optional[Callable] = None,
             loader: Callable = pil_loader,
@@ -159,7 +159,7 @@ class Urban100(FolderByDir):
     def __init__(
             self,
             root: str,
-            scale: Union[int, List[int]] = 2,
+            scale: Union[int, List[int], None] = None,
             split: str = 'val',
             transform: Optional[Callable] = None,
             loader: Callable = pil_loader,

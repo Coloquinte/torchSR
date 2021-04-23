@@ -77,7 +77,7 @@ class FolderByDir(Folder):
     def __init__(
             self,
             root: str,
-            scale: Union[int, List[int]],
+            scale: Union[int, List[int], None],
             track: Union[str, List[str]],
             split: str = 'train',
             transform: Optional[Callable] = None,
@@ -85,6 +85,8 @@ class FolderByDir(Folder):
             download: bool = False,
             predecode: bool = False,
             preload: bool = False):
+        if scale is None:
+            scale = []
         if isinstance(scale, int):
             scale = [scale]
         if isinstance(track, str):
@@ -119,7 +121,9 @@ class FolderByDir(Folder):
             if split not in self.get_splits():
                 raise ValueError(f"{self.__class__.__name__} does not include split {split}. "
                                  f"Use one of {list(self.get_splits())}")
-            raise ValueError(f"{self.__class__.__name__} track {track} does not include scale X{scale}")
+            available = ", ".join([str(sc) for t, sp, sc in self.track_dirs if t == track and sp == split])
+            raise ValueError(f"{self.__class__.__name__} track {track} does not include scale X{scale}. "
+                             f"Use {available}")
         return os.path.join(self.root, self.track_dirs[(track, split, scale)])
 
     def list_samples(self, track, split, scale):
