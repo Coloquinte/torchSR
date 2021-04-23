@@ -149,9 +149,7 @@ class Trainer:
         print(f"PSNR: {psnr:.2f}, SSIM: {ssim:.4f}")
 
     def run_model(self):
-        if len(args.scale) != 1:
-            raise ValueError("Multiscale is not supported")
-        scale = args.scale[0]
+        scale = args.scale
         with torch.no_grad():
             self.model.eval()
             input_images = []
@@ -293,7 +291,7 @@ def names_to_dataset(names, split, transform):
 
 def get_transform_train():
     transforms = []
-    transforms.append(RandomCrop(args.patch_size_train, scales=[1, ]+args.scale, margin=0.5))
+    transforms.append(RandomCrop(args.patch_size_train, scales=[1, args.scale], margin=0.5))
     if DataAugmentationType.FlipTurn in args.augment:
         transforms.append(RandomFlipTurn())
     else:
@@ -318,9 +316,9 @@ def get_transform_val():
     transforms = []
     if not args.validation_only:
         # Full images are too big: only validate on a centered patch
-        transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, ]+args.scale))
+        transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, args.scale]))
     else:
-        transforms.append(AdjustToScale(scales=[1, ]+args.scale))
+        transforms.append(AdjustToScale(scales=[1, args.scale]))
     transforms.append(ToTensor())
     return Compose(transforms)
 
@@ -421,9 +419,7 @@ def get_loss():
 def get_model():
     if args.arch not in models.__dict__:
         raise ValueError(f"Unknown model {args.arch}")
-    if len(args.scale) != 1:
-        raise ValueError("Multiscale superresolution is not supported yet")
-    model = models.__dict__[args.arch](scale=args.scale[0], pretrained=args.download_pretrained)
+    model = models.__dict__[args.arch](scale=args.scale, pretrained=args.download_pretrained)
     if args.freeze_backbone:
         if args.download_pretrained is None and args.load_checkpoint is None and args.load_pretrained is None:
             raise ValueError("A pretrained model is required to freeze the backbone")
@@ -440,7 +436,7 @@ def get_model():
     if args.self_ensemble:
         model = models.utils.SelfEnsembleModel(model)
     if args.chop_size is not None:
-        model = models.utils.ChoppedModel(model, args.scale[0], args.chop_size, args.chop_overlap)
+        model = models.utils.ChoppedModel(model, args.scale, args.chop_size, args.chop_overlap)
     return model
 
 
@@ -477,10 +473,14 @@ trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val
 if args.validation_only or args.images:
     if args.load_pretrained is None and args.load_checkpoint is None and not args.download_pretrained:
         raise ValueError("For validation, please use --load-pretrained CHECKPOINT or --download-pretrained")
+    if args.scale is None:
+        raise ValueError("--scale-range is not supported for validation")
     if args.images:
         trainer.run_model()
     else:
         trainer.validation()
 else:
+    if args.scale is None:
+        raise ValueError("--scale-range is not supported yet")
     report_model(model, args.arch)
     trainer.train()

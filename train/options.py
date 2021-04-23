@@ -41,7 +41,7 @@ run.add_argument('--chop-overlap', type=int, default=10,
 
 # Training specification
 scales = train.add_mutually_exclusive_group(required=True)
-scales.add_argument('--scale', type=int, nargs='+',
+scales.add_argument('--scale', type=int,
                     help='upsampling scale')
 scales.add_argument('--scale-range', type=float, nargs=2,
                     help='upsampling scale')
