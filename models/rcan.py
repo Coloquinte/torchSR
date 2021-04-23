@@ -129,6 +129,7 @@ class ResidualGroup(nn.Module):
 class RCAN(nn.Module):
     def __init__(self, n_resgroups, n_resblocks, n_feats, reduction, scale, pretrained=False):
         super(RCAN, self).__init__()
+        self.scale = scale
         
         kernel_size = 3
         n_colors = 3
@@ -169,7 +170,9 @@ class RCAN(nn.Module):
         if pretrained:
             self.load_pretrained()
 
-    def forward(self, x):
+    def forward(self, x, scale=None):
+        if scale is not None and scale != self.scale:
+            raise ValueError(f"Network scale is {self.scale}, not {scale}")
         x = self.sub_mean(255 * x)
         x = self.head(x)
 

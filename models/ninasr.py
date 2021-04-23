@@ -83,6 +83,7 @@ class Rescale(nn.Module):
 class NinaSR(nn.Module):
     def __init__(self, n_resblocks, n_feats, scale, pretrained=False, expansion=2.0):
         super(NinaSR, self).__init__()
+        self.scale = scale
 
         url_name = 'r{}f{}x{}'.format(n_resblocks, n_feats, scale)
         if url_name in url:
@@ -127,7 +128,9 @@ class NinaSR(nn.Module):
         ]
         return nn.Sequential(*m_tail)
 
-    def forward(self, x):
+    def forward(self, x, scale=None):
+        if scale is not None and scale != self.scale:
+            raise ValueError(f"Network scale is {self.scale}, not {scale}")
         x = self.head(x)
         res = self.body(x)
         res += x

@@ -199,7 +199,14 @@ class CARN(nn.Module):
         if pretrained:
             self.load_pretrained()
                 
-    def forward(self, x):
+    def forward(self, x, scale=None):
+        if self.scale is not None:
+            if scale is not None and scale != self.scale:
+                raise ValueError(f"Network scale is {self.scale}, not {scale}")
+            scale = self.scale
+        else:
+            if scale is None:
+                raise ValueError(f"Network scale was not set")
         x = self.sub_mean(x)
         x = self.entry(x)
         c0 = o0 = x
@@ -216,7 +223,7 @@ class CARN(nn.Module):
         c3 = torch.cat([c2, b3], dim=1)
         o3 = self.c3(c3)
 
-        out = self.upsample(o3, scale=self.scale)
+        out = self.upsample(o3, scale=scale)
 
         out = self.exit(out)
         out = self.add_mean(out)
@@ -285,7 +292,14 @@ class CARNM(nn.Module):
         if pretrained:
             self.load_pretrained()
                 
-    def forward(self, x):
+    def forward(self, x, scale=None):
+        if self.scale is not None:
+            if scale is not None and scale != self.scale:
+                raise ValueError(f"Network scale is {self.scale}, not {scale}")
+            scale = self.scale
+        else:
+            if scale is None:
+                raise ValueError(f"Network scale was not set")
         scale = self.scale
         x = self.sub_mean(x)
         x = self.entry(x)
@@ -303,7 +317,7 @@ class CARNM(nn.Module):
         c3 = torch.cat([c2, b3], dim=1)
         o3 = self.c3(c3)
 
-        out = self.upsample(o3, scale=self.scale)
+        out = self.upsample(o3, scale=scale)
 
         out = self.exit(out)
         out = self.add_mean(out)

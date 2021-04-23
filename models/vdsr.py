@@ -32,6 +32,7 @@ class MeanShift(nn.Conv2d):
 class VDSR(nn.Module):
     def __init__(self, n_resblocks, n_feats, scale, pretrained):
         super(VDSR, self).__init__()
+        self.scale = scale
 
         kernel_size = 3 
         n_colors = 3
@@ -60,7 +61,9 @@ class VDSR(nn.Module):
         if pretrained:
             self.load_pretrained()
 
-    def forward(self, x):
+    def forward(self, x, scale=None):
+        if scale is not None and scale != self.scale:
+            raise ValueError(f"Network scale is {self.scale}, not {scale}")
         x = nn.functional.interpolate(x, scale_factor=self.scale, mode='bicubic', align_corners=False)
         x = self.sub_mean(x)
         res = self.body(x)

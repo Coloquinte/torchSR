@@ -50,6 +50,8 @@ class RDB(nn.Module):
 class RDN(nn.Module):
     def __init__(self, scale, G0, D, C, G, pretrained=False):
         super(RDN, self).__init__()
+        self.scale = scale
+
         url_name = 'g{}go{}d{}c{}x{}'.format(G, G0, D, C, scale)
         if url_name in url:
             self.url = url[url_name]
@@ -98,7 +100,9 @@ class RDN(nn.Module):
         if pretrained:
             self.load_pretrained()
 
-    def forward(self, x):
+    def forward(self, x, scale=None):
+        if scale is not None and scale != self.scale:
+            raise ValueError(f"Network scale is {self.scale}, not {scale}")
         f__1 = self.sfe1(x)
         x  = self.sfe2(f__1)
 

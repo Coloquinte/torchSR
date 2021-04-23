@@ -95,6 +95,7 @@ class Upsampler(nn.Sequential):
 class EDSR(nn.Module):
     def __init__(self, n_resblocks, n_feats, scale, res_scale, pretrained=False):
         super(EDSR, self).__init__()
+        self.scale = scale
 
         kernel_size = 3 
         n_colors = 3
@@ -133,7 +134,9 @@ class EDSR(nn.Module):
         if pretrained:
             self.load_pretrained()
 
-    def forward(self, x):
+    def forward(self, x, scale=None):
+        if scale is not None and scale != self.scale:
+            raise ValueError(f"Network scale is {self.scale}, not {scale}")
         x = self.sub_mean(255 * x)
         x = self.head(x)
 
