@@ -43,6 +43,7 @@ sr.show()
 
 The following pretrained models are available:
 * [EDSR](https://arxiv.org/abs/1707.02921) (x2 x3 x4)
+* [CARN](https://arxiv.org/abs/1803.08664) (x2 x3 x4)
 * [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
 * [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
 * [NinaSR](NinaSR.md), my own model for real-time super resolution (x2 x3 x4 x8)
