@@ -1,4 +1,4 @@
-# Super-Resolution Datasets for Pytorch
+# Super-Resolution Networks for Pytorch
 
 Super-resolution is a process that increases the resolution of an image, adding additional details.
 Neural networks are the go-to method for accurate or realistic super-resolution.
