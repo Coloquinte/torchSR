@@ -319,6 +319,8 @@ def get_transform_val():
     if not args.validation_only:
         # Full images are too big: only validate on a centered patch
         transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, ]+args.scale))
+    else:
+        transforms.append(AdjustToScale(scales=[1, ]+args.scale))
     transforms.append(ToTensor())
     return Compose(transforms)
 

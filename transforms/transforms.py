@@ -10,8 +10,10 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms.functional as F
 
-__all__ = ('ToTensor', 'ToPILImage', 'Compose', 'RandomHorizontalFlip', 'RandomVerticalFlip',
-           'RandomFlipTurn', 'RandomCrop', 'CenterCrop', 'ColorJitter', 'GaussianBlur')
+__all__ = ('ToTensor', 'ToPILImage', 'Compose',
+           'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomFlipTurn',
+           'RandomCrop', 'CenterCrop', 'AdjustToScale',
+           'ColorJitter', 'GaussianBlur')
 
 
 def apply_all(x, func):
@@ -200,10 +202,34 @@ class RandomCrop(nn.Module):
         i = np.clip(i, 0,  h - th)
         j = np.clip(j, 0,  w - tw)
         if not isinstance(x, (list, tuple)):
-            return crop(x, h, w, th, tw)
+            return crop(x, i, j, th, tw)
         ret = []
         for img, (rw, rh) in zip(x, size_ratios):
             ret.append(crop(img, i * rh, j * rw, th * rh, tw * rw))
+        return ret
+
+
+class AdjustToScale(nn.Module):
+    """Crop the given images so that they match the scale exactly
+
+    Args:
+        scales (list): Scales of the images received.
+    """
+
+    def __init__(self,
+                 scales: List[int]):
+        super(AdjustToScale, self).__init__()
+        self.scales = [to_tuple(s, 2, "AdjustToScale.scale") for s in scales]
+
+    def forward(self, x):
+        scales = self.scales
+        common_size, size_ratios = get_crop_params(x, scales)
+        tw, th = common_size
+        if not isinstance(x, (list, tuple)):
+            return crop(x, 0, 0, th, tw)
+        ret = []
+        for img, (rw, rh) in zip(x, size_ratios):
+            ret.append(crop(img, 0, 0, th * rh, tw * rw))
         return ret
 
 
