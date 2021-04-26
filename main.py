@@ -292,13 +292,15 @@ class Trainer:
 def name_to_dataset(name, split, transform):
     kwargs = {
         'root': args.dataset_root,
-        'scale': args.scale,
         'split': split,
         'transform': transform,
         'download': args.download_dataset,
         'predecode': not args.preload_dataset,
         'preload': args.preload_dataset,
     }
+    if args.scale is not None:
+        kwargs['scale'] = args.scale
+
     if name == DatasetType.Div2KBicubic:
         return Div2K(**kwargs, track='bicubic')
     if name == DatasetType.Div2KUnknown:
@@ -325,7 +327,8 @@ def names_to_dataset(names, split, transform):
 
 def get_transform_train():
     transforms = []
-    transforms.append(RandomCrop(args.patch_size_train, scales=[1, args.scale], margin=0.5))
+    if args.scale is not None:
+        transforms.append(RandomCrop(args.patch_size_train, scales=[1, args.scale], margin=0.5))
     if DataAugmentationType.FlipTurn in args.augment:
         transforms.append(RandomFlipTurn())
     else:
@@ -348,11 +351,12 @@ def get_transform_train():
 
 def get_transform_val():
     transforms = []
-    if not args.validation_only:
-        # Full images are too big: only validate on a centered patch
-        transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, args.scale]))
-    else:
-        transforms.append(AdjustToScale(scales=[1, args.scale]))
+    if args.scale is not None:
+        if not args.validation_only:
+            # Full images are too big: only validate on a centered patch
+            transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, args.scale]))
+        else:
+            transforms.append(AdjustToScale(scales=[1, args.scale]))
     transforms.append(ToTensor())
     return Compose(transforms)
 
@@ -370,6 +374,9 @@ def get_datasets():
     loader_val = torch.utils.data.DataLoader(
         dataset_val, batch_size=1, shuffle=False,
         num_workers=args.workers, pin_memory=not args.cpu)
+    if args.scale_range is not None:
+        # TODO: create an ad-hoc dataloader for multiscale
+        pass
     return loader_train, loader_val
 
 
