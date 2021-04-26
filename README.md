@@ -3,6 +3,13 @@
 Super-resolution is a process that increases the resolution of an image, adding additional details.
 Neural networks are the go-to method for accurate or realistic super-resolution.
 
+A low-resolution image, magnified x4 by a neural network, and the high resolution image:
+
+![Pixelated image of a butterfly](doc/example_small.png "Low resolution image")
+![Smooth magnified image](doc/example_x4.png "Magnified x4")
+![High resolution image](doc/example_hr.png "High resolution image")
+
+
 In this repository, you will find:
 * the popular super-resolution networks, pretrained
 * common super-resolution datasets
