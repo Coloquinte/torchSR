@@ -46,11 +46,25 @@ The following pretrained models are available:
 * [CARN](https://arxiv.org/abs/1803.08664) (x2 x3 x4)
 * [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
 * [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
-* [NinaSR](NinaSR.md), my own model for real-time super resolution (x2 x3 x4 x8)
+* [NinaSR](doc/NinaSR.md), my own model (x2 x3 x4 x8)
 
-The following models are implemented without pretrained weights:
-* [VDSR](https://arxiv.org/abs/1511.04587)
+<details>
+<summary>DIV2K validation results</summary>
 
+
+|  Network            | Parameters (M) | 2x (PSNR/SSIM) | 3x (PSNR/SSIM) | 4x (PSNR/SSIM) | 8x (PSNR/SSIM) |
+| ------------------- | -------------- | -------------- | -------------- | -------------- | -------------- |
+| carn                | 1.59           | 34.58 / 0.9373 | 30.91 / 0.8734 | 28.98 / 0.8188 | N/A            |
+| carn\_m             | 0.41           | 34.29 / 0.9350 | 30.65 / 0.8689 | 28.73 / 0.8131 | N/A            |
+| edsr\_baseline      | 1.37           | 34.66 / 0.9379 | 30.96 / 0.8743 | 28.99 / 0.8191 | N/A            |
+| edsr                | 40.7           | 35.08 / 0.9413 | 31.30 / 0.8804 | 29.30 / 0.8274 | N/A            |
+| ninasr\_b0          | 0.10           | 34.25 / 0.9346 | 30.56 / 0.8670 | 28.63 / 0.8102 | 25.12 / 0.6799 |
+| ninasr\_b1          | 1.02           | 34.76 / 0.9388 | 31.04 / 0.8757 | 29.08 / 0.8216 | 25.48 / 0.6928 |
+| ninasr\_b2          | 10.0           | 35.06 / 0.9411 | 31.29 / 0.8797 | 29.29 / 0.8267 | 25.62 / 0.6983 |
+| rcan                | 15.4           | 35.13 / 0.9416 | 31.34 / 0.8807 | 29.30 / 0.8276 | 25.73 / 0.7036 |
+| rdn                 | 22.1           | 34.85 / 0.9394 | 30.59 / 0.8678 | 29.17 / 0.8240 | N/A            |
+
+</details>
 
 
 ## Datasets
@@ -98,7 +112,7 @@ python main.py --arch edsr_baseline --epochs 300 --loss l1 --dataset-train div2k
 # Contributions
 
 All contributions are welcome! Usability improvements, training improvements, new models, new transforms, ...
-Don't hesitate to contribute your own pretrained models too.
+Pretrained models are particularly welcome.
 
 
 
@@ -106,4 +120,4 @@ Don't hesitate to contribute your own pretrained models too.
 
 Thanks to the people behind [torchvision](https://github.com/pytorch/vision) and [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch), whose work inspired this repository.
 
-Some of the models used here come from [EDSR-PyTorch](https://github.com/zhouhuanxiang/EDSR-PyTorch).
+Some of the model codes used here come from [EDSR-PyTorch](https://github.com/zhouhuanxiang/EDSR-PyTorch) and [CARN-PyTorch](https://github.com/nmhkahn/CARN-pytorch).
