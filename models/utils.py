@@ -1,7 +1,7 @@
 import torch
 import torch.nn as nn
 
-__all__ = [ 'ChoppedModel' ]
+__all__ = [ 'ChoppedModel', 'SelfEnsembleModel' ]
 
 def get_windows(tot_size, chop_size, chop_overlap):
     stride = chop_size - chop_overlap
@@ -57,6 +57,12 @@ def chop_and_forward(model, x, scale, chop_size, chop_overlap):
 class ChoppedModel(nn.Module):
     """
     Wrapper to run a model on small image tiles in order to use less memory
+
+    Args:
+        model (torch.nn.Module): The super-resolution model to wrap
+        scale (int): the scaling factor
+        chop_size (int): the size of the tiles, in pixels
+        chop_overlap (int): the overlap between the tiles, in pixels
     """
     def __init__(self, model, scale, chop_size, chop_overlap):
         super(ChoppedModel, self).__init__()
@@ -78,6 +84,10 @@ class ChoppedModel(nn.Module):
 class SelfEnsembleModel(nn.Module):
     """
     Wrapper to run a model with the self-ensemble method
+
+    Args:
+        model (torch.nn.Module): The super-resolution model to wrap
+        median (boolean, optional): Use the median of the runs instead of the mean
     """
     def __init__(self, model, median=False):
         super(SelfEnsembleModel, self).__init__()
