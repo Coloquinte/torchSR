@@ -1,7 +1,7 @@
 import os
 from typing import Callable, List, Optional, Tuple, Union
 
-from .utils import FolderByDir, pil_loader
+from .common import FolderByDir, pil_loader
 
 
 class REDS(FolderByDir):

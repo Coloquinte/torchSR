@@ -1,4 +1,4 @@
-from .utils import pil_loader, FolderByDir
+from .common import pil_loader, FolderByDir
 
 import os
 from typing import Callable, List, Optional, Tuple, Union
