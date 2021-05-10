@@ -5,6 +5,8 @@ import torch
 import torch.nn as nn
 import torchvision
 
+from transforms import RandomCrop
+
 from typing import Any, Callable, List, Optional, Tuple, Union
 
 
@@ -38,7 +40,7 @@ def rescale_image(img, scale: Union[int, float], downscaler, crop_size=None) -> 
     if crop_size is None:
         hr = img
     else:
-        hr = torchvision.transforms.RandomCrop(int(round(scale*crop_size)))(img)
+        hr = RandomCrop(int(round(scale*crop_size)), scales=[1])(img)
     # Rescale
     target_size = (int(round(hr.width / scale)), int(round(hr.height / scale)))
     lr = downscaler(hr, size=target_size)

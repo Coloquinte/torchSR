@@ -298,8 +298,7 @@ def name_to_dataset(name, split, transform):
         'transform': transform,
         'download': args.download_dataset,
         # TODO FIXME (requires RandomDownscaledDataset to support numpy)
-        #'predecode': not args.preload_dataset,
-        'predecode': False,
+        'predecode': not args.preload_dataset,
         'preload': args.preload_dataset,
     }
     if args.scale is not None:
