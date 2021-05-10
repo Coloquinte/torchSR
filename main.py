@@ -107,8 +107,9 @@ class Trainer:
             for i in range(args.dataset_repeat):
                 for hr, lr in self.loader_train:
                     hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
+                    scale = hr.shape[-1] / lr.shape[-1]
                     self.optimizer.zero_grad()
-                    sr = self.model(lr)
+                    sr = self.model(lr, scale=scale)
                     sr = self.process_for_eval(sr)
                     hr = self.process_for_eval(hr)
                     loss = self.loss_fn(sr, hr)
@@ -144,7 +145,8 @@ class Trainer:
             l2_avg = AverageMeter()
             for hr, lr in t:
                 hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
-                sr = self.model(lr).clamp(0, 1)
+                scale = hr.shape[-1] / lr.shape[-1]
+                sr = self.model(lr, scale=scale).clamp(0, 1)
                 if final:
                     # Round to pixel values
                     sr = sr.mul(255).round().div(255)
@@ -196,7 +198,7 @@ class Trainer:
                     print(f"Could not open {filename}")
                     continue
                 img = to_tensor(img).to(self.device)
-                sr_img = model(img)
+                sr_img = model(img, scale=scale)
                 sr_img = to_image(sr_img)
                 destname = os.path.splitext(os.path.basename(filename))[0] + f"_x{scale}.png"
                 sr_img.save(os.path.join(args.destination, destname))
@@ -295,7 +297,9 @@ def name_to_dataset(name, split, transform):
         'split': split,
         'transform': transform,
         'download': args.download_dataset,
-        'predecode': not args.preload_dataset,
+        # TODO FIXME (requires RandomDownscaledDataset to support numpy)
+        #'predecode': not args.preload_dataset,
+        'predecode': False,
         'preload': args.preload_dataset,
     }
     if args.scale is not None:
@@ -319,7 +323,12 @@ def name_to_dataset(name, split, transform):
 def names_to_dataset(names, split, transform):
     datasets = []
     for d in names:
-        datasets.append(name_to_dataset(d, split, transform))
+        if args.scale_range is not None:
+            dataset = name_to_dataset(d, split, None)
+            datasets.append(utils.RandomDownscaledDataset(dataset, args.scale_range, utils.BicubicDownscaler(), transform=transform))
+        else:
+            dataset = name_to_dataset(d, split, transform)
+            datasets.append(dataset)
     if len(datasets) == 0:
         return None
     return torch.utils.data.ConcatDataset(datasets)
@@ -368,11 +377,8 @@ def get_datasets():
                                      transform=get_transform_train())
     dataset_val = names_to_dataset(args.dataset_val, 'val',
                                    transform=get_transform_val())
-    if args.scale_range is not None:
-        if args.batch_size != 1:
-            raise ValueError(f"Training with --scale-range requires a batch size of 1")
-        dataset_train = utils.RandomDownscaledDataset(dataset_train, args.scale_range, utils.BicubicDownscaler())
-        dataset_val = utils.RandomDownscaledDataset(dataset_val, args.scale_range, utils.BicubicDownscaler())
+    if args.scale_range is not None and args.batch_size != 1:
+        raise ValueError(f"Training with --scale-range requires a batch size of 1")
     loader_train = torch.utils.data.DataLoader(
         dataset_train, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=not args.cpu)
@@ -534,7 +540,5 @@ if args.validation_only or args.images:
     else:
         trainer.validation()
 else:
-    if args.scale is None:
-        raise ValueError("--scale-range is not supported yet")
     report_model(model, args.arch)
     trainer.train()

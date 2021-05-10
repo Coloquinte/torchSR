@@ -31,7 +31,7 @@ def remove_numpy(x):
     Transform numpy arrays to Pil Images, so we can apply torchvision transforms
     """
     if isinstance(x, np.ndarray):
-        return Image.fromarray(x)
+        return PIL.Image.fromarray(x)
     return x
 
 

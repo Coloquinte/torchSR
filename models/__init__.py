@@ -4,5 +4,6 @@ from .rdn import *
 from .rcan import *
 from .direct import *
 from .ninasr import *
+from .ninasr_x import *
 from .carn import *
 from . import utils
