@@ -69,7 +69,7 @@ class RandomDownscaledDataset(torch.utils.data.Dataset):
                  scale_range,
                  downscaler,
                  transform=None):
-        if not isinstance(scale_range, tuple) or len(scale_range) != 2 or scale_range[0] >= scale_range[1]:
+        if not isinstance(scale_range, (tuple, list)) or len(scale_range) != 2 or scale_range[0] >= scale_range[1]:
             raise ValueError(f"Expected an ordered 2-tuple for scale_range")
         self.dataset = dataset
         self.scale_range = scale_range

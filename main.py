@@ -368,15 +368,17 @@ def get_datasets():
                                      transform=get_transform_train())
     dataset_val = names_to_dataset(args.dataset_val, 'val',
                                    transform=get_transform_val())
+    if args.scale_range is not None:
+        if args.batch_size != 1:
+            raise ValueError(f"Training with --scale-range requires a batch size of 1")
+        dataset_train = utils.RandomDownscaledDataset(dataset_train, args.scale_range, utils.BicubicDownscaler())
+        dataset_val = utils.RandomDownscaledDataset(dataset_val, args.scale_range, utils.BicubicDownscaler())
     loader_train = torch.utils.data.DataLoader(
         dataset_train, batch_size=args.batch_size, shuffle=True,
         num_workers=args.workers, pin_memory=not args.cpu)
     loader_val = torch.utils.data.DataLoader(
         dataset_val, batch_size=1, shuffle=False,
         num_workers=args.workers, pin_memory=not args.cpu)
-    if args.scale_range is not None:
-        # TODO: create an ad-hoc dataloader for multiscale
-        pass
     return loader_train, loader_val
 
 
