@@ -21,16 +21,12 @@ In this repository, you will find:
 
 ```python
 from datasets import Div2K
-from models import edsr
-from transforms import Compose, RandomCrop, ColorJitter
+from models import ninasr_b0
 from torchvision.transforms.functional import to_pil_image, to_tensor
 
-# Div2K dataset, cropped to 256px with brightness jitter
-dataset = Div2K(root="./data", scale=2, download=False,
-                transform=Compose([
-		    RandomCrop(256, scales=[1, 2]),
-		    ColorJitter(brightness=0.2)
-		]))
+# Div2K dataset
+dataset = Div2K(root="./data", scale=2, download=False)
+
 # Get the first image in the dataset (High-Res and Low-Res)
 hr, lr = dataset[0]
 
@@ -44,7 +40,32 @@ sr = to_pil_image(sr_t.squeeze(0))
 sr.show()
 ```
 
+<details>
+<summary>More examples</summary>
 
+
+```python
+import datasets
+import models
+import transforms
+
+# Div2K dataset, cropped to 256px, width color jitter
+dataset = datasets.Div2K(
+    root="./data", scale=2, download=False,
+    transform=transforms.Compose([
+        transforms.RandomCrop(256, scales=[1, 2]),
+        transforms.ColorJitter(brightness=0.2)
+    ]))
+
+# Pretrained RCAN model, with tiling for large images
+model = models.utils.ChoppedModel(
+    models.rcan(scale=2, pretrained=True), scale=2,
+    chop_size=400, chop_overlap=10)
+
+# Pretrained EDSR model, with self-ensemble method for higher quality
+model = models.utils.SelfEnsemble(models.edsr(scale=2, pretrained=True))
+```
+</details>
 
 ## Models
 
