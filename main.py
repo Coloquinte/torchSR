@@ -38,14 +38,19 @@ def to_tensor(img):
         t = t.unsqueeze(0)
     return t
 
+
 def to_image(t):
     """Workaround a bug in torchvision
     The conversion of a tensor to a PIL image causes overflows, which result in huge errors"""
     if t.ndim == 4:
         t = t.squeeze(0)
-    t = torch.round(255 * t) / 255
-    t = torch.clamp(t, 0, 1)
+    t = t.mul(255).round().div(255).clamp(0, 1)
     return F.to_pil_image(t.cpu())
+
+
+def to_luminance(t):
+    coeffs = torch.tensor([65.738, 129.057, 25.064]).reshape(1, 3, 1, 1).to(t.device) / 256
+    return t.mul(coeffs).sum(dim=1, keepdim=True)
 
 
 def report_model(model, name):
@@ -94,6 +99,8 @@ class Trainer:
                     hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
                     self.optimizer.zero_grad()
                     sr = self.model(lr)
+                    sr = self.process_for_eval(sr)
+                    hr = self.process_for_eval(hr)
                     loss = self.loss_fn(sr, hr)
                     loss.backward()
                     if args.gradient_clipping is not None:
@@ -128,6 +135,11 @@ class Trainer:
             for hr, lr in t:
                 hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
                 sr = self.model(lr).clamp(0, 1)
+                if final:
+                    # Round to pixel values
+                    sr = sr.mul(255).round().div(255)
+                sr = self.process_for_eval(sr)
+                hr = self.process_for_eval(hr)
                 l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
                 l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
                 psnr = piq.psnr(hr, sr)
@@ -253,6 +265,14 @@ class Trainer:
             torch.save(state, best_path)
             model_path = base + "_model" + ext
             torch.save(self.model.state_dict(), model_path)
+
+    def process_for_eval(self, img):
+        if args.shave_border != 0:
+            shave = args.shave_border
+            img = img[..., shave:-shave, shave:-shave]
+        if args.eval_luminance:
+            img = to_luminance(img)
+        return img
 
 
 def name_to_dataset(name, split, transform):

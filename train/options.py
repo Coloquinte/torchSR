@@ -24,6 +24,7 @@ load_ckp.add_argument('--load-pretrained', type=str,
 model.add_argument('--save-checkpoint', type=str,
                    help='save model checkpoint')
 
+
 # Run specification
 val = run.add_mutually_exclusive_group()
 val.add_argument('--validation-only', action='store_const', const='do',
@@ -35,9 +36,14 @@ run.add_argument('--destination', type=str,
 run.add_argument('--self-ensemble', action='store_const', const='do',
                  help='use self-ensemble method for better accuracy (8x slower)')
 run.add_argument('--chop-size', type=int,
-                 help='split the image below this size (LR)')
+                 help='split the image below this size (in LR pixels)')
 run.add_argument('--chop-overlap', type=int, default=10,
-                 help='overlap between tiles when splitting (LR)')
+                 help='overlap between tiles when splitting (in LR pixels)')
+run.add_argument('--shave-border', type=int, default=0,
+                 help='shave the border before evaluation (in HR pixels)')
+run.add_argument('--eval-luminance', action='store_true',
+                 help='evaluate on the luminance (Y of YCbCr)')
+
 
 # Training specification
 train.add_argument('--scale', type=int, required=True,
@@ -109,6 +115,7 @@ hw.add_argument('--datatype', type=DataType, default=DataType.FP32,
                 help='specify floating-point format')
 hw.add_argument('--workers', type=int, default=0 if platform.system() == 'Windows' else 2,
                 help='number of workers for data loaders')
+
 
 args = parser.parse_args()
 if args.workers != 0 and args.preload_dataset:
