@@ -10,9 +10,9 @@ from torchvision.models.utils import load_state_dict_from_url
 __all__ = [ 'rdn', 'rdn_a', 'rdn_b', ]
 
 url = {
-    'g64go64d16c8x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rdn_x2.pth',
-    'g64go64d16c8x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rdn_x3.pth',
-    'g64go64d16c8x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0/rdn_x4.pth',
+    'g64go64d16c8x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/rdn_x2.pt',
+    'g64go64d16c8x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/rdn_x3.pt',
+    'g64go64d16c8x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/rdn_x4.pt',
 }
 
 class RDB_Conv(nn.Module):
