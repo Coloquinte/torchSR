@@ -53,6 +53,16 @@ def to_luminance(t):
     return t.mul(coeffs).sum(dim=1, keepdim=True)
 
 
+def to_YCbCr(t):
+    weights =  torch.tensor([
+            [65.738, 129.057, 25.064],
+            [-37.945, -74.494, 112.439],
+            [112.439, -94.154, -18.285],
+        ]).reshape(3, 3, 1, 1).to(t.device) / 256
+    biases = torch.tensor([0.0, 0.5, 0.5]).to(t.device)
+    return torch.nn.functional.conv2d(t, weights, biases)
+
+
 def report_model(model, name):
     n_parameters = 0
     for p in model.parameters():
@@ -272,6 +282,10 @@ class Trainer:
             img = img[..., shave:-shave, shave:-shave]
         if args.eval_luminance:
             img = to_luminance(img)
+        elif args.scale_chroma is not None:
+            img = to_YCbCr(img)
+            chroma_scaling = torch.tensor([1.0, args.scale_chroma, args.scale_chroma])
+            img = img * chroma_scaling.reshape(1, 3, 1, 1).to(img.device)
         return img
 
 
