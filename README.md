@@ -192,9 +192,9 @@ This repository defines several transforms that follow torchvision conventions:
 
 ## Training
 
-A script is available to train the models from scratch, evaluate them, and much more:
+A script is available to train the models from scratch, evaluate them, and much more. Install the dependencies first, as shown here:
 ```bash
-pip install pip tqdm tensorboard  # Additional dependencies
+pip install piq tqdm tensorboard  # Additional dependencies
 python main.py -h
 python main.py --arch edsr_baseline --scale 2 --download-pretrained --images test/butterfly.png --destination results/
 python main.py --arch edsr_baseline --scale 2 --download-pretrained --validation-only
