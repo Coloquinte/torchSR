@@ -31,6 +31,7 @@ val.add_argument('--validation-only', action='store_const', const='do',
                  help='only run the validation (no training)')
 val.add_argument('--images', type=str, nargs="+",
                  help='run on the given images')
+
 run.add_argument('--destination', type=str,
                  help='directory to output SR images')
 run.add_argument('--self-ensemble', action='store_const', const='do',
@@ -41,7 +42,13 @@ run.add_argument('--chop-overlap', type=int, default=10,
                  help='overlap between tiles when splitting (in LR pixels)')
 run.add_argument('--shave-border', type=int, default=0,
                  help='shave the border before evaluation (in HR pixels)')
-ycbcr = model.add_mutually_exclusive_group()
+
+padding = run.add_mutually_exclusive_group()
+padding.add_argument('--zero-pad', type=int, help='pad the image with zeros')
+padding.add_argument('--replication-pad', type=int, help='pad the image with replication padding')
+padding.add_argument('--reflection-pad', type=int, help='pad the image with reflection padding')
+
+ycbcr = run.add_mutually_exclusive_group()
 ycbcr.add_argument('--scale-chroma', type=float,
                    help='scale chrominance channels for evaluation (CbCr of YCbCr)')
 ycbcr.add_argument('--eval-luminance', action='store_true',

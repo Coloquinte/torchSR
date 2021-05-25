@@ -454,6 +454,7 @@ def get_model():
     if args.arch not in models.__dict__:
         raise ValueError(f"Unknown model {args.arch}")
     model = models.__dict__[args.arch](scale=args.scale, pretrained=args.download_pretrained)
+
     if args.freeze_backbone:
         if args.download_pretrained is None and args.load_checkpoint is None and args.load_pretrained is None:
             raise ValueError("A pretrained model is required to freeze the backbone")
@@ -467,10 +468,20 @@ def get_model():
                 p.requires_grad = True
         else:
             raise ValueError("The model has no known upsampling module to unfreeze")
+
     if args.self_ensemble:
         model = models.utils.SelfEnsembleModel(model)
+
     if args.chop_size is not None:
         model = models.utils.ChoppedModel(model, args.scale, args.chop_size, args.chop_overlap)
+
+    if args.zero_pad:
+        model = models.utils.ZeroPaddedModel(model, args.zero_pad)
+    elif args.replication_pad:
+        model = models.utils.ReplicationPaddedModel(model, args.replication_pad)
+    elif args.reflection_pad:
+        model = models.utils.ReflectionPaddedModel(model, args.reflection_pad)
+
     return model
 
 

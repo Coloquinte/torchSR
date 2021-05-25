@@ -1,7 +1,23 @@
 import torch
 import torch.nn as nn
 
-__all__ = [ 'ChoppedModel', 'SelfEnsembleModel' ]
+__all__ = [ 'ChoppedModel', 'SelfEnsembleModel', 'ZeroPaddedModel', 'ReplicationPaddedModel', 'ReflectionPaddedModel' ]
+
+
+class WrappedModel(nn.Module):
+    """
+    Generic model wrapper, overriding state_dict to avoid issues during save/restore
+    """
+    def __init__(self, model):
+        super(WrappedModel, self).__init__()
+        self.model = model
+
+    def state_dict(self):
+        return self.model.state_dict()
+
+    def load_state_dict(self, state_dict, strict=True):
+        return self.model.load_state_dict(state_dict, strict)
+
 
 def get_windows(tot_size, chop_size, chop_overlap):
     stride = chop_size - chop_overlap
@@ -54,7 +70,7 @@ def chop_and_forward(model, x, scale, chop_size, chop_overlap):
     return result
 
 
-class ChoppedModel(nn.Module):
+class ChoppedModel(WrappedModel):
     """
     Wrapper to run a model on small image tiles in order to use less memory
 
@@ -65,8 +81,7 @@ class ChoppedModel(nn.Module):
         chop_overlap (int): the overlap between the tiles, in pixels
     """
     def __init__(self, model, scale, chop_size, chop_overlap):
-        super(ChoppedModel, self).__init__()
-        self.model = model
+        super(ChoppedModel, self).__init__(model)
         self.scale = scale
         self.chop_size = chop_size
         self.chop_overlap = chop_overlap
@@ -74,14 +89,8 @@ class ChoppedModel(nn.Module):
     def forward(self, x):
         return chop_and_forward(self.model, x, self.scale, self.chop_size, self.chop_overlap)
 
-    def state_dict(self):
-        return self.model.state_dict()
 
-    def load_state_dict(self, state_dict, strict=True):
-        return self.model.load_state_dict(state_dict, strict)
-
-
-class SelfEnsembleModel(nn.Module):
+class SelfEnsembleModel(WrappedModel):
     """
     Wrapper to run a model with the self-ensemble method
 
@@ -90,8 +99,7 @@ class SelfEnsembleModel(nn.Module):
         median (boolean, optional): Use the median of the runs instead of the mean
     """
     def __init__(self, model, median=False):
-        super(SelfEnsembleModel, self).__init__()
-        self.model = model
+        super(SelfEnsembleModel, self).__init__(model)
         self.median = median
 
     def forward_transformed(self, x, hflip, vflip, rotate):
@@ -122,8 +130,57 @@ class SelfEnsembleModel(nn.Module):
         else:
             return torch.mean(t, dim=0)
 
-    def state_dict(self):
-        return self.model.state_dict()
 
-    def load_state_dict(self, state_dict, strict=True):
-        return self.model.load_state_dict(state_dict, strict)
+def run_and_remove_pad(x, model, padding):
+    w, h = x.shape[-2:]
+    x = model(x)
+    sw, sh = x.shape[-2:]
+    if padding * sw % w != 0:
+        raise ValueError(f"Padding {padding} is incompatible with scaling {w} --> {sw}")
+    if padding * sh % h != 0:
+        raise ValueError(f"Padding {padding} is incompatible with scaling {h} --> {sh}")
+    px = padding * sw // w
+    py = padding * sh // h
+    return x[..., px:-px, py:-py]
+
+
+class ZeroPaddedModel(WrappedModel):
+    """
+    Wrapper to add zero-padding to the input images
+    """
+    def __init__(self, model, padding):
+        super(ZeroPaddedModel, self).__init__(model)
+        self.padding = padding
+        self.padder = nn.ZeroPad2d(padding)
+
+    def forward(self, x):
+        x = self.padder(x)
+        return run_and_remove_pad(x, self.model, self.padding)
+
+
+class ReplicationPaddedModel(WrappedModel):
+    """
+    Wrapper to add replication-padding to the input images
+    """
+    def __init__(self, model, padding):
+        super(ReplicationPaddedModel, self).__init__(model)
+        self.padding = padding
+        self.padder = nn.ReplicationPad2d(padding)
+
+    def forward(self, x):
+        x = self.padder(x)
+        return run_and_remove_pad(x, self.model, self.padding)
+
+
+class ReflectionPaddedModel(WrappedModel):
+    """
+    Wrapper to add reflection-padding to the input images
+    """
+    def __init__(self, model, padding):
+        super(ReflectionPaddedModel, self).__init__(model)
+        self.padding = padding
+        self.padder = nn.ReflectionPad2d(padding)
+
+    def forward(self, x):
+        x = self.padder(x)
+        return run_and_remove_pad(x, self.model, self.padding)
