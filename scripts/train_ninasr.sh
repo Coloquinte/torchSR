@@ -1,42 +1,76 @@
+#!/bin/bash
+
+train_network () {
+    arch=$1
+    scale=$2
+    echo Training network $arch x${scale}
+    echo python -m torchsr.train --arch $arch --scale $scale --tune-backend \
+        --log-dir logs_train/${arch}_x${scale} --save-checkpoint ${arch}_x${scale}.pt \
+        --lr $learning_rate --epochs $epochs --lr-decay-steps $((epochs*2/3)) $((epochs*5/6)) --lr-decay-rate 3 \
+        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4
+    python -m torchsr.train --arch $arch --scale $scale --tune-backend \
+        --log-dir logs_train/${arch}_x${scale} --save-checkpoint ${arch}_x${scale}.pt \
+        --lr $learning_rate --epochs $epochs --lr-decay-steps $((epochs*2/3)) $((epochs*5/6)) --lr-decay-rate 3 \
+        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4
+}
+
+train_network_with_pretrained () {
+    arch=$1
+    scale=$2
+    pretrained_scale=$3
+    echo Pretraining network $arch x${scale} from x${pretrained_scale}
+    echo python -m torchsr.train --arch $arch --scale $scale --tune-backend \
+        --save-checkpoint ${arch}_x${scale}_pre.pt \
+        --load-pretrained ${arch}_x${pretrained_scale}_model.pt \
+        --lr $learning_rate --epochs 1 --freeze-backbone \
+        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4
+    python -m torchsr.train --arch $arch --scale $scale --tune-backend \
+        --save-checkpoint ${arch}_x${scale}_pre.pt \
+        --load-pretrained ${arch}_x${pretrained_scale}_model.pt \
+        --lr $learning_rate --epochs 1 \
+        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4
+    echo Training network $arch x${scale}
+    echo python -m torchsr.train --arch $arch --scale $scale --tune-backend \
+        --log-dir logs_train/${arch}_x${scale} --save-checkpoint ${arch}_x${scale}.pt \
+        --load-pretrained ${arch}_x${scale}_pre_model.pt \
+        --lr $learning_rate --epochs $epochs --lr-decay-steps $((epochs*2/3)) $((epochs*5/6)) --lr-decay-rate 3 \
+        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4
+    python -m torchsr.train --arch $arch --scale $scale --tune-backend \
+        --log-dir logs_train/${arch}_x${scale} --save-checkpoint ${arch}_x${scale}.pt \
+        --load-pretrained ${arch}_x${scale}_pre_model.pt \
+        --lr $learning_rate --epochs $epochs --lr-decay-steps $((epochs*2/3)) $((epochs*5/6)) --lr-decay-rate 3 \
+        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4
+}
+
+epochs=300
+patch_size=48
+learning_rate=0.001
 
 # NinaSR-B0
-#   x2
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train  96 --epochs 300 --lr-decay-steps 250 290 --arch ninasr_b0 --scale 2 --log-dir logs/ninasr_b0_x2 --save-checkpoint ninasr_b0_x2.pt
-#   x3
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 144 --epochs 1 --lr-decay-steps 60 90 --freeze-backbone --arch ninasr_b0 --scale 3 --save-checkpoint ninasr_b0_x3.pt --load-pretrained ninasr_b0_x2_model.pt
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 144 --epochs 100 --lr-decay-steps 60 90 --arch ninasr_b0 --scale 3 --log-dir logs/ninasr_b0_x3 --save-checkpoint ninasr_b0_x3.pt --load-pretrained ninasr_b0_x3_model.pt
-#   x4
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 192 --epochs 1 --lr-decay-steps 60 90 --freeze-backbone --arch ninasr_b0 --scale 4 --save-checkpoint ninasr_b0_x4.pt --load-pretrained ninasr_b0_x3_model.pt
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 192 --epochs 100 --lr-decay-steps 60 90 --arch ninasr_b0 --scale 4 --log-dir logs/ninasr_b0_x4 --save-checkpoint ninasr_b0_x4.pt --load-pretrained ninasr_b0_x4_model.pt
-#   x8
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 384 --epochs 1 --lr-decay-steps 60 90 --freeze-backbone --arch ninasr_b0 --scale 8 --save-checkpoint ninasr_b0_x8.pt --load-pretrained ninasr_b0_x4_model.pt
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 384 --epochs 100 --lr-decay-steps 60 90 --arch ninasr_b0 --scale 8 --log-dir logs/ninasr_b0_x8 --save-checkpoint ninasr_b0_x8.pt --load-pretrained ninasr_b0_x8_model.pt
+train_network ninasr_b0 2
+train_network_with_pretrained ninasr_b0 3 2
+train_network_with_pretrained ninasr_b0 4 3
+train_network_with_pretrained ninasr_b0 8 4
+train_network_with_pretrained ninasr_b0 2 4
+
+epochs=500
+patch_size=48
+learning_rate=0.0003
 
 # NinaSR-B1
-#   x2
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train  96 --epochs 300 --lr-decay-steps 200 290 --arch ninasr_b1 --scale 2 --log-dir logs/ninasr_b1_x2 --save-checkpoint ninasr_b1_x2.pt
-#   x3
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 144 --epochs 1 --lr-decay-steps 50 90 --freeze-backbone --arch ninasr_b1 --scale 3 --save-checkpoint ninasr_b1_x3.pt --load-pretrained ninasr_b1_x2_model.pt
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 144 --epochs 100 --lr-decay-steps 50 90 --arch ninasr_b1 --scale 3 --log-dir logs/ninasr_b1_x3 --save-checkpoint ninasr_b1_x3.pt --load-pretrained ninasr_b1_x3_model.pt
-#   x4
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 192 --epochs 1 --lr-decay-steps 50 90 --freeze-backbone --arch ninasr_b1 --scale 4 --save-checkpoint ninasr_b1_x4.pt --load-pretrained ninasr_b1_x3_model.pt
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 192 --epochs 100 --lr-decay-steps 50 90 --arch ninasr_b1 --scale 4 --log-dir logs/ninasr_b1_x4 --save-checkpoint ninasr_b1_x4.pt --load-pretrained ninasr_b1_x4_model.pt
-#   x8
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 384 --epochs 1 --lr-decay-steps 50 90 --freeze-backbone --arch ninasr_b1 --scale 8 --save-checkpoint ninasr_b1_x8.pt --load-pretrained ninasr_b1_x4_model.pt
-python -m torchsr.train --tune-backend --lr 0.001 --patch-size-train 384 --epochs 100 --lr-decay-steps 50 90 --arch ninasr_b1 --scale 8 --log-dir logs/ninasr_b1_x8 --save-checkpoint ninasr_b1_x8.pt --load-pretrained ninasr_b1_x8_model.pt
+train_network ninasr_b1 2
+train_network_with_pretrained ninasr_b1 3 2
+train_network_with_pretrained ninasr_b1 4 3
+train_network_with_pretrained ninasr_b1 8 4
+train_network_with_pretrained ninasr_b1 2 4
+
+epochs=1000
+patch_size=48
+learning_rate=0.0001
 
 # NinaSR-B2
-#   x2
-python -m torchsr.train --tune-backend --lr 0.0001 --patch-size-train  96 --epochs 300 --lr-decay-steps 280 --arch ninasr_b2 --scale 2 --log-dir logs/ninasr_b2_x2 --save-checkpoint ninasr_b2_x2.pt
-#   x3
-python -m torchsr.train --tune-backend --lr 0.0001 --patch-size-train 144 --epochs 1 --lr-decay-steps 80 --freeze-backbone --arch ninasr_b2 --scale 3 --save-checkpoint ninasr_b2_x3.pt --load-pretrained ninasr_b2_x2_model.pt
-python -m torchsr.train --tune-backend --lr 0.0001 --patch-size-train 144 --epochs 100 --lr-decay-steps 80 --arch ninasr_b2 --scale 3 --log-dir logs/ninasr_b2_x3 --save-checkpoint ninasr_b2_x3.pt --load-pretrained ninasr_b2_x3_model.pt
-#   x4
-python -m torchsr.train --tune-backend --lr 0.0001 --patch-size-train 192 --epochs 1 --lr-decay-steps 80 --freeze-backbone --arch ninasr_b2 --scale 4 --save-checkpoint ninasr_b2_x4.pt --load-pretrained ninasr_b2_x3_model.pt
-python -m torchsr.train --tune-backend --lr 0.0001 --patch-size-train 192 --epochs 100 --lr-decay-steps 80 --arch ninasr_b2 --scale 4 --log-dir logs/ninasr_b2_x4 --save-checkpoint ninasr_b2_x4.pt --load-pretrained ninasr_b2_x4_model.pt
-#   x8
-python -m torchsr.train --tune-backend --lr 0.0001 --patch-size-train 384 --epochs 1 --lr-decay-steps 80 --freeze-backbone --arch ninasr_b2 --scale 8 --save-checkpoint ninasr_b2_x8.pt --load-pretrained ninasr_b2_x4_model.pt
-python -m torchsr.train --tune-backend --lr 0.0001 --patch-size-train 384 --epochs 100 --lr-decay-steps 80 --arch ninasr_b2 --scale 8 --log-dir logs/ninasr_b2_x8 --save-checkpoint ninasr_b2_x8.pt --load-pretrained ninasr_b2_x8_model.pt
-
-
-
+train_network ninasr_b2 2
+train_network_with_pretrained ninasr_b2 3 2
+train_network_with_pretrained ninasr_b2 4 3
+train_network_with_pretrained ninasr_b2 8 4
+train_network_with_pretrained ninasr_b2 2 4
