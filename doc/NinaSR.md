@@ -7,7 +7,7 @@ At the high end, it achieves results similar to RCAN.
 ## Architecture
 
 I used a simple residual block (two 3x3 convolutions), with a channel attention block. Grouped convolutions tend to be slow on CUDA, so only simple convolutions are used.
-After some experiments, the residual block has an expansion ratio of 2x (similar to [WDSR](https://arxiv.org/abs/1808.08718)), and the attention block is local (15x15 average pooling) instead of global.
+After some experiments, the residual block has an expansion ratio of 2x (similar to [WDSR](https://arxiv.org/abs/1808.08718)), and the attention block is local (31x31 average pooling) instead of global.
 
 Deep and narrow networks tend to have better quality, as exemplified by [RCAN](https://arxiv.org/abs/1807.02758). This comes at the cost of a slower training and inference.
 I picked parameters that achieve high quality while keeping near-optimal running times on my machine.

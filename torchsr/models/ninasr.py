@@ -25,7 +25,7 @@ class AttentionBlock(nn.Module):
     """
     A typical Squeeze-Excite attention block, with a local pooling instead of global
     """
-    def __init__(self, n_feats, reduction=4, stride=8):
+    def __init__(self, n_feats, reduction=4, stride=16):
         super(AttentionBlock, self).__init__()
         self.body = nn.Sequential(
             nn.AvgPool2d(2*stride-1, stride=stride, padding=stride-1, count_include_pad=False),
