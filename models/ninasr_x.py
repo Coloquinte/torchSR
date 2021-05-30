@@ -84,17 +84,18 @@ def spatial_features(shape, scale):
 
 
 class EmbeddingUpsampler(nn.Module):
-    def __init__(self, n_feats, n_embed, n_backbone, n_resblocks):
+    def __init__(self, n_colors, n_feats, n_resblocks, expansion):
         super(EmbeddingUpsampler, self).__init__()
-        self.spatial_embed = nn.Conv2d(2, n_embed, 1)
-        self.feature_embed = nn.Conv2d(n_backbone, n_feats, 3, padding=1)
+        self.spatial_embed = nn.Conv2d(2, n_feats, 1)
+        self.feature_embed = nn.Conv2d(n_feats, n_feats, 3, padding=1)
+        self.output = nn.Conv2d(n_feats, n_colors, 1)
+        mid_feats = int(n_feats*expansion)
         self.resblocks = nn.ModuleList()
-        self.output = nn.Conv2d(n_feats, 3, 1)
         for i in range(n_resblocks):
             seq = nn.Sequential(
-                nn.Conv2d(n_embed + n_feats, n_feats, 1),
+                nn.Conv2d(2 * n_feats, mid_feats, 1),
                 nn.ReLU(True),
-                nn.Conv2d(n_feats, n_feats, 1),
+                nn.Conv2d(mid_feats, n_feats, 1),
             )
             self.resblocks.append(seq)
                 
@@ -128,7 +129,7 @@ class NinaSR_X(nn.Module):
         n_colors = 3
         self.head = NinaSR_X.make_head(n_colors, n_feats)
         self.body = NinaSR_X.make_body(n_resblocks, n_feats, expansion)
-        self.tail = NinaSR_X.make_tail(n_colors, n_feats)
+        self.tail = NinaSR_X.make_tail(n_colors, n_resblocks, n_feats, expansion)
 
         if pretrained:
             self.load_pretrained()
@@ -154,8 +155,8 @@ class NinaSR_X(nn.Module):
         return nn.Sequential(*m_body)
 
     @staticmethod
-    def make_tail(n_colors, n_feats):
-        return EmbeddingUpsampler(n_feats, n_feats, n_feats, 16)
+    def make_tail(n_colors, n_resblocks, n_feats, expansion):
+        return EmbeddingUpsampler(n_colors, n_feats, n_resblocks // 2, expansion)
 
     def forward(self, x, scale):
         x = self.head(x)
