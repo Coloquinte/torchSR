@@ -203,15 +203,20 @@ python main.py --arch edsr_baseline --scale 2 --epochs 300 --loss l1 --dataset-t
 
 
 
-# Contributions
-
-All contributions are welcome! Usability improvements, training improvements, new models, new transforms, ...
-Pretrained models are particularly welcome.
-
-
-
 # Acknowledgements
 
 Thanks to the people behind [torchvision](https://github.com/pytorch/vision) and [EDSR](https://github.com/zhouhuanxiang/EDSR-PyTorch), whose work inspired this repository.
+Some of the models available here come from [EDSR-PyTorch](https://github.com/zhouhuanxiang/EDSR-PyTorch) and [CARN-PyTorch](https://github.com/nmhkahn/CARN-pytorch).
 
-Some of the model codes used here come from [EDSR-PyTorch](https://github.com/zhouhuanxiang/EDSR-PyTorch) and [CARN-PyTorch](https://github.com/nmhkahn/CARN-pytorch).
+To cite this work, please use:
+
+```
+@misc{torchsr,
+  author = {Gabriel Gouvine},
+  title = {Super-Resolution Networks for Pytorch},
+  year = {2021},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/Coloquinte/torchSR}}
+}
+```
