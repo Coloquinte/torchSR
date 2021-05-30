@@ -83,10 +83,30 @@ def spatial_features(shape, scale):
     return torch.stack([x_features, y_features], 0).unsqueeze(0)
 
 
+class FeatureEmbedding(nn.Module):
+    def __init__(self, n_feats, n_embed):
+        self.conv = nn.Conv2d(n_feats, n_feats, 3, padding=1)
+
+    def forward(self, x, scale):
+        ret = torch.nn.functional.interpolate(x, scale_factor=scale, recompute_scale_factor=False)
+        ret = self.conv(features)
+        return ret
+
+
+class SpatialEmbedding(nn.Module):
+    def __init__(self, n_feats, n_embed):
+        self.conv = nn.Conv2d(2, n_embed, 1)
+
+    def forward(self, x, scale):
+        ret = spatial_features(x.shape, scale).to(x.device)
+        ret = self.conv(ret)
+        return torch.cos(ret)
+
+
 class EmbeddingUpsampler(nn.Module):
     def __init__(self, n_colors, n_feats, n_resblocks, expansion):
         super(EmbeddingUpsampler, self).__init__()
-        self.spatial_embed = nn.Conv2d(2, n_feats, 1)
+        self.spatial_embed = SpatialEmbedding(n_feats, n_feats)
         self.feature_embed = nn.Conv2d(n_feats, n_feats, 3, padding=1)
         self.output = nn.Conv2d(n_feats, n_colors, 1)
         mid_feats = int(n_feats*expansion)
@@ -105,9 +125,7 @@ class EmbeddingUpsampler(nn.Module):
         features = torch.nn.functional.interpolate(x, scale_factor=scale, recompute_scale_factor=False)
         features = self.feature_embed(features)
         # Spatial embedding: learnable cosinus coefficients
-        spatial = spatial_features(x.shape, scale).to(features.device)
-        spatial = self.spatial_embed(spatial)
-        spatial = torch.cos(spatial)
+        spatial = self.spatial_embed(x)
         spatial = spatial.expand(features.shape[0], *spatial.shape[1:])
         for resblock in self.resblocks:
             f = torch.cat([spatial, features], dim=1)
