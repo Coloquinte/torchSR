@@ -1,3 +1,5 @@
+[![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4868308.svg)](https://doi.org/10.5281/zenodo.4868308)
+
 # Super-Resolution Networks for Pytorch
 
 Super-resolution is a process that increases the resolution of an image, adding additional details.
@@ -217,6 +219,7 @@ To cite this work, please use:
   year = {2021},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/Coloquinte/torchSR}}
+  howpublished = {\url{https://github.com/Coloquinte/torchSR}},
+  doi = {10.5281/zenodo.4868308}
 }
 ```
