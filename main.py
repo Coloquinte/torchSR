@@ -218,7 +218,7 @@ class Trainer:
                 self.best_ssim = ssim
                 self.best_epoch = self.epoch
                 t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
-            self.save_checkpoint(best=True)
+            self.save_checkpoint(best=is_best)
             t.update(1)
             scheduler.step()
 
