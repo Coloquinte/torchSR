@@ -6,7 +6,8 @@
 # Super-Resolution Networks for Pytorch
 
 [Super-resolution](https://en.wikipedia.org/wiki/Super-resolution_imaging) is a process that increases the resolution of an image, adding additional details.
-Neural networks are the go-to method for accurate or realistic super-resolution.
+Methods using neural networks give the most accurate results, much better than other interpolation methods.
+With the right training, it is even possible to make photo-realistic images.
 
 For example, here is a low-resolution image, magnified x4 by a neural network, and a high resolution image of the same object:
 
@@ -24,12 +25,15 @@ In this repository, you will find:
 
 ## Models
 
-The following pretrained models are available:
-* [EDSR](https://arxiv.org/abs/1707.02921) (x2 x3 x4)
-* [CARN](https://arxiv.org/abs/1803.08664) (x2 x3 x4)
-* [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
-* [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
-* [NinaSR](doc/NinaSR.md), my own model (x2 x3 x4 x8)
+The following pretrained models are available. Click on the links for the paper:
+* [EDSR](https://arxiv.org/abs/1707.02921)
+* [CARN](https://arxiv.org/abs/1803.08664)
+* [RDN](https://arxiv.org/abs/1802.08797)
+* [RCAN](https://arxiv.org/abs/1807.02758)
+* [NinaSR](doc/NinaSR.md)
+
+Newer and larger models perform better: the most accurate models are EDSR (huge), RCAN and NinaSR-B2.
+For practical applications, I recommend a smaller model, such as NinaSR-B1.
 
 
 <details>
@@ -122,13 +126,13 @@ The following pretrained models are available:
 
 </details>
 
-All models are defined in `torchsr.models`. `torchsr.models.utils` provides useful tools to augment your models, such as self-ensemble methods and tiling.
+All models are defined in `torchsr.models`. Other useful tools to augment your models, such as self-ensemble methods and tiling, are present in `torchsr.models.utils`.
 
 
 
 ## Datasets
 
-The following datasets are available:
+The following datasets are available. Click on the links for the project page:
 * [DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)
 * [RealSR](https://github.com/csjcai/RealSR)
 * [Flicr2K](https://github.com/limbee/NTIRE2017)
