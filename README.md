@@ -45,7 +45,7 @@ sr.show()
 ```
 
 <details>
-<summary>More examples</summary>
+<summary>Expand more examples</summary>
 
 
 ```python
