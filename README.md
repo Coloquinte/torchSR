@@ -5,10 +5,10 @@
 
 # Super-Resolution Networks for Pytorch
 
-Super-resolution is a process that increases the resolution of an image, adding additional details.
+[Super-resolution](https://en.wikipedia.org/wiki/Super-resolution_imaging) is a process that increases the resolution of an image, adding additional details.
 Neural networks are the go-to method for accurate or realistic super-resolution.
 
-A low-resolution image, magnified x4 by a neural network, and the high resolution image:
+For example, here is a low-resolution image, magnified x4 by a neural network, and a high resolution image of the same object:
 
 ![Pixelated image of a butterfly](https://raw.githubusercontent.com/Coloquinte/torchSR/v1.0.2/doc/example_small.png "Low resolution image")
 ![Smooth magnified image](https://raw.githubusercontent.com/Coloquinte/torchSR/v1.0.2/doc/example_x4.png "Magnified x4")
@@ -21,59 +21,6 @@ In this repository, you will find:
 * a unified training script for all models
 
 
-
-## Usage
-
-Install with `pip install torchsr`.
-
-```python
-from torchsr.datasets import Div2K
-from torchsr.models import ninasr_b0
-from torchvision.transforms.functional import to_pil_image, to_tensor
-
-# Div2K dataset
-dataset = Div2K(root="./data", scale=2, download=False)
-
-# Get the first image in the dataset (High-Res and Low-Res)
-hr, lr = dataset[0]
-
-# Download a pretrained NinaSR model
-model = ninasr_b0(scale=2, pretrained=True)
-
-# Run the Super-Resolution model
-lr_t = to_tensor(lr).unsqueeze(0)
-sr_t = model(lr_t)
-sr = to_pil_image(sr_t.squeeze(0))
-sr.show()
-```
-
-<details>
-<summary>Expand more examples</summary>
-
-
-```python
-from torchsr.datasets import Div2K
-from torchsr.models import edsr, rcan
-from torchsr.models.utils import ChoppedModel, SelfEnsembleModel
-from torchsr.transforms import ColorJitter, Compose, RandomCrop
-
-# Div2K dataset, cropped to 256px, width color jitter
-dataset = Div2K(
-    root="./data", scale=2, download=False,
-    transform=Compose([
-        RandomCrop(256, scales=[1, 2]),
-        ColorJitter(brightness=0.2)
-    ]))
-
-# Pretrained RCAN model, with tiling for large images
-model = ChoppedModel(
-    rcan(scale=2, pretrained=True), scale=2,
-    chop_size=400, chop_overlap=10)
-
-# Pretrained EDSR model, with self-ensemble method for higher quality
-model = SelfEnsembleModel(edsr(scale=2, pretrained=True))
-```
-</details>
 
 ## Models
 
@@ -192,6 +139,60 @@ All datasets are defined in `torchsr.datasets`. They return a list of images, wi
 Data augmentation methods are provided in `torchsr.transforms`.
 
 Datasets are downloaded automatically when using the `download=True` flag, or by running the corresponding script i.e. `./scripts/download_div2k.sh`.
+
+
+
+## Usage
+
+
+```python
+from torchsr.datasets import Div2K
+from torchsr.models import ninasr_b0
+from torchvision.transforms.functional import to_pil_image, to_tensor
+
+# Div2K dataset
+dataset = Div2K(root="./data", scale=2, download=False)
+
+# Get the first image in the dataset (High-Res and Low-Res)
+hr, lr = dataset[0]
+
+# Download a pretrained NinaSR model
+model = ninasr_b0(scale=2, pretrained=True)
+
+# Run the Super-Resolution model
+lr_t = to_tensor(lr).unsqueeze(0)
+sr_t = model(lr_t)
+sr = to_pil_image(sr_t.squeeze(0))
+sr.show()
+```
+
+<details>
+<summary>Expand more examples</summary>
+
+
+```python
+from torchsr.datasets import Div2K
+from torchsr.models import edsr, rcan
+from torchsr.models.utils import ChoppedModel, SelfEnsembleModel
+from torchsr.transforms import ColorJitter, Compose, RandomCrop
+
+# Div2K dataset, cropped to 256px, width color jitter
+dataset = Div2K(
+    root="./data", scale=2, download=False,
+    transform=Compose([
+        RandomCrop(256, scales=[1, 2]),
+        ColorJitter(brightness=0.2)
+    ]))
+
+# Pretrained RCAN model, with tiling for large images
+model = ChoppedModel(
+    rcan(scale=2, pretrained=True), scale=2,
+    chop_size=400, chop_overlap=10)
+
+# Pretrained EDSR model, with self-ensemble method for higher quality
+model = SelfEnsembleModel(edsr(scale=2, pretrained=True))
+```
+</details>
 
 
 
