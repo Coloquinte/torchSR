@@ -1,4 +1,7 @@
 [![DOI](https://zenodo.org/badge/DOI/10.5281/zenodo.4868308.svg)](https://doi.org/10.5281/zenodo.4868308)
+[![PyPI](https://img.shields.io/pypi/v/torchsr?color=orange)](https://pypi.org/project/torchsr/)
+[![GitHub](https://img.shields.io/github/license/coloquinte/torchsr?color=lightgrey)](https://opensource.org/licenses/MIT)
+
 
 # Super-Resolution Networks for Pytorch
 
