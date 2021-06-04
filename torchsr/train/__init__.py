@@ -8,11 +8,11 @@ import torchvision.transforms.functional as F
 from tqdm import tqdm
 from PIL import Image
 
-import models
-from datasets import *
-from train.enums import *
-from train.options import args
-from transforms import *
+import torchsr.models as models
+from torchsr.datasets import *
+from torchsr.transforms import *
+from .enums import *
+from .options import args
 
 
 class AverageMeter:
