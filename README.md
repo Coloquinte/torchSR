@@ -21,9 +21,11 @@ In this repository, you will find:
 
 ## Usage
 
+Install with `pip install torchsr`.
+
 ```python
-from datasets import Div2K
-from models import ninasr_b0
+from torchsr.datasets import Div2K
+from torchsr.models import ninasr_b0
 from torchvision.transforms.functional import to_pil_image, to_tensor
 
 # Div2K dataset
@@ -47,25 +49,26 @@ sr.show()
 
 
 ```python
-import datasets
-import models
-import transforms
+from torchsr.datasets import Div2K
+from torchsr.models import edsr, rcan
+from torchsr.models.utils import ChoppedModel, SelfEnsembleModel
+from torchsr.transforms import ColorJitter, Compose, RandomCrop
 
 # Div2K dataset, cropped to 256px, width color jitter
-dataset = datasets.Div2K(
+dataset = Div2K(
     root="./data", scale=2, download=False,
-    transform=transforms.Compose([
-        transforms.RandomCrop(256, scales=[1, 2]),
-        transforms.ColorJitter(brightness=0.2)
+    transform=Compose([
+        RandomCrop(256, scales=[1, 2]),
+        ColorJitter(brightness=0.2)
     ]))
 
 # Pretrained RCAN model, with tiling for large images
-model = models.utils.ChoppedModel(
-    models.rcan(scale=2, pretrained=True), scale=2,
+model = ChoppedModel(
+    rcan(scale=2, pretrained=True), scale=2,
     chop_size=400, chop_overlap=10)
 
 # Pretrained EDSR model, with self-ensemble method for higher quality
-model = models.utils.SelfEnsemble(models.edsr(scale=2, pretrained=True))
+model = SelfEnsembleModel(edsr(scale=2, pretrained=True))
 ```
 </details>
 
@@ -77,6 +80,10 @@ The following pretrained models are available:
 * [RDN](https://arxiv.org/abs/1802.08797) (x2 x3 x4)
 * [RCAN](https://arxiv.org/abs/1807.02758) (x2 x3 x4 x8)
 * [NinaSR](doc/NinaSR.md), my own model (x2 x3 x4 x8)
+
+
+<details>
+<summary>Expand benchmark results</summary>
 
 <details>
 <summary>Set5 results</summary>
@@ -163,9 +170,13 @@ The following pretrained models are available:
 
 </details>
 
-## Datasets
+</details>
 
-Datasets return a list of images. The first image is the original one, and the next images are downscaled or degraded versions.
+All models are defined in `torchsr.models`. `torchsr.models.utils` provides useful tools to augment your models, such as self-ensemble methods and tiling.
+
+
+
+## Datasets
 
 The following datasets are available:
 * [DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)
@@ -174,27 +185,17 @@ The following datasets are available:
 * [REDS](https://seungjunnah.github.io/Datasets/reds)
 * [Set5](http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html), [Set14](https://paperswithcode.com/dataset/set14), [B100](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/), [Urban100](https://paperswithcode.com/dataset/urban100)
 
-They are downloaded automatically when using the `download=True` flag, or by running the corresponding script i.e. `./scripts/download_div2k.sh`.
+All datasets are defined in `torchsr.datasets`. They return a list of images, with the high-resolution image followed by downscaled or degraded versions.
+Data augmentation methods are provided in `torchsr.transforms`.
 
-
-
-## Transforms
-
-Transforms are used for preprocessing and data augmentation. They are applied identically to the original and downscaled image.
-
-This repository defines several transforms that follow torchvision conventions:
-* ToTensor, ToPILImage
-* Compose
-* RandomCrop
-* ColorJitter
-* GaussianBlur
-* RandomHorizontalFlip, RandomVerticalFlip, RandomFlipTurn
+Datasets are downloaded automatically when using the `download=True` flag, or by running the corresponding script i.e. `./scripts/download_div2k.sh`.
 
 
 
 ## Training
 
-A script is available to train the models from scratch, evaluate them, and much more. Install the dependencies first, as shown here:
+A script is available to train the models from scratch, evaluate them, and much more. It is not part of the pip package, and requires additional dependencies.
+
 ```bash
 pip install piq tqdm tensorboard  # Additional dependencies
 python main.py -h
