@@ -206,10 +206,10 @@ A script is available to train the models from scratch, evaluate them, and much 
 
 ```bash
 pip install piq tqdm tensorboard  # Additional dependencies
-python main.py -h
-python main.py --arch edsr_baseline --scale 2 --download-pretrained --images test/butterfly.png --destination results/
-python main.py --arch edsr_baseline --scale 2 --download-pretrained --validation-only
-python main.py --arch edsr_baseline --scale 2 --epochs 300 --loss l1 --dataset-train div2k_bicubic
+python -m torchsr.train -h
+python -m torchsr.train --arch edsr_baseline --scale 2 --download-pretrained --images test/butterfly.png --destination results/
+python -m torchsr.train --arch edsr_baseline --scale 2 --download-pretrained --validation-only
+python -m torchsr.train --arch edsr_baseline --scale 2 --epochs 300 --loss l1 --dataset-train div2k_bicubic
 ```
 
 
