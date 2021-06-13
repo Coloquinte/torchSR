@@ -58,7 +58,8 @@ class ResBlock(nn.Module):
         m.append(nn.ReLU(True))
         m.append(AttentionBlock(mid_feats))
         conv2 = nn.Conv2d(mid_feats, n_feats, 3, padding=1, bias=False)
-        nn.init.zeros_(conv2.weight)
+        nn.init.kaiming_normal_(conv2.weight)
+        #nn.init.zeros_(conv2.weight)
         m.append(conv2)
 
         self.body = nn.Sequential(*m)

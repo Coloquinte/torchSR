@@ -1,3 +1,4 @@
+import copy
 import os
 
 import numpy as np
@@ -84,8 +85,8 @@ class Trainer:
         self.best_psnr = None
         self.best_ssim = None
         self.best_epoch = None
-        self.load_checkpoint()
         self.load_pretrained()
+        self.load_checkpoint()
         self.writer = None
         if not args.validation_only:
             try:
@@ -222,6 +223,17 @@ class Trainer:
             t.update(1)
             scheduler.step()
 
+    def get_model_state_dict(self):
+        # Ensures that the state_dict is on the CPU and reverse model transformations
+        self.model.to('cpu')
+        model = copy.deepcopy(self.model)
+        self.model.to(self.device)
+        if args.weight_norm:
+            for m in model.modules():
+                if isinstance(m, (nn.Linear, nn.Conv1d, nn.Conv2d, nn.Conv3d)):
+                    m = nn.utils.remove_weight_norm(m)
+        return model.state_dict()
+
     def load_checkpoint(self):
         if args.load_checkpoint is None:
             return
@@ -274,7 +286,7 @@ class Trainer:
             best_path = base + "_best" + ext
             torch.save(state, best_path)
             model_path = base + "_model" + ext
-            torch.save(self.model.state_dict(), model_path)
+            torch.save(self.get_model_state_dict(), model_path)
 
     def process_for_eval(self, img):
         if args.shave_border != 0:
@@ -481,6 +493,11 @@ def get_model():
         model = models.utils.ReplicationPaddedModel(model, args.replication_pad)
     elif args.reflection_pad:
         model = models.utils.ReflectionPaddedModel(model, args.reflection_pad)
+
+    if args.weight_norm:
+        for m in model.modules():
+            if isinstance(m, (nn.Linear, nn.Conv1d, nn.Conv2d, nn.Conv3d)):
+                m = nn.utils.weight_norm(m)
 
     return model
 
