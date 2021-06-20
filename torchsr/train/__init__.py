@@ -85,7 +85,6 @@ class Trainer:
         self.best_psnr = None
         self.best_ssim = None
         self.best_epoch = None
-        self.load_pretrained()
         self.load_checkpoint()
         self.writer = None
         if not args.validation_only:
@@ -250,22 +249,6 @@ class Trainer:
             self.best_psnr = ckp['best_psnr']
         if 'best_ssim' in ckp:
             self.best_ssim = ckp['best_ssim']
-
-    def load_pretrained(self):
-        if args.load_pretrained is None:
-            return
-        ckp = torch.load(args.load_pretrained)
-        state = self.model.state_dict()
-        for name, param in ckp.items():
-            if name in state:
-                try:
-                    state[name].copy_(param)
-                except Exception as e:
-                    if 'tail' not in name and 'upsampler' not in name:
-                        raise e
-            else:
-                if 'tail' not in name and 'upsampler' not in name:
-                    raise KeyError(f'Unexpected key "{name}" in state_dict')
 
     def save_checkpoint(self, best=False):
         if args.save_checkpoint is None:
@@ -462,6 +445,23 @@ def get_loss():
     raise ValueError("Unknown loss")
 
 
+def load_pretrained(model):
+    if args.load_pretrained is None:
+        return
+    ckp = torch.load(args.load_pretrained)
+    state = model.state_dict()
+    for name, param in ckp.items():
+        if name in state:
+            try:
+                state[name].copy_(param)
+            except Exception as e:
+                if 'tail' not in name and 'upsampler' not in name:
+                    raise e
+        else:
+            if 'tail' not in name and 'upsampler' not in name:
+                raise KeyError(f'Unexpected key "{name}" in state_dict')
+
+
 def get_model():
     if args.arch not in models.__dict__:
         raise ValueError(f"Unknown model {args.arch}")
@@ -493,6 +493,8 @@ def get_model():
         model = models.utils.ReplicationPaddedModel(model, args.replication_pad)
     elif args.reflection_pad:
         model = models.utils.ReflectionPaddedModel(model, args.reflection_pad)
+
+    load_pretrained(model)
 
     if args.weight_norm:
         for m in model.modules():
