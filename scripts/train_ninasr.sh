@@ -11,7 +11,8 @@ train_network () {
     python -m torchsr.train --arch $arch --scale $scale --tune-backend \
         --log-dir logs_train/${arch}_x${scale} --save-checkpoint ${arch}_x${scale}.pt \
         --lr $learning_rate --epochs $epochs --lr-decay-steps $((epochs*2/3)) $((epochs*5/6)) --lr-decay-rate 3 \
-        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4
+        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4 \
+        --weight-norm
 }
 
 train_network_with_pretrained () {
@@ -39,7 +40,8 @@ train_network_with_pretrained () {
         --log-dir logs_train/${arch}_x${scale} --save-checkpoint ${arch}_x${scale}.pt \
         --load-pretrained ${arch}_x${scale}_pre_model.pt \
         --lr $learning_rate --epochs $epochs --lr-decay-steps $((epochs*2/3)) $((epochs*5/6)) --lr-decay-rate 3 \
-        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4
+        --patch-size-train $(( (patch_size+1) * scale)) --shave-border $scale --replication-pad 4 \
+        --weight-norm
 }
 
 epochs=300
@@ -48,10 +50,9 @@ learning_rate=0.001
 
 # NinaSR-B0
 train_network ninasr_b0 2
-train_network_with_pretrained ninasr_b0 3 2
-train_network_with_pretrained ninasr_b0 4 3
-train_network_with_pretrained ninasr_b0 8 4
-train_network_with_pretrained ninasr_b0 2 4
+train_network ninasr_b0 3 
+train_network ninasr_b0 4 
+train_network ninasr_b0 8 
 
 epochs=500
 patch_size=48
