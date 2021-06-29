@@ -7,18 +7,18 @@ from torchvision.models.utils import load_state_dict_from_url
 __all__ = [ 'ninasr_b0', 'ninasr_b1', 'ninasr_b2' ]
 
 url = {
-    'r10f16x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b0_x2.pt',
-    'r10f16x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b0_x3.pt',
-    'r10f16x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b0_x4.pt',
-    'r10f16x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b0_x8.pt',
-    'r26f32x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b1_x2.pt',
-    'r26f32x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b1_x3.pt',
-    'r26f32x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b1_x4.pt',
-    'r26f32x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b1_x8.pt',
-    'r84f56x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b2_x2.pt',
-    'r84f56x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b2_x3.pt',
-    'r84f56x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b2_x4.pt',
-    'r84f56x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/ninasr_b2_x8.pt',
+    'r10f16x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b0_x2.pt',
+    'r10f16x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b0_x3.pt',
+    'r10f16x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b0_x4.pt',
+    'r10f16x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b0_x8.pt',
+    'r26f32x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b1_x2.pt',
+    'r26f32x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b1_x3.pt',
+    'r26f32x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b1_x4.pt',
+    'r26f32x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b1_x8.pt',
+    'r84f56x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b2_x2.pt',
+    'r84f56x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b2_x3.pt',
+    'r84f56x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b2_x4.pt',
+    'r84f56x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/ninasr_b2_x8.pt',
 }
 
 class AttentionBlock(nn.Module):

@@ -11,10 +11,10 @@ from torchvision.models.utils import load_state_dict_from_url
 __all__ = [ 'rcan', 'rcan_g10r20f64', ]
 
 url = {
-    'g10r20f64x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/rcan_x2.pt',
-    'g10r20f64x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/rcan_x3.pt',
-    'g10r20f64x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/rcan_x4.pt',
-    'g10r20f64x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/rcan_x8.pt',
+    'g10r20f64x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/rcan_x2.pt',
+    'g10r20f64x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/rcan_x3.pt',
+    'g10r20f64x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/rcan_x4.pt',
+    'g10r20f64x8': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/rcan_x8.pt',
 }
 
 def default_conv(in_channels, out_channels, kernel_size, bias=True):

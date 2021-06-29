@@ -10,12 +10,12 @@ from torchvision.models.utils import load_state_dict_from_url
 __all__ = [ 'edsr_baseline', 'edsr', 'edsr_r16f64', 'edsr_r32f256', ]
 
 url = {
-    'r16f64x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/edsr64_x2.pt',
-    'r16f64x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/edsr64_x3.pt',
-    'r16f64x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/edsr64_x4.pt',
-    'r32f256x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/edsr_x2.pt',
-    'r32f256x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/edsr_x3.pt',
-    'r32f256x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/edsr_x4.pt',
+    'r16f64x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/edsr64_x2.pt',
+    'r16f64x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/edsr64_x3.pt',
+    'r16f64x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/edsr64_x4.pt',
+    'r32f256x2': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/edsr_x2.pt',
+    'r32f256x3': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/edsr_x3.pt',
+    'r32f256x4': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/edsr_x4.pt',
 }
 
 

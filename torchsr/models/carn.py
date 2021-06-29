@@ -12,8 +12,8 @@ __all__ = [ 'carn', 'carn_m' ]
 
 
 urls = {
-    'carn': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/carn.pt',
-    'carn_m': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.1/carn_m.pt',
+    'carn': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/carn.pt',
+    'carn_m': 'https://github.com/Coloquinte/torchSR/releases/download/v1.0.3/carn_m.pt',
 }
 
 
