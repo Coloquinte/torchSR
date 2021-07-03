@@ -88,6 +88,7 @@ train.add_argument('--weight-norm', action='store_true',
                    help='use weight normalization on linear and convolution layers')
 train.add_argument('--freeze-backbone', action='store_true',
                    help='freeze the model, except the upsampler')
+train.add_argument('--save-every', type=int, help='keep every nth checkpoints')
 train.add_argument('--log-dir', type=str,
                    help='log directory for tensorboard')
 

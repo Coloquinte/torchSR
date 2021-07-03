@@ -264,12 +264,12 @@ class Trainer:
             'best_ssim': self.best_ssim,
         }
         torch.save(state, path)
+        base, ext = os.path.splitext(path)
+        if args.save_every is not None and self.epoch % args.save_every == 0:
+            torch.save(state, base + f"_e{self.epoch}" + ext)
         if best:
-            base, ext = os.path.splitext(path)
-            best_path = base + "_best" + ext
-            torch.save(state, best_path)
-            model_path = base + "_model" + ext
-            torch.save(self.get_model_state_dict(), model_path)
+            torch.save(state, base + "_best" + ext)
+            torch.save(self.get_model_state_dict(), base + "_model" + ext)
 
     def process_for_eval(self, img):
         if args.shave_border != 0:
