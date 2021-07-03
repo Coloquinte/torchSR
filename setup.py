@@ -7,7 +7,7 @@ with open('README.md') as f:
 
 setup(
     name="torchsr",
-    version="1.0.2",
+    version="1.0.3",
     description="Super Resolution Networks for pytorch",
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -24,6 +24,6 @@ setup(
     ],
     packages=["torchsr", "torchsr.models", "torchsr.datasets", "torchsr.transforms"],
     include_package_data=True,
-    install_requires=["torch", "torchvision"],
+    install_requires=["torch>=1.6", "torchvision>=0.6"],
 )
 
