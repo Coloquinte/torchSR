@@ -72,20 +72,41 @@ def report_model(model, name):
 
 
 class Trainer:
-    def __init__(self, model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype):
-        self.model = model
-        self.optimizer = optimizer
-        self.scheduler = scheduler
-        self.loss_fn = loss_fn
-        self.loader_train = loader_train
-        self.loader_val = loader_val
-        self.device = device
-        self.dtype = dtype
+    def __init__(self):
         self.epoch = 0
         self.best_psnr = None
         self.best_ssim = None
         self.best_epoch = None
+
+        self.setup_device()
+        self.setup_datasets()
+        self.setup_model()
+        self.setup_optimizer()
+        self.setup_scheduler()
+        self.setup_loss()
         self.load_checkpoint()
+        self.setup_tensorboard()
+
+    def setup_device(self):
+        self.device = get_device()
+        self.dtype = get_dtype()
+
+    def setup_datasets(self):
+        self.loader_train, self.loader_val = get_datasets()
+
+    def setup_model(self):
+        self.model = get_model().to(self.device).to(self.dtype)
+
+    def setup_optimizer(self):
+        self.optimizer = get_optimizer(self.model)
+
+    def setup_scheduler(self):
+        self.scheduler = get_scheduler(self.optimizer)
+
+    def setup_loss(self):
+        self.loss_fn = get_loss()
+
+    def setup_tensorboard(self):
         self.writer = None
         if not args.validation_only:
             try:
@@ -114,8 +135,8 @@ class Trainer:
                     loss = self.loss_fn(sr, hr)
                     loss.backward()
                     if args.gradient_clipping is not None:
-                        nn.utils.clip_grad_norm_(model.parameters(), args.gradient_clipping)
-                    optimizer.step()
+                        nn.utils.clip_grad_norm_(self.model.parameters(), args.gradient_clipping)
+                    self.optimizer.step()
                     l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
                     l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
                     l1_avg.update(l1_loss)
@@ -196,7 +217,7 @@ class Trainer:
                     print(f"Could not open {filename}")
                     continue
                 img = to_tensor(img).to(self.device)
-                sr_img = model(img)
+                sr_img = self.model(img)
                 sr_img = to_image(sr_img)
                 destname = os.path.splitext(os.path.basename(filename))[0] + f"_x{scale}.png"
                 sr_img.save(os.path.join(args.destination, destname))
@@ -220,7 +241,7 @@ class Trainer:
                 t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
             self.save_checkpoint(best=is_best)
             t.update(1)
-            scheduler.step()
+            self.scheduler.step()
 
     def get_model_state_dict(self):
         # Ensures that the state_dict is on the CPU and reverse model transformations
@@ -523,28 +544,15 @@ def get_dtype():
     else:
         return torch.float32
 
-
-loader_train, loader_val = get_datasets()
-device = get_device()
-dtype = get_dtype()
-model = get_model().to(dtype).to(device)
-optimizer = get_optimizer(model)
-scheduler = get_scheduler(optimizer)
-loss_fn = get_loss()
-
-trainer = Trainer(model, optimizer, scheduler, loss_fn, loader_train, loader_val, device, dtype)
+trainer = Trainer()
 
 if args.validation_only or args.images:
     if args.load_pretrained is None and args.load_checkpoint is None and not args.download_pretrained:
         raise ValueError("For validation, please use --load-pretrained CHECKPOINT or --download-pretrained")
-    if args.scale is None:
-        raise ValueError("--scale-range is not supported for validation")
     if args.images:
         trainer.run_model()
     else:
         trainer.validation()
 else:
-    if args.scale is None:
-        raise ValueError("--scale-range is not supported yet")
-    report_model(model, args.arch)
+    report_model(trainer.model, args.arch)
     trainer.train()
