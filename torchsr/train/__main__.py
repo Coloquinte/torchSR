@@ -145,9 +145,9 @@ class Trainer:
                         'L1': f'{l1_avg.get():.4f}',
                         'L2': f'{l2_avg.get():.4f}'
                     }
-                    if not isinstance(self.loss_fn, (nn.L1Loss, nn.MSELoss)):
+                    if args.loss not in [LossType.L1, LossType.L2]:
                         loss_avg.update(loss.item())
-                        args_dic['Loss'] = f'{loss_avg.get():.4f}'
+                        args_dic[args.loss.name] = f'{loss_avg.get():.4f}'
                     t.update()
                     t.set_postfix(**args_dic)
 
@@ -163,6 +163,7 @@ class Trainer:
             ssim_avg = AverageMeter()
             l1_avg = AverageMeter()
             l2_avg = AverageMeter()
+            loss_avg = AverageMeter()
             for hr, lr in t:
                 hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
                 sr = self.model(lr).clamp(0, 1)
@@ -179,12 +180,22 @@ class Trainer:
                 l2_avg.update(l2_loss)
                 psnr_avg.update(psnr)
                 ssim_avg.update(ssim)
-                t.set_postfix(PSNR=f'{psnr_avg.get():.2f}', SSIM=f'{ssim_avg.get():.4f}')
+                args_dic = {
+                    'PSNR': f'{psnr_avg.get():.4f}',
+                    'SSIM': f'{ssim_avg.get():.4f}'
+                }
+                if args.loss not in [LossType.L1, LossType.L2, LossType.SSIM]:
+                    loss = self.loss_fn(sr, hr)
+                    loss_avg.update(loss.item())
+                    args_dic[args.loss.name] = f'{loss_avg.get():.4f}'
+                t.set_postfix(**args_dic)
             if self.writer is not None:
                 self.writer.add_scalar('PSNR', psnr_avg.get(), self.epoch)
                 self.writer.add_scalar('SSIM', ssim_avg.get(), self.epoch)
                 self.writer.add_scalar('L1', l1_avg.get(), self.epoch)
                 self.writer.add_scalar('L2', l2_avg.get(), self.epoch)
+                if args.loss not in [LossType.L1, LossType.L2, LossType.SSIM]:
+                    self.writer.add_scalar(args.loss.name, loss_avg.get(), self.epoch)
             return psnr_avg.get(), ssim_avg.get()
 
     def validation(self):
