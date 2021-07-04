@@ -76,6 +76,7 @@ class Trainer:
         self.epoch = 0
         self.best_psnr = None
         self.best_ssim = None
+        self.best_loss = None
         self.best_epoch = None
 
         self.setup_device()
@@ -172,10 +173,12 @@ class Trainer:
                     sr = sr.mul(255).round().div(255)
                 sr = self.process_for_eval(sr)
                 hr = self.process_for_eval(hr)
+                loss = self.loss_fn(sr, hr)
                 l1_loss = torch.nn.functional.l1_loss(sr, hr).item()
                 l2_loss = torch.sqrt(torch.nn.functional.mse_loss(sr, hr)).item()
                 psnr = piq.psnr(hr, sr)
                 ssim = piq.ssim(hr, sr)
+                loss_avg.update(loss.item())
                 l1_avg.update(l1_loss)
                 l2_avg.update(l2_loss)
                 psnr_avg.update(psnr)
@@ -185,8 +188,6 @@ class Trainer:
                     'SSIM': f'{ssim_avg.get():.4f}'
                 }
                 if args.loss not in [LossType.L1, LossType.L2, LossType.SSIM]:
-                    loss = self.loss_fn(sr, hr)
-                    loss_avg.update(loss.item())
                     args_dic[args.loss.name] = f'{loss_avg.get():.4f}'
                 t.set_postfix(**args_dic)
             if self.writer is not None:
@@ -196,7 +197,7 @@ class Trainer:
                 self.writer.add_scalar('L2', l2_avg.get(), self.epoch)
                 if args.loss not in [LossType.L1, LossType.L2, LossType.SSIM]:
                     self.writer.add_scalar(args.loss.name, loss_avg.get(), self.epoch)
-            return psnr_avg.get(), ssim_avg.get()
+            return loss_avg.get(), psnr_avg.get(), ssim_avg.get()
 
     def validation(self):
         psnr, ssim = self.val_iter()
@@ -236,20 +237,27 @@ class Trainer:
     def train(self):
         t = tqdm(total=args.epochs, initial=self.epoch)
         t.set_description("Epochs")
-        if self.best_epoch is not None and self.best_psnr is not None and self.best_ssim is not None:
-            t.set_postfix(best=self.best_epoch,
-                          PSNR=f'{self.best_psnr:.2f}',
-                          SSIM=f'{self.best_ssim:.4f}')
+        if self.best_epoch is not None:
+            args_dic = {'best': self.best_epoch}
+            if self.best_psnr is not None:
+                args_dic['PSNR'] = f'{self.best_psnr:.2f}'
+            if self.best_ssim is not None:
+                args_dic['SSIM'] = f'{self.best_ssim:.2f}'
+            if self.best_loss is not None:
+                args_dic['loss'] = f'{self.best_loss:.2f}'
+            t.set_postfix(**args_dic)
         while self.epoch < args.epochs:
             self.epoch += 1
             self.train_iter()
-            psnr, ssim = self.val_iter(final=False)
-            is_best = self.best_psnr is None or psnr > self.best_psnr
+            loss, psnr, ssim = self.val_iter(final=False)
+            is_best = self.best_loss is None or loss < self.best_loss
             if is_best:
+                self.best_loss = loss
                 self.best_psnr = psnr
                 self.best_ssim = ssim
                 self.best_epoch = self.epoch
-                t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}', SSIM=f'{ssim:.4f}')
+                t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}',
+                              SSIM=f'{ssim:.4f}', loss=f'{loss:.4f}')
             self.save_checkpoint(best=is_best)
             t.update(1)
             self.scheduler.step()
@@ -281,6 +289,8 @@ class Trainer:
             self.best_psnr = ckp['best_psnr']
         if 'best_ssim' in ckp:
             self.best_ssim = ckp['best_ssim']
+        if 'best_loss' in ckp:
+            self.best_loss = ckp['best_loss']
 
     def save_checkpoint(self, best=False):
         if args.save_checkpoint is None:
@@ -294,6 +304,7 @@ class Trainer:
             'best_epoch': self.best_epoch,
             'best_psnr': self.best_psnr,
             'best_ssim': self.best_ssim,
+            'best_loss': self.best_loss,
         }
         torch.save(state, path)
         base, ext = os.path.splitext(path)
