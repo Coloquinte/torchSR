@@ -28,44 +28,61 @@ class AttentionBlock(nn.Module):
     def __init__(self, n_feats, reduction=4, stride=16):
         super(AttentionBlock, self).__init__()
         self.body = nn.Sequential(
-            nn.AvgPool2d(2*stride-1, stride=stride, padding=stride-1, count_include_pad=False),
+            nn.AdaptiveAvgPool2d(1),
             nn.Conv2d(n_feats, n_feats//reduction, 1, bias=True),
             nn.ReLU(True),
             nn.Conv2d(n_feats//reduction, n_feats, 1, bias=True),
-            nn.Sigmoid(),
-            nn.Upsample(scale_factor=stride, mode='nearest')
+            nn.Sigmoid()
         )
 
     def forward(self, x):
         res = self.body(x)
-        if res.shape != x.shape:
-            res = res[:, :, :x.shape[2], :x.shape[3]]
         return res * x
 
 
+class ScaledConv2d(nn.Conv2d):
+    def __init__(self, in_channels, out_channels, kernel_size,
+                 stride=1, padding=0, dilation=1, groups=1, bias=True,
+                 scale=1.0, eps=1.0e-6):
+        super().__init__(in_channels, out_channels, kernel_size,
+                         stride=stride, padding=padding, dilation=dilation,
+                         groups=groups, bias=bias)
+        self.scale = scale / self.weight[0].numel() ** 0.5
+        self.gain = nn.Parameter(torch.ones(out_channels, 1, 1, 1))
+        self.eps = eps
+        nn.init.kaiming_normal_(self.weight)
+        if self.bias is not None:
+            nn.init.zeros_(self.bias)
+
+    def get_weight(self):
+        mean = torch.mean(self.weight, dim=(1, 2, 3), keepdim=True)
+        std = torch.std(self.weight, dim=(1, 2, 3), keepdim=True)
+        return (self.scale * self.gain) * (self.weight - mean) / (std + self.eps)
+
+    def forward(self, x):
+        return nn.functional.conv2d(x, self.get_weight(), self.bias, self.stride, self.padding, self.dilation, self.groups)
+
+
 class ResBlock(nn.Module):
-    def __init__(self, n_feats, mid_feats, in_scale, out_scale):
+    def __init__(self, n_feats, mid_feats, in_scale, out_scale, attention):
         super(ResBlock, self).__init__()
 
-        self.in_scale = in_scale
-        self.out_scale = out_scale
+        scale1 = in_scale * 1.7139588594436646
+        scale2 = out_scale * 2.0 if attention else out_scale
 
         m = []
-        conv1 = nn.Conv2d(n_feats, mid_feats, 3, padding=1, bias=True)
-        nn.init.kaiming_normal_(conv1.weight)
-        nn.init.zeros_(conv1.bias)
+        conv1 = ScaledConv2d(n_feats, mid_feats, 3, padding=1, bias=True, scale=scale1)
         m.append(conv1)
         m.append(nn.ReLU(True))
-        m.append(AttentionBlock(mid_feats))
-        conv2 = nn.Conv2d(mid_feats, n_feats, 3, padding=1, bias=False)
-        nn.init.kaiming_normal_(conv2.weight)
-        #nn.init.zeros_(conv2.weight)
+        if attention:
+            m.append(AttentionBlock(mid_feats))
+        conv2 = ScaledConv2d(mid_feats, n_feats, 3, padding=1, bias=False, scale=scale2)
         m.append(conv2)
 
         self.body = nn.Sequential(*m)
 
     def forward(self, x):
-        res = self.body(x * self.in_scale) * (2*self.out_scale)
+        res = self.body(x)
         res += x
         return res
 
@@ -82,7 +99,7 @@ class Rescale(nn.Module):
 
 
 class NinaSR(nn.Module):
-    def __init__(self, n_resblocks, n_feats, scale, pretrained=False, expansion=2.0):
+    def __init__(self, n_resblocks, n_feats, scale, pretrained=False, expansion=2.0, attention=True):
         super(NinaSR, self).__init__()
         self.scale = scale
 
@@ -94,7 +111,7 @@ class NinaSR(nn.Module):
 
         n_colors = 3
         self.head = NinaSR.make_head(n_colors, n_feats)
-        self.body = NinaSR.make_body(n_resblocks, n_feats, expansion)
+        self.body = NinaSR.make_body(n_resblocks, n_feats, expansion, attention)
         self.tail = NinaSR.make_tail(n_colors, n_feats, scale)
 
         if pretrained:
@@ -109,14 +126,14 @@ class NinaSR(nn.Module):
         return nn.Sequential(*m_head)
 
     @staticmethod
-    def make_body(n_resblocks, n_feats, expansion):
+    def make_body(n_resblocks, n_feats, expansion, attention):
         mid_feats = int(n_feats*expansion)
-        out_scale = 4 / n_resblocks
+        out_scale = 0.2
         expected_variance = 1.0
         m_body = []
         for i in range(n_resblocks):
             in_scale = 1.0/math.sqrt(expected_variance)
-            m_body.append(ResBlock(n_feats, mid_feats, in_scale, out_scale))
+            m_body.append(ResBlock(n_feats, mid_feats, in_scale, out_scale, attention))
             expected_variance += out_scale ** 2
         return nn.Sequential(*m_body)
 

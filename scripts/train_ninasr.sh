@@ -50,9 +50,10 @@ learning_rate=0.001
 
 # NinaSR-B0
 train_network ninasr_b0 2
-train_network ninasr_b0 3 
-train_network ninasr_b0 4 
-train_network ninasr_b0 8 
+train_network_with_pretrained ninasr_b0 3 2
+train_network_with_pretrained ninasr_b0 4 3
+train_network_with_pretrained ninasr_b0 8 4
+train_network_with_pretrained ninasr_b0 2 4
 
 epochs=500
 patch_size=48
