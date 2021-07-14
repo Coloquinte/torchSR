@@ -82,7 +82,7 @@ class Rescale(nn.Module):
 
 
 class NinaSR(nn.Module):
-    def __init__(self, n_resblocks, n_feats, scale, pretrained=False, expansion=2.0):
+    def __init__(self, n_resblocks, n_feats, scale, pretrained=False, map_location=None, expansion=2.0):
         super(NinaSR, self).__init__()
         self.scale = scale
 
@@ -98,7 +98,7 @@ class NinaSR(nn.Module):
         self.tail = NinaSR.make_tail(n_colors, n_feats, scale)
 
         if pretrained:
-            self.load_pretrained()
+            self.load_pretrained(map_location=map_location)
 
     @staticmethod
     def make_head(n_colors, n_feats):
@@ -138,10 +138,12 @@ class NinaSR(nn.Module):
         x = self.tail(res)
         return x
 
-    def load_pretrained(self):
+    def load_pretrained(self, map_location=None):
         if self.url is None:
             raise KeyError("No URL available for this model")
-        state_dict = load_state_dict_from_url(self.url, progress=True)
+        if not torch.cuda.is_available():
+            map_location = torch.device('cpu')
+        state_dict = load_state_dict_from_url(self.url, map_location=map_location, progress=True)
         self.load_state_dict(state_dict)
 
 

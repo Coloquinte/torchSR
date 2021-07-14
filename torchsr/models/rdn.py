@@ -48,7 +48,7 @@ class RDB(nn.Module):
 
 
 class RDN(nn.Module):
-    def __init__(self, scale, G0, D, C, G, pretrained=False):
+    def __init__(self, scale, G0, D, C, G, pretrained=False, map_location=None):
         super(RDN, self).__init__()
         self.scale = scale
 
@@ -98,7 +98,7 @@ class RDN(nn.Module):
         self.output = nn.Conv2d(G, n_colors, kSize, padding=(kSize-1)//2, stride=1)
 
         if pretrained:
-            self.load_pretrained()
+            self.load_pretrained(map_location=map_location)
 
     def forward(self, x, scale=None):
         if scale is not None and scale != self.scale:
@@ -116,10 +116,12 @@ class RDN(nn.Module):
 
         return self.output(self.upscale(x))
 
-    def load_pretrained(self):
+    def load_pretrained(self, map_location=None):
         if self.url is None:
             raise KeyError("No URL available for this model")
-        state_dict = load_state_dict_from_url(self.url, progress=True)
+        if not torch.cuda.is_available():
+            map_location = torch.device('cpu')
+        state_dict = load_state_dict_from_url(self.url, map_location=map_location, progress=True)
         self.load_state_dict(state_dict)
 
 

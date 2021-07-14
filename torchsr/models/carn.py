@@ -265,7 +265,7 @@ class CARNMBlock(nn.Module):
         
 
 class CARNM(nn.Module):
-    def __init__(self, scale, pretrained):
+    def __init__(self, scale, pretrained, map_location=None):
         super(CARNM, self).__init__()
         
         multi_scale = True
@@ -290,7 +290,7 @@ class CARNM(nn.Module):
         self.exit = nn.Conv2d(64, 3, 3, 1, 1)
 
         if pretrained:
-            self.load_pretrained()
+            self.load_pretrained(map_location=map_location)
                 
     def forward(self, x, scale=None):
         if self.scale is not None:
@@ -324,9 +324,11 @@ class CARNM(nn.Module):
 
         return out
 
-    def load_pretrained(self):
+    def load_pretrained(self, map_location=None):
         state_dict = load_state_dict_from_url(urls["carn_m"], progress=True)
-        self.load_state_dict(state_dict)
+        if not torch.cuda.is_available():
+            map_location = torch.device('cpu')
+        self.load_state_dict(state_dict, map_location=map_location)
 
 
 def carn(scale, pretrained=False):

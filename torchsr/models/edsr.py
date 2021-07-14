@@ -93,7 +93,7 @@ class Upsampler(nn.Sequential):
 
 
 class EDSR(nn.Module):
-    def __init__(self, n_resblocks, n_feats, scale, res_scale, pretrained=False):
+    def __init__(self, n_resblocks, n_feats, scale, res_scale, pretrained=False, map_location=None):
         super(EDSR, self).__init__()
         self.scale = scale
 
@@ -132,7 +132,7 @@ class EDSR(nn.Module):
         self.tail = nn.Sequential(*m_tail)
 
         if pretrained:
-            self.load_pretrained()
+            self.load_pretrained(map_location=map_location)
 
     def forward(self, x, scale=None):
         if scale is not None and scale != self.scale:
@@ -148,10 +148,12 @@ class EDSR(nn.Module):
 
         return x 
 
-    def load_pretrained(self):
+    def load_pretrained(self, map_location=None):
         if self.url is None:
             raise KeyError("No URL available for this model")
-        state_dict = load_state_dict_from_url(self.url, progress=True)
+        if not torch.cuda.is_available():
+            map_location = torch.device('cpu')
+        state_dict = load_state_dict_from_url(self.url, map_location=map_location, progress=True)
         self.load_state_dict(state_dict)
 
 
