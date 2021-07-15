@@ -75,7 +75,9 @@ class VDSR(nn.Module):
     def load_pretrained(self, map_location=None):
         if self.url is None:
             raise KeyError("No URL available for this model")
-        if not torch.cuda.is_available():
+        if torch.cuda.is_available():
+            map_location = torch.device('cuda')
+        else:
             map_location = torch.device('cpu')
         state_dict = load_state_dict_from_url(self.url, map_location=map_location, progress=True)
         self.load_state_dict(state_dict)

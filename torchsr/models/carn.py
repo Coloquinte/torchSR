@@ -231,7 +231,9 @@ class CARN(nn.Module):
         return out
 
     def load_pretrained(self, map_location=None):
-        if not torch.cuda.is_available():
+        if torch.cuda.is_available():
+            map_location = torch.device('cuda')
+        else:
             map_location = torch.device('cpu')
         state_dict = load_state_dict_from_url(urls["carn"], map_location=map_location, progress=True)
         self.load_state_dict(state_dict)
