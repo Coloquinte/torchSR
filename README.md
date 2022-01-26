@@ -202,7 +202,7 @@ model = SelfEnsembleModel(edsr(scale=2, pretrained=True))
 
 ## Training
 
-A script is available to train the models from scratch, evaluate them, and much more. It is not part of the pip package, and requires additional dependencies.
+A script is available to train the models from scratch, evaluate them, and much more. It is not part of the pip package, and requires additional dependencies. More examples are available in `scripts/`.
 
 ```bash
 pip install piq tqdm tensorboard  # Additional dependencies
@@ -212,6 +212,10 @@ python -m torchsr.train --arch edsr_baseline --scale 2 --download-pretrained --v
 python -m torchsr.train --arch edsr_baseline --scale 2 --epochs 300 --loss l1 --dataset-train div2k_bicubic
 ```
 
+You can evaluate models from the command line as well. For example, for EDSR with the paper's PSNR evaluation:
+```
+python -m torchsr.train --validation-only --arch edsr_baseline --scale 2 --dataset-val set5 --chop-size 400 --download-pretrained --shave-border 2 --eval-luminance
+```
 
 
 # Acknowledgements
