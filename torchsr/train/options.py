@@ -82,7 +82,7 @@ train.add_argument('--gradient-clipping', type=float,
                    help='clip the gradient values')
 train.add_argument('--lr-decay-steps', type=int, nargs='+', default=[200],
                    help='steps for learning rate decay')
-train.add_argument('--lr-decay-rate', type=float, default=10.0,
+train.add_argument('--lr-decay-rate', type=float, default=2.0,
                    help='learning rate decay per step')
 train.add_argument('--weight-norm', action='store_true',
                    help='use weight normalization on linear and convolution layers')
