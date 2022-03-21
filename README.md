@@ -242,7 +242,7 @@ To cite this work, please use:
   year = {2021},
   publisher = {GitHub},
   journal = {GitHub repository},
-  howpublished = {\url{https://github.com/Coloquinte/torchSR}},
+  howpublished = {\url{https://github.com/Coloquinte/torchSR/blob/main/doc/NinaSR.md}},
   doi = {10.5281/zenodo.4868308}
 }
 ```
