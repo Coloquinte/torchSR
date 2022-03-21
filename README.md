@@ -235,4 +235,14 @@ To cite this work, please use:
   howpublished = {\url{https://github.com/Coloquinte/torchSR}},
   doi = {10.5281/zenodo.4868308}
 }
+
+@misc{ninasr,
+  author = {Gabriel Gouvine},
+  title = {NinaSR: Efficient Small and Large ConvNets for Super-Resolution},
+  year = {2021},
+  publisher = {GitHub},
+  journal = {GitHub repository},
+  howpublished = {\url{https://github.com/Coloquinte/torchSR}},
+  doi = {10.5281/zenodo.4868308}
+}
 ```
