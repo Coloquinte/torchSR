@@ -5,7 +5,7 @@
 import math
 import torch
 import torch.nn as nn
-from torchvision.models.utils import load_state_dict_from_url
+from torch.hub import load_state_dict_from_url
 
 __all__ = [ 'edsr_baseline', 'edsr', 'edsr_r16f64', 'edsr_r32f256', ]
 

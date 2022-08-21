@@ -6,7 +6,7 @@
 import math
 import torch
 import torch.nn as nn
-from torchvision.models.utils import load_state_dict_from_url
+from torch.hub import load_state_dict_from_url
 
 __all__ = [ 'rcan', 'rcan_g10r20f64', ]
 
