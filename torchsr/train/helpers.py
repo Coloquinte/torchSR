@@ -83,16 +83,19 @@ def _get_transform_val():
 def get_datasets():
     if args.images is not None:
         return None, None
-    dataset_train = _names_to_dataset(args.dataset_train, 'train',
-                                     transform=_get_transform_train())
     dataset_val = _names_to_dataset(args.dataset_val, 'val',
                                    transform=_get_transform_val())
-    loader_train = torch.utils.data.DataLoader(
-        dataset_train, batch_size=args.batch_size, shuffle=True,
-        num_workers=args.workers, pin_memory=not args.cpu)
     loader_val = torch.utils.data.DataLoader(
         dataset_val, batch_size=1, shuffle=False,
         num_workers=args.workers, pin_memory=not args.cpu)
+    if not args.validation_only:
+        dataset_train = _names_to_dataset(args.dataset_train, 'train',
+                                         transform=_get_transform_train())
+        loader_train = torch.utils.data.DataLoader(
+            dataset_train, batch_size=args.batch_size, shuffle=True,
+            num_workers=args.workers, pin_memory=not args.cpu)
+    else:
+        loader_train = None
     return loader_train, loader_val
 
 
