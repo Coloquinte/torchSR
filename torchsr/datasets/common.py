@@ -110,7 +110,7 @@ class FolderByDir(Folder):
         return set(sp for (t, sp, sc) in cls.track_dirs.keys())
 
     @classmethod
-    def has_split(self, split):
+    def has_split(cls, split):
         return split in cls.get_splits()
 
     def get_dir(self, track, split, scale):
@@ -118,7 +118,7 @@ class FolderByDir(Folder):
             if track not in self.get_tracks():
                 raise ValueError(f"{self.__class__.__name__} does not include track {track}. "
                                  f"Use one of {list(self.get_tracks())}")
-            if split not in self.get_splits():
+            if not self.has_split(split):
                 raise ValueError(f"{self.__class__.__name__} does not include split {split}. "
                                  f"Use one of {list(self.get_splits())}")
             available = ", ".join([str(sc) for t, sp, sc in self.track_dirs if t == track and sp == split])
