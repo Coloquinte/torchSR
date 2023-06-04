@@ -19,6 +19,7 @@ For example, here is a low-resolution image, magnified x4 by a neural network, a
 In this repository, you will find:
 * the popular super-resolution networks, pretrained
 * common super-resolution datasets
+* Pytorch datasets and transforms adapted to super-resolution
 * a unified training script for all models
 
 
