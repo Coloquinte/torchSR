@@ -167,7 +167,7 @@ model = ninasr_b0(scale=2, pretrained=True)
 # Run the Super-Resolution model
 lr_t = to_tensor(lr).unsqueeze(0)
 sr_t = model(lr_t)
-sr = to_pil_image(sr_t.squeeze(0))
+sr = to_pil_image(sr_t.squeeze(0).clamp(0, 1))
 sr.show()
 ```
 
