@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 # Evaluate on luminance channels, removing the border pixel; this is the convention used by most publications
 
 for scale in 2 3 4

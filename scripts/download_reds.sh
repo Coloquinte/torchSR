@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 directory=./data/REDS
 urls="
 http://data.cv.snu.ac.kr:8008/webdav/dataset/REDS/train_sharp.zip

@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 directory=./data/RealSR
 file="./data/RealSR/RealSR(V3).tar.gz"
 mkdir -p $directory

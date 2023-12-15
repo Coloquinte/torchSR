@@ -1,4 +1,4 @@
-#!/bin/sh
+#!/bin/bash
 directory=./data/Flickr2K
 urls="
 https://cv.snu.ac.kr/research/EDSR/Flickr2K.tar
