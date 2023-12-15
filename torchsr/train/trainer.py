@@ -68,6 +68,7 @@ class Trainer:
             try:
                 # Only if tensorboard is present
                 from torch.utils.tensorboard import SummaryWriter
+
                 self.writer = SummaryWriter(args.log_dir, purge_step=self.epoch)
             except ImportError:
                 if args.log_dir is not None:
@@ -83,7 +84,9 @@ class Trainer:
             l2_avg = AverageMeter(0.05)
             for i in range(args.dataset_repeat):
                 for hr, lr in self.loader_train:
-                    hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
+                    hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(
+                        self.device
+                    )
                     self.optimizer.zero_grad()
                     sr = self.model(lr)
                     sr = self.process_for_eval(sr)
@@ -91,19 +94,21 @@ class Trainer:
                     loss = self.loss_fn(sr, hr)
                     loss.backward()
                     if args.gradient_clipping is not None:
-                        nn.utils.clip_grad_norm_(self.model.parameters(), args.gradient_clipping)
+                        nn.utils.clip_grad_norm_(
+                            self.model.parameters(), args.gradient_clipping
+                        )
                     self.optimizer.step()
                     l1_loss = nn.functional.l1_loss(sr, hr).item()
                     l2_loss = torch.sqrt(nn.functional.mse_loss(sr, hr)).item()
                     l1_avg.update(l1_loss)
                     l2_avg.update(l2_loss)
                     args_dic = {
-                        'L1': f'{l1_avg.get():.4f}',
-                        'L2': f'{l2_avg.get():.4f}'
+                        "L1": f"{l1_avg.get():.4f}",
+                        "L2": f"{l2_avg.get():.4f}",
                     }
                     if args.loss not in [LossType.L1, LossType.L2]:
                         loss_avg.update(loss.item())
-                        args_dic[args.loss.name] = f'{loss_avg.get():.4f}'
+                        args_dic[args.loss.name] = f"{loss_avg.get():.4f}"
                     t.update()
                     t.set_postfix(**args_dic)
 
@@ -121,7 +126,9 @@ class Trainer:
             l2_avg = AverageMeter()
             loss_avg = AverageMeter()
             for hr, lr in t:
-                hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(self.device)
+                hr, lr = hr.to(self.dtype).to(self.device), lr.to(self.dtype).to(
+                    self.device
+                )
                 sr = self.model(lr).clamp(0, 1)
                 if final:
                     # Round to pixel values
@@ -139,17 +146,17 @@ class Trainer:
                 psnr_avg.update(psnr)
                 ssim_avg.update(ssim)
                 args_dic = {
-                    'PSNR': f'{psnr_avg.get():.4f}',
-                    'SSIM': f'{ssim_avg.get():.4f}'
+                    "PSNR": f"{psnr_avg.get():.4f}",
+                    "SSIM": f"{ssim_avg.get():.4f}",
                 }
                 if args.loss not in [LossType.L1, LossType.L2, LossType.SSIM]:
-                    args_dic[args.loss.name] = f'{loss_avg.get():.4f}'
+                    args_dic[args.loss.name] = f"{loss_avg.get():.4f}"
                 t.set_postfix(**args_dic)
             if self.writer is not None:
-                self.writer.add_scalar('PSNR', psnr_avg.get(), self.epoch)
-                self.writer.add_scalar('SSIM', ssim_avg.get(), self.epoch)
-                self.writer.add_scalar('L1', l1_avg.get(), self.epoch)
-                self.writer.add_scalar('L2', l2_avg.get(), self.epoch)
+                self.writer.add_scalar("PSNR", psnr_avg.get(), self.epoch)
+                self.writer.add_scalar("SSIM", ssim_avg.get(), self.epoch)
+                self.writer.add_scalar("L1", l1_avg.get(), self.epoch)
+                self.writer.add_scalar("L2", l2_avg.get(), self.epoch)
                 if args.loss not in [LossType.L1, LossType.L2, LossType.SSIM]:
                     self.writer.add_scalar(args.loss.name, loss_avg.get(), self.epoch)
             return loss_avg.get(), psnr_avg.get(), ssim_avg.get()
@@ -189,20 +196,22 @@ class Trainer:
                 img = to_tensor(img).to(self.device)
                 sr_img = self.model(img)
                 sr_img = to_image(sr_img)
-                destname = os.path.splitext(os.path.basename(filename))[0] + f"_x{scale}.png"
+                destname = (
+                    os.path.splitext(os.path.basename(filename))[0] + f"_x{scale}.png"
+                )
                 sr_img.save(os.path.join(args.destination, destname))
 
     def train(self):
         t = tqdm(total=args.epochs, initial=self.epoch)
         t.set_description("Epochs")
         if self.best_epoch is not None:
-            args_dic = {'best': self.best_epoch}
+            args_dic = {"best": self.best_epoch}
             if self.best_psnr is not None:
-                args_dic['PSNR'] = f'{self.best_psnr:.2f}'
+                args_dic["PSNR"] = f"{self.best_psnr:.2f}"
             if self.best_ssim is not None:
-                args_dic['SSIM'] = f'{self.best_ssim:.2f}'
+                args_dic["SSIM"] = f"{self.best_ssim:.2f}"
             if self.best_loss is not None:
-                args_dic['loss'] = f'{self.best_loss:.2f}'
+                args_dic["loss"] = f"{self.best_loss:.2f}"
             t.set_postfix(**args_dic)
         while self.epoch < args.epochs:
             self.epoch += 1
@@ -214,15 +223,19 @@ class Trainer:
                 self.best_psnr = psnr
                 self.best_ssim = ssim
                 self.best_epoch = self.epoch
-                t.set_postfix(best=self.epoch, PSNR=f'{psnr:.2f}',
-                              SSIM=f'{ssim:.4f}', loss=f'{loss:.4f}')
+                t.set_postfix(
+                    best=self.epoch,
+                    PSNR=f"{psnr:.2f}",
+                    SSIM=f"{ssim:.4f}",
+                    loss=f"{loss:.4f}",
+                )
             self.save_checkpoint(best=is_best)
             t.update(1)
             self.scheduler.step()
 
     def get_model_state_dict(self):
         # Ensures that the state_dict is on the CPU and reverse model transformations
-        self.model.to('cpu')
+        self.model.to("cpu")
         model = copy.deepcopy(self.model)
         self.model.to(self.device)
         if args.weight_norm:
@@ -235,34 +248,34 @@ class Trainer:
         if args.load_checkpoint is None:
             return
         ckp = torch.load(args.load_checkpoint)
-        self.model.load_state_dict(ckp['state_dict'])
+        self.model.load_state_dict(ckp["state_dict"])
         if self.optimizer is not None:
-            self.optimizer.load_state_dict(ckp['optimizer'])
+            self.optimizer.load_state_dict(ckp["optimizer"])
         if self.scheduler is not None:
-            self.scheduler.load_state_dict(ckp['scheduler'])
-        self.epoch = ckp['epoch']
-        if 'best_epoch' in ckp:
-            self.best_epoch = ckp['best_epoch']
-        if 'best_psnr' in ckp:
-            self.best_psnr = ckp['best_psnr']
-        if 'best_ssim' in ckp:
-            self.best_ssim = ckp['best_ssim']
-        if 'best_loss' in ckp:
-            self.best_loss = ckp['best_loss']
+            self.scheduler.load_state_dict(ckp["scheduler"])
+        self.epoch = ckp["epoch"]
+        if "best_epoch" in ckp:
+            self.best_epoch = ckp["best_epoch"]
+        if "best_psnr" in ckp:
+            self.best_psnr = ckp["best_psnr"]
+        if "best_ssim" in ckp:
+            self.best_ssim = ckp["best_ssim"]
+        if "best_loss" in ckp:
+            self.best_loss = ckp["best_loss"]
 
     def save_checkpoint(self, best=False):
         if args.save_checkpoint is None:
             return
         path = args.save_checkpoint
         state = {
-            'state_dict': self.model.state_dict(),
-            'optimizer': self.optimizer.state_dict(),
-            'scheduler': self.scheduler.state_dict(),
-            'epoch': self.epoch,
-            'best_epoch': self.best_epoch,
-            'best_psnr': self.best_psnr,
-            'best_ssim': self.best_ssim,
-            'best_loss': self.best_loss,
+            "state_dict": self.model.state_dict(),
+            "optimizer": self.optimizer.state_dict(),
+            "scheduler": self.scheduler.state_dict(),
+            "epoch": self.epoch,
+            "best_epoch": self.best_epoch,
+            "best_psnr": self.best_psnr,
+            "best_ssim": self.best_ssim,
+            "best_loss": self.best_loss,
         }
         torch.save(state, path)
         base, ext = os.path.splitext(path)
@@ -283,5 +296,3 @@ class Trainer:
             chroma_scaling = torch.tensor([1.0, args.scale_chroma, args.scale_chroma])
             img = img * chroma_scaling.reshape(1, 3, 1, 1).to(img.device)
         return img
-
-

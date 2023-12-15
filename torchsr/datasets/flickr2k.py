@@ -22,30 +22,41 @@ class Flickr2K(FolderByDir):
     """
 
     urls = [
-        ("https://cv.snu.ac.kr/research/EDSR/Flickr2K.tar", "5d3f39443d5e9489bff8963f8f26cb03")
+        (
+            "https://cv.snu.ac.kr/research/EDSR/Flickr2K.tar",
+            "5d3f39443d5e9489bff8963f8f26cb03",
+        )
     ]
 
-
     track_dirs = {
-        ('hr', 'train', 1) : os.path.join('Flickr2K', 'Flickr2K_HR')
-      , ('bicubic', 'train', 2) : os.path.join('Flickr2K', 'Flickr2K_LR_bicubic', 'X2')
-      , ('bicubic', 'train', 3) : os.path.join('Flickr2K', 'Flickr2K_LR_bicubic', 'X3')
-      , ('bicubic', 'train', 4) : os.path.join('Flickr2K', 'Flickr2K_LR_bicubic', 'X4')
-      , ('unknown', 'train', 2) : os.path.join('Flickr2K', 'Flickr2K_LR_unknown', 'X2')
-      , ('unknown', 'train', 3) : os.path.join('Flickr2K', 'Flickr2K_LR_unknown', 'X3')
-      , ('unknown', 'train', 4) : os.path.join('Flickr2K', 'Flickr2K_LR_unknown', 'X4')
+        ("hr", "train", 1): os.path.join("Flickr2K", "Flickr2K_HR"),
+        ("bicubic", "train", 2): os.path.join("Flickr2K", "Flickr2K_LR_bicubic", "X2"),
+        ("bicubic", "train", 3): os.path.join("Flickr2K", "Flickr2K_LR_bicubic", "X3"),
+        ("bicubic", "train", 4): os.path.join("Flickr2K", "Flickr2K_LR_bicubic", "X4"),
+        ("unknown", "train", 2): os.path.join("Flickr2K", "Flickr2K_LR_unknown", "X2"),
+        ("unknown", "train", 3): os.path.join("Flickr2K", "Flickr2K_LR_unknown", "X3"),
+        ("unknown", "train", 4): os.path.join("Flickr2K", "Flickr2K_LR_unknown", "X4"),
     }
 
     def __init__(
-            self,
-            root: str,
-            scale: Union[int, List[int], None] = None,
-            track: Union[str, List[str]] = 'bicubic',
-            transform: Optional[Callable] = None,
-            loader: Callable = pil_loader,
-            download: bool = False,
-            predecode: bool = False,
-            preload: bool = False):
-        super(Flickr2K, self).__init__(os.path.join(root, 'Flickr2K'),
-                                    scale, track, 'train', transform,
-                                    loader, download, predecode, preload)
+        self,
+        root: str,
+        scale: Union[int, List[int], None] = None,
+        track: Union[str, List[str]] = "bicubic",
+        transform: Optional[Callable] = None,
+        loader: Callable = pil_loader,
+        download: bool = False,
+        predecode: bool = False,
+        preload: bool = False,
+    ):
+        super(Flickr2K, self).__init__(
+            os.path.join(root, "Flickr2K"),
+            scale,
+            track,
+            "train",
+            transform,
+            loader,
+            download,
+            predecode,
+            preload,
+        )

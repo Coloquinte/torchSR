@@ -1,4 +1,3 @@
-
 import piq
 import torch
 import torch.nn as nn
@@ -14,18 +13,18 @@ from .options import args
 
 def _name_to_dataset(name, split, transform):
     kwargs = {
-        'root': args.dataset_root,
-        'scale': args.scale,
-        'split': split,
-        'transform': transform,
-        'download': args.download_dataset,
-        'predecode': not args.preload_dataset,
-        'preload': args.preload_dataset,
+        "root": args.dataset_root,
+        "scale": args.scale,
+        "split": split,
+        "transform": transform,
+        "download": args.download_dataset,
+        "predecode": not args.preload_dataset,
+        "preload": args.preload_dataset,
     }
     if name == DatasetType.Div2KBicubic:
-        return Div2K(**kwargs, track='bicubic')
+        return Div2K(**kwargs, track="bicubic")
     if name == DatasetType.Div2KUnknown:
-        return Div2K(**kwargs, track='unknown')
+        return Div2K(**kwargs, track="unknown")
     if name == DatasetType.Set5:
         return Set5(**kwargs)
     if name == DatasetType.Set14:
@@ -48,7 +47,9 @@ def _names_to_dataset(names, split, transform):
 
 def _get_transform_train():
     transforms = []
-    transforms.append(RandomCrop(args.patch_size_train, scales=[1, args.scale], margin=0.5))
+    transforms.append(
+        RandomCrop(args.patch_size_train, scales=[1, args.scale], margin=0.5)
+    )
     if DataAugmentationType.FlipTurn in args.augment:
         transforms.append(RandomFlipTurn())
     else:
@@ -61,11 +62,13 @@ def _get_transform_train():
     contrast = DataAugmentationType.ContrastJitter in args.augment
     saturation = DataAugmentationType.SaturationJitter in args.augment
     if brightness or contrast or saturation:
-        transforms.append(ColorJitter(
-            brightness=0.2 if brightness else 0,
-            contrast=0.1 if contrast else 0,
-            saturation=0.1 if saturation else 0
-        ))
+        transforms.append(
+            ColorJitter(
+                brightness=0.2 if brightness else 0,
+                contrast=0.1 if contrast else 0,
+                saturation=0.1 if saturation else 0,
+            )
+        )
     return Compose(transforms)
 
 
@@ -73,7 +76,9 @@ def _get_transform_val():
     transforms = []
     if not args.validation_only:
         # Full images are too big: only validate on a centered patch
-        transforms.append(CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, args.scale]))
+        transforms.append(
+            CenterCrop(args.patch_size_val, allow_smaller=True, scales=[1, args.scale])
+        )
     else:
         transforms.append(AdjustToScale(scales=[1, args.scale]))
     transforms.append(ToTensor())
@@ -83,17 +88,27 @@ def _get_transform_val():
 def get_datasets():
     if args.images is not None:
         return None, None
-    dataset_val = _names_to_dataset(args.dataset_val, 'val',
-                                   transform=_get_transform_val())
+    dataset_val = _names_to_dataset(
+        args.dataset_val, "val", transform=_get_transform_val()
+    )
     loader_val = torch.utils.data.DataLoader(
-        dataset_val, batch_size=1, shuffle=False,
-        num_workers=args.workers, pin_memory=not args.cpu)
+        dataset_val,
+        batch_size=1,
+        shuffle=False,
+        num_workers=args.workers,
+        pin_memory=not args.cpu,
+    )
     if not args.validation_only:
-        dataset_train = _names_to_dataset(args.dataset_train, 'train',
-                                         transform=_get_transform_train())
+        dataset_train = _names_to_dataset(
+            args.dataset_train, "train", transform=_get_transform_train()
+        )
         loader_train = torch.utils.data.DataLoader(
-            dataset_train, batch_size=args.batch_size, shuffle=True,
-            num_workers=args.workers, pin_memory=not args.cpu)
+            dataset_train,
+            batch_size=args.batch_size,
+            shuffle=True,
+            num_workers=args.workers,
+            pin_memory=not args.cpu,
+        )
     else:
         loader_train = None
     return loader_train, loader_val
@@ -104,34 +119,35 @@ def get_optimizer(model):
         return None
 
     kwargs = {}
-    kwargs['lr'] = args.lr
+    kwargs["lr"] = args.lr
     if args.weight_decay is not None:
-        kwargs['weight_decay'] = args.weight_decay
+        kwargs["weight_decay"] = args.weight_decay
 
-    if args.optimizer in [OptimizerType.ADAM,
-                          OptimizerType.ADAMW,
-                          OptimizerType.ADAMAX]:
+    if args.optimizer in [
+        OptimizerType.ADAM,
+        OptimizerType.ADAMW,
+        OptimizerType.ADAMAX,
+    ]:
         if args.momentum is not None:
             raise ValueError("No momentum for Adam-like optimizers")
         if args.adam_betas is not None:
-            kwargs['betas'] = args.adam_betas
+            kwargs["betas"] = args.adam_betas
         if args.optimizer is OptimizerType.ADAM:
             return torch.optim.Adam(model.parameters(), **kwargs)
         if args.optimizer is OptimizerType.ADAMW:
             return torch.optim.AdamW(model.parameters(), **kwargs)
         if args.optimizer is OptimizerType.ADAMAX:
             return torch.optim.Adamax(model.parameters(), **kwargs)
-    elif args.optimizer in [OptimizerType.SGD,
-                            OptimizerType.NESTEROV]:
+    elif args.optimizer in [OptimizerType.SGD, OptimizerType.NESTEROV]:
         if args.momentum is not None:
-            kwargs['momentum'] = args.momentum
-        kwargs['nesterov'] = args.optimizer is OptimizerType.NESTEROV
+            kwargs["momentum"] = args.momentum
+        kwargs["nesterov"] = args.optimizer is OptimizerType.NESTEROV
         return torch.optim.SGD(model.parameters(), **kwargs)
     elif args.optimizer is OptimizerType.RMSPROP:
         if args.momentum is not None:
-            kwargs['momentum'] = args.momentum
+            kwargs["momentum"] = args.momentum
         if args.rmsprop_alpha is not None:
-            kwargs['alpha'] = args.rmsprop_alpha
+            kwargs["alpha"] = args.rmsprop_alpha
         return torch.optim.RMSprop(model.parameters(), **kwargs)
     assert False
 
@@ -140,8 +156,8 @@ def get_scheduler(optimizer):
     if args.validation_only:
         return None
     return torch.optim.lr_scheduler.MultiStepLR(
-        optimizer, milestones=args.lr_decay_steps,
-        gamma=1.0/args.lr_decay_rate)
+        optimizer, milestones=args.lr_decay_steps, gamma=1.0 / args.lr_decay_rate
+    )
 
 
 class PIQLoss(nn.Module):
@@ -186,27 +202,33 @@ def load_pretrained(model):
             try:
                 state[name].copy_(param)
             except Exception as e:
-                if 'tail' not in name and 'upsampler' not in name:
+                if "tail" not in name and "upsampler" not in name:
                     raise e
         else:
-            if 'tail' not in name and 'upsampler' not in name:
+            if "tail" not in name and "upsampler" not in name:
                 raise KeyError(f'Unexpected key "{name}" in state_dict')
 
 
 def get_model():
     if args.arch not in models.__dict__:
         raise ValueError(f"Unknown model {args.arch}")
-    model = models.__dict__[args.arch](scale=args.scale, pretrained=args.download_pretrained)
+    model = models.__dict__[args.arch](
+        scale=args.scale, pretrained=args.download_pretrained
+    )
 
     if args.freeze_backbone:
-        if args.download_pretrained is None and args.load_checkpoint is None and args.load_pretrained is None:
+        if (
+            args.download_pretrained is None
+            and args.load_checkpoint is None
+            and args.load_pretrained is None
+        ):
             raise ValueError("A pretrained model is required to freeze the backbone")
         for p in model.parameters():
             p.requires_grad = False
-        if hasattr(model, 'upsampler'):
+        if hasattr(model, "upsampler"):
             for p in model.upsampler.parameters():
                 p.requires_grad = True
-        elif hasattr(model, 'tail'):
+        elif hasattr(model, "tail"):
             for p in model.tail.parameters():
                 p.requires_grad = True
         else:
@@ -216,7 +238,9 @@ def get_model():
         model = models.utils.SelfEnsembleModel(model)
 
     if args.chop_size is not None:
-        model = models.utils.ChoppedModel(model, args.scale, args.chop_size, args.chop_overlap)
+        model = models.utils.ChoppedModel(
+            model, args.scale, args.chop_size, args.chop_overlap
+        )
 
     if args.zero_pad:
         model = models.utils.ZeroPaddedModel(model, args.zero_pad)
@@ -239,11 +263,11 @@ def get_device():
     if args.tune_backend:
         torch.backends.cudnn.benchmark = True
     if args.cpu:
-        return 'cpu'
+        return "cpu"
     elif args.gpu is not None:
-        return 'cuda:{}'.format(args.gpu)
+        return "cuda:{}".format(args.gpu)
     else:
-        return 'cuda'
+        return "cuda"
 
 
 def get_dtype():
@@ -288,7 +312,8 @@ def to_tensor(img):
 
 def to_image(t):
     """Workaround a bug in torchvision
-    The conversion of a tensor to a PIL image causes overflows, which result in huge errors"""
+    The conversion of a tensor to a PIL image causes overflows, which result in huge errors
+    """
     if t.ndim == 4:
         t = t.squeeze(0)
     t = t.mul(255).round().div(255).clamp(0, 1)
@@ -296,19 +321,24 @@ def to_image(t):
 
 
 def to_luminance(t):
-    coeffs = torch.tensor([65.738, 129.057, 25.064]).reshape(1, 3, 1, 1).to(t.device) / 256
+    coeffs = (
+        torch.tensor([65.738, 129.057, 25.064]).reshape(1, 3, 1, 1).to(t.device) / 256
+    )
     return t.mul(coeffs).sum(dim=1, keepdim=True)
 
 
 def to_YCbCr(t):
-    weights =  torch.tensor([
-            [65.738, 129.057, 25.064],
-            [-37.945, -74.494, 112.439],
-            [112.439, -94.154, -18.285],
-        ]).reshape(3, 3, 1, 1).to(t.device) / 256
+    weights = (
+        torch.tensor(
+            [
+                [65.738, 129.057, 25.064],
+                [-37.945, -74.494, 112.439],
+                [112.439, -94.154, -18.285],
+            ]
+        )
+        .reshape(3, 3, 1, 1)
+        .to(t.device)
+        / 256
+    )
     biases = torch.tensor([0.0, 0.5, 0.5]).to(t.device)
     return nn.functional.conv2d(t, weights, biases)
-
-
-
-

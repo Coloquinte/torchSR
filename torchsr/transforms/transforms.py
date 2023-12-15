@@ -10,10 +10,19 @@ import torch.nn as nn
 import torchvision
 import torchvision.transforms.functional as F
 
-__all__ = ('ToTensor', 'ToPILImage', 'Compose',
-           'RandomHorizontalFlip', 'RandomVerticalFlip', 'RandomFlipTurn',
-           'RandomCrop', 'CenterCrop', 'AdjustToScale',
-           'ColorJitter', 'GaussianBlur')
+__all__ = (
+    "ToTensor",
+    "ToPILImage",
+    "Compose",
+    "RandomHorizontalFlip",
+    "RandomVerticalFlip",
+    "RandomFlipTurn",
+    "RandomCrop",
+    "CenterCrop",
+    "AdjustToScale",
+    "ColorJitter",
+    "GaussianBlur",
+)
 
 
 def apply_all(x, func):
@@ -60,7 +69,9 @@ def get_image_size(img):
         return (img.width, img.height)
     if isinstance(img, torch.Tensor):
         if img.ndim < 3:
-            raise ValueError("Unsupported torch tensor (should have 3 dimensions or more)")
+            raise ValueError(
+                "Unsupported torch tensor (should have 3 dimensions or more)"
+            )
         return (img.shape[-1], img.shape[-2])
     if isinstance(img, np.ndarray):
         if img.ndim != 3:
@@ -70,10 +81,9 @@ def get_image_size(img):
 
 
 def crop(img, top, left, height, width):
-    """Torchvision crop + numpy ndarray support
-    """
+    """Torchvision crop + numpy ndarray support"""
     if isinstance(img, np.ndarray):
-        return PIL.Image.fromarray(img[top:top+height, left:left+width])
+        return PIL.Image.fromarray(img[top : top + height, left : left + width])
     return F.crop(img, top, left, height, width)
 
 
@@ -114,19 +124,21 @@ def get_crop_params(x, scales):
     assert len(x) == len(scales)
     sizes = [get_image_size(img) for img in x]
     # Find a size in which all images fit
-    scaled_widths = [sc[0]*sz[0] for sc, sz in zip(scales, sizes)]
-    scaled_heights = [sc[1]*sz[1] for sc, sz in zip(scales, sizes)]
+    scaled_widths = [sc[0] * sz[0] for sc, sz in zip(scales, sizes)]
+    scaled_heights = [sc[1] * sz[1] for sc, sz in zip(scales, sizes)]
     min_width = min(scaled_widths)
     min_height = min(scaled_heights)
     # Check that the scales are close enough to the actual sizes (5%)
     if max(scaled_widths) > min_width * 1.05:
         raise ValueError(
             f"Scaled widths range from {min_width} to {max(scaled_widths)}. "
-            f"This does not seem compatible")
+            f"This does not seem compatible"
+        )
     if max(scaled_heights) > min_height * 1.05:
         raise ValueError(
             f"Scaled heights range from {min_height} to {max(scaled_heights)}. "
-            f"This does not seem compatible")
+            f"This does not seem compatible"
+        )
     # Now find a size so that pixel-accurate cropping is possible for all images
     pixels_x = int(functools.reduce(np.lcm, [sc[0] for sc in scales]))
     pixels_y = int(functools.reduce(np.lcm, [sc[1] for sc in scales]))
@@ -177,10 +189,9 @@ class RandomCrop(nn.Module):
             the image.
     """
 
-    def __init__(self,
-                 size: Union[int, Tuple[int, int]],
-                 scales: List[int],
-                 margin: float = 0.0):
+    def __init__(
+        self, size: Union[int, Tuple[int, int]], scales: List[int], margin: float = 0.0
+    ):
         super(RandomCrop, self).__init__()
         self.size = to_tuple(size, 2, "RandomCrop.size")
         self.scales = [to_tuple(s, 2, "RandomCrop.scale") for s in scales]
@@ -192,15 +203,18 @@ class RandomCrop(nn.Module):
         scales = self.scales
         common_size, size_ratios = get_crop_params(x, scales)
         crop_ratio = size_ratios[0]
-        common_crop_size = (self.size[0] // crop_ratio[0], self.size[1] // crop_ratio[1])
+        common_crop_size = (
+            self.size[0] // crop_ratio[0],
+            self.size[1] // crop_ratio[1],
+        )
         w, h = common_size
         tw, th = common_crop_size
         margin_w = int(tw * self.margin)
         margin_h = int(th * self.margin)
-        i = torch.randint(-margin_h, h - th + 1 + margin_h, size=(1, )).item()
-        j = torch.randint(-margin_w, w - tw + 1 + margin_w, size=(1, )).item()
-        i = np.clip(i, 0,  h - th)
-        j = np.clip(j, 0,  w - tw)
+        i = torch.randint(-margin_h, h - th + 1 + margin_h, size=(1,)).item()
+        j = torch.randint(-margin_w, w - tw + 1 + margin_w, size=(1,)).item()
+        i = np.clip(i, 0, h - th)
+        j = np.clip(j, 0, w - tw)
         if not isinstance(x, (list, tuple)):
             return crop(x, i, j, th, tw)
         ret = []
@@ -216,8 +230,7 @@ class AdjustToScale(nn.Module):
         scales (list): Scales of the images received.
     """
 
-    def __init__(self,
-                 scales: List[int]):
+    def __init__(self, scales: List[int]):
         super(AdjustToScale, self).__init__()
         self.scales = [to_tuple(s, 2, "AdjustToScale.scale") for s in scales]
 
@@ -246,10 +259,12 @@ class CenterCrop(nn.Module):
             than the given size
     """
 
-    def __init__(self,
-                 size: Union[int, Tuple[int, int]],
-                 scales: List[int],
-                 allow_smaller: bool = False):
+    def __init__(
+        self,
+        size: Union[int, Tuple[int, int]],
+        scales: List[int],
+        allow_smaller: bool = False,
+    ):
         super(CenterCrop, self).__init__()
         self.size = to_tuple(size, 2, "CenterCrop.size")
         self.allow_smaller = allow_smaller
@@ -261,20 +276,27 @@ class CenterCrop(nn.Module):
         scales = self.scales
         common_size, size_ratios = get_crop_params(x, scales)
         crop_ratio = size_ratios[0]
-        common_crop_size = (self.size[0] // crop_ratio[0], self.size[1] // crop_ratio[1])
+        common_crop_size = (
+            self.size[0] // crop_ratio[0],
+            self.size[1] // crop_ratio[1],
+        )
         w, h = common_size
         tw, th = common_crop_size
         # Check the size
         if th > h:
             if not self.allow_smaller:
-                raise ValueError("Required height for CenterCrop is larger than the image")
+                raise ValueError(
+                    "Required height for CenterCrop is larger than the image"
+                )
             th = h
             i = 0
         else:
             i = (h - th) // 2
         if tw > w:
             if not self.allow_smaller:
-                raise ValueError("Required height for CenterCrop is larger than the image")
+                raise ValueError(
+                    "Required height for CenterCrop is larger than the image"
+                )
             tw = w
             j = 0
         else:
@@ -291,10 +313,10 @@ class CenterCrop(nn.Module):
 class ColorJitter(nn.Module):
     def __init__(self, brightness=0, contrast=0, saturation=0, hue=0):
         super(ColorJitter, self).__init__()
-        self.brightness = param_to_tuple(brightness, 'ColorJitter.brightness')
-        self.contrast = param_to_tuple(contrast, 'ColorJitter.contrast')
-        self.saturation = param_to_tuple(saturation, 'ColorJitter.saturation')
-        self.hue = param_to_tuple(hue, 'ColorJitter.hue', center=0, bounds=[-0.5, 0.5])
+        self.brightness = param_to_tuple(brightness, "ColorJitter.brightness")
+        self.contrast = param_to_tuple(contrast, "ColorJitter.contrast")
+        self.saturation = param_to_tuple(saturation, "ColorJitter.saturation")
+        self.hue = param_to_tuple(hue, "ColorJitter.hue", center=0, bounds=[-0.5, 0.5])
 
     def get_params(self):
         brightness_factor = random_uniform_none(self.brightness)
@@ -303,7 +325,9 @@ class ColorJitter(nn.Module):
         hue_factor = random_uniform_none(self.hue)
         return (brightness_factor, contrast_factor, saturation_factor, hue_factor)
 
-    def apply_jitter(self, img, brightness_factor, contrast_factor, saturation_factor, hue_factor):
+    def apply_jitter(
+        self, img, brightness_factor, contrast_factor, saturation_factor, hue_factor
+    ):
         if brightness_factor is not None:
             img = F.adjust_brightness(img, brightness_factor)
         if contrast_factor is not None:
@@ -316,8 +340,18 @@ class ColorJitter(nn.Module):
 
     def forward(self, x):
         x = apply_all(x, remove_numpy)
-        brightness_factor, contrast_factor, saturation_factor, hue_factor = self.get_params()
-        return apply_all(x, lambda y: self.apply_jitter(y, brightness_factor, contrast_factor, saturation_factor, hue_factor))
+        (
+            brightness_factor,
+            contrast_factor,
+            saturation_factor,
+            hue_factor,
+        ) = self.get_params()
+        return apply_all(
+            x,
+            lambda y: self.apply_jitter(
+                y, brightness_factor, contrast_factor, saturation_factor, hue_factor
+            ),
+        )
 
 
 class RandomHorizontalFlip(nn.Module):
@@ -382,7 +416,7 @@ class GaussianBlur(nn.Module):
         if self.kernel_size is not None:
             kernel_size = self.kernel_size
         else:
-            k_x = max(2*int(math.ceil(3*sigma_x))+1, 3)
-            k_y = max(2*int(math.ceil(3*sigma_y))+1, 3)
+            k_x = max(2 * int(math.ceil(3 * sigma_x)) + 1, 3)
+            k_y = max(2 * int(math.ceil(3 * sigma_y)) + 1, 3)
             kernel_size = (k_x, k_y)
         return apply_all(x, lambda y: F.gaussian_blur(y, kernel_size, sigma))

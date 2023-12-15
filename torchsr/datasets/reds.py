@@ -23,37 +23,45 @@ class REDS(FolderByDir):
         preload (boolean, optional): If true, load all images in memory
     """
 
-    urls = [
-    ]
+    urls = []
 
     track_dirs = {
-        ('hr', 'train', 1) : os.path.join('train', 'train_sharp')
-      , ('blur', 'train', 1) : os.path.join('train', 'train_blur')
-      , ('blur_comp', 'train', 1) : os.path.join('train', 'train_blur_comp')
-      , ('bicubic', 'train', 4) : os.path.join('train', 'train_sharp_bicubic')
-      , ('blur_bicubic', 'train', 4) : os.path.join('train', 'train_blur_bicubic')
-      , ('hr', 'val', 1) : os.path.join('val', 'val_sharp')
-      , ('blur', 'val', 1) : os.path.join('val', 'val_blur')
-      , ('blur_comp', 'val', 1) : os.path.join('val', 'val_blur_comp')
-      , ('bicubic', 'val', 4) : os.path.join('val', 'val_sharp_bicubic')
-      , ('blur_bicubic', 'val', 4) : os.path.join('val', 'val_blur_bicubic')
-      , ('blur', 'test', 1) : os.path.join('test', 'test_blur')
-      , ('blur_comp', 'test', 1) : os.path.join('test', 'test_blur_comp')
-      , ('bicubic', 'test', 4) : os.path.join('test', 'test_sharp_bicubic')
-      , ('blur_bicubic', 'test', 4) : os.path.join('test', 'test_blur_bicubic')
+        ("hr", "train", 1): os.path.join("train", "train_sharp"),
+        ("blur", "train", 1): os.path.join("train", "train_blur"),
+        ("blur_comp", "train", 1): os.path.join("train", "train_blur_comp"),
+        ("bicubic", "train", 4): os.path.join("train", "train_sharp_bicubic"),
+        ("blur_bicubic", "train", 4): os.path.join("train", "train_blur_bicubic"),
+        ("hr", "val", 1): os.path.join("val", "val_sharp"),
+        ("blur", "val", 1): os.path.join("val", "val_blur"),
+        ("blur_comp", "val", 1): os.path.join("val", "val_blur_comp"),
+        ("bicubic", "val", 4): os.path.join("val", "val_sharp_bicubic"),
+        ("blur_bicubic", "val", 4): os.path.join("val", "val_blur_bicubic"),
+        ("blur", "test", 1): os.path.join("test", "test_blur"),
+        ("blur_comp", "test", 1): os.path.join("test", "test_blur_comp"),
+        ("bicubic", "test", 4): os.path.join("test", "test_sharp_bicubic"),
+        ("blur_bicubic", "test", 4): os.path.join("test", "test_blur_bicubic"),
     }
 
     def __init__(
-            self,
-            root: str,
-            scale: Optional[int] = None,
-            track: Union[str, List[str]] = 'bicubic',
-            split: str = 'train',
-            transform: Optional[Callable] = None,
-            loader: Callable = pil_loader,
-            download: bool = False,
-            predecode: bool = False,
-            preload: bool = False):
-        super(REDS, self).__init__(os.path.join(root, 'REDS'),
-                                    scale, track, split, transform,
-                                    loader, download, predecode, preload)
+        self,
+        root: str,
+        scale: Optional[int] = None,
+        track: Union[str, List[str]] = "bicubic",
+        split: str = "train",
+        transform: Optional[Callable] = None,
+        loader: Callable = pil_loader,
+        download: bool = False,
+        predecode: bool = False,
+        preload: bool = False,
+    ):
+        super(REDS, self).__init__(
+            os.path.join(root, "REDS"),
+            scale,
+            track,
+            split,
+            transform,
+            loader,
+            download,
+            predecode,
+            preload,
+        )

@@ -21,29 +21,41 @@ class Set5(FolderByDir):
     """
 
     urls = [
-        ("https://cv.snu.ac.kr/research/EDSR/benchmark.tar", "4ace41d33c2384b97e6b320cd0afd6ba")
+        (
+            "https://cv.snu.ac.kr/research/EDSR/benchmark.tar",
+            "4ace41d33c2384b97e6b320cd0afd6ba",
+        )
     ]
-    
+
     track_dirs = {
-        ('hr', 'val', 1) : os.path.join('benchmark', 'Set5', 'HR')
-      , ('bicubic', 'val', 2) : os.path.join('benchmark', 'Set5', 'LR_bicubic', 'X2')
-      , ('bicubic', 'val', 3) : os.path.join('benchmark', 'Set5', 'LR_bicubic', 'X3')
-      , ('bicubic', 'val', 4) : os.path.join('benchmark', 'Set5', 'LR_bicubic', 'X4')
+        ("hr", "val", 1): os.path.join("benchmark", "Set5", "HR"),
+        ("bicubic", "val", 2): os.path.join("benchmark", "Set5", "LR_bicubic", "X2"),
+        ("bicubic", "val", 3): os.path.join("benchmark", "Set5", "LR_bicubic", "X3"),
+        ("bicubic", "val", 4): os.path.join("benchmark", "Set5", "LR_bicubic", "X4"),
     }
 
     def __init__(
-            self,
-            root: str,
-            scale: Union[int, List[int], None] = None,
-            split: str = 'val',
-            transform: Optional[Callable] = None,
-            loader: Callable = pil_loader,
-            download: bool = False,
-            predecode: bool = False,
-            preload: bool = False):
-        super(Set5, self).__init__(os.path.join(root, 'SRBenchmarks'),
-                                   scale, 'bicubic', split, transform,
-                                   loader, download, predecode, preload)
+        self,
+        root: str,
+        scale: Union[int, List[int], None] = None,
+        split: str = "val",
+        transform: Optional[Callable] = None,
+        loader: Callable = pil_loader,
+        download: bool = False,
+        predecode: bool = False,
+        preload: bool = False,
+    ):
+        super(Set5, self).__init__(
+            os.path.join(root, "SRBenchmarks"),
+            scale,
+            "bicubic",
+            split,
+            transform,
+            loader,
+            download,
+            predecode,
+            preload,
+        )
 
 
 class Set14(FolderByDir):
@@ -63,29 +75,41 @@ class Set14(FolderByDir):
     """
 
     urls = [
-        ("https://cv.snu.ac.kr/research/EDSR/benchmark.tar", "4ace41d33c2384b97e6b320cd0afd6ba")
+        (
+            "https://cv.snu.ac.kr/research/EDSR/benchmark.tar",
+            "4ace41d33c2384b97e6b320cd0afd6ba",
+        )
     ]
-    
+
     track_dirs = {
-        ('hr', 'val', 1) : os.path.join('benchmark', 'Set14', 'HR')
-      , ('bicubic', 'val', 2) : os.path.join('benchmark', 'Set14', 'LR_bicubic', 'X2')
-      , ('bicubic', 'val', 3) : os.path.join('benchmark', 'Set14', 'LR_bicubic', 'X3')
-      , ('bicubic', 'val', 4) : os.path.join('benchmark', 'Set14', 'LR_bicubic', 'X4')
+        ("hr", "val", 1): os.path.join("benchmark", "Set14", "HR"),
+        ("bicubic", "val", 2): os.path.join("benchmark", "Set14", "LR_bicubic", "X2"),
+        ("bicubic", "val", 3): os.path.join("benchmark", "Set14", "LR_bicubic", "X3"),
+        ("bicubic", "val", 4): os.path.join("benchmark", "Set14", "LR_bicubic", "X4"),
     }
 
     def __init__(
-            self,
-            root: str,
-            scale: Union[int, List[int], None] = None,
-            split: str = 'val',
-            transform: Optional[Callable] = None,
-            loader: Callable = pil_loader,
-            download: bool = False,
-            predecode: bool = False,
-            preload: bool = False):
-        super(Set14, self).__init__(os.path.join(root, 'SRBenchmarks'),
-                                    scale, 'bicubic', split, transform,
-                                    loader, download, predecode, preload)
+        self,
+        root: str,
+        scale: Union[int, List[int], None] = None,
+        split: str = "val",
+        transform: Optional[Callable] = None,
+        loader: Callable = pil_loader,
+        download: bool = False,
+        predecode: bool = False,
+        preload: bool = False,
+    ):
+        super(Set14, self).__init__(
+            os.path.join(root, "SRBenchmarks"),
+            scale,
+            "bicubic",
+            split,
+            transform,
+            loader,
+            download,
+            predecode,
+            preload,
+        )
 
 
 class B100(FolderByDir):
@@ -105,29 +129,42 @@ class B100(FolderByDir):
     """
 
     urls = [
-        ("https://cv.snu.ac.kr/research/EDSR/benchmark.tar", "4ace41d33c2384b97e6b320cd0afd6ba")
+        (
+            "https://cv.snu.ac.kr/research/EDSR/benchmark.tar",
+            "4ace41d33c2384b97e6b320cd0afd6ba",
+        )
     ]
-    
+
     track_dirs = {
-        ('hr', 'val', 1) : os.path.join('benchmark', 'B100', 'HR')
-      , ('bicubic', 'val', 2) : os.path.join('benchmark', 'B100', 'LR_bicubic', 'X2')
-      , ('bicubic', 'val', 3) : os.path.join('benchmark', 'B100', 'LR_bicubic', 'X3')
-      , ('bicubic', 'val', 4) : os.path.join('benchmark', 'B100', 'LR_bicubic', 'X4')
+        ("hr", "val", 1): os.path.join("benchmark", "B100", "HR"),
+        ("bicubic", "val", 2): os.path.join("benchmark", "B100", "LR_bicubic", "X2"),
+        ("bicubic", "val", 3): os.path.join("benchmark", "B100", "LR_bicubic", "X3"),
+        ("bicubic", "val", 4): os.path.join("benchmark", "B100", "LR_bicubic", "X4"),
     }
 
     def __init__(
-            self,
-            root: str,
-            scale: Union[int, List[int], None] = None,
-            split: str = 'val',
-            transform: Optional[Callable] = None,
-            loader: Callable = pil_loader,
-            download: bool = False,
-            predecode: bool = False,
-            preload: bool = False):
-        super(B100, self).__init__(os.path.join(root, 'SRBenchmarks'),
-                                   scale, 'bicubic', split, transform,
-                                   loader, download, predecode, preload)
+        self,
+        root: str,
+        scale: Union[int, List[int], None] = None,
+        split: str = "val",
+        transform: Optional[Callable] = None,
+        loader: Callable = pil_loader,
+        download: bool = False,
+        predecode: bool = False,
+        preload: bool = False,
+    ):
+        super(B100, self).__init__(
+            os.path.join(root, "SRBenchmarks"),
+            scale,
+            "bicubic",
+            split,
+            transform,
+            loader,
+            download,
+            predecode,
+            preload,
+        )
+
 
 class Urban100(FolderByDir):
     """`Urban100 Superresolution Dataset, linked to by `EDSR <https://github.com/zhouhuanxiang/EDSR-PyTorch>`
@@ -146,27 +183,44 @@ class Urban100(FolderByDir):
     """
 
     urls = [
-        ("https://cv.snu.ac.kr/research/EDSR/benchmark.tar", "4ace41d33c2384b97e6b320cd0afd6ba")
+        (
+            "https://cv.snu.ac.kr/research/EDSR/benchmark.tar",
+            "4ace41d33c2384b97e6b320cd0afd6ba",
+        )
     ]
-    
+
     track_dirs = {
-        ('hr', 'val', 1) : os.path.join('benchmark', 'Urban100', 'HR')
-      , ('bicubic', 'val', 2) : os.path.join('benchmark', 'Urban100', 'LR_bicubic', 'X2')
-      , ('bicubic', 'val', 3) : os.path.join('benchmark', 'Urban100', 'LR_bicubic', 'X3')
-      , ('bicubic', 'val', 4) : os.path.join('benchmark', 'Urban100', 'LR_bicubic', 'X4')
+        ("hr", "val", 1): os.path.join("benchmark", "Urban100", "HR"),
+        ("bicubic", "val", 2): os.path.join(
+            "benchmark", "Urban100", "LR_bicubic", "X2"
+        ),
+        ("bicubic", "val", 3): os.path.join(
+            "benchmark", "Urban100", "LR_bicubic", "X3"
+        ),
+        ("bicubic", "val", 4): os.path.join(
+            "benchmark", "Urban100", "LR_bicubic", "X4"
+        ),
     }
 
     def __init__(
-            self,
-            root: str,
-            scale: Union[int, List[int], None] = None,
-            split: str = 'val',
-            transform: Optional[Callable] = None,
-            loader: Callable = pil_loader,
-            download: bool = False,
-            predecode: bool = False,
-            preload: bool = False):
-        super(Urban100, self).__init__(os.path.join(root, 'SRBenchmarks'),
-                                       scale, 'bicubic', split, transform,
-                                       loader, download, predecode, preload)
-
+        self,
+        root: str,
+        scale: Union[int, List[int], None] = None,
+        split: str = "val",
+        transform: Optional[Callable] = None,
+        loader: Callable = pil_loader,
+        download: bool = False,
+        predecode: bool = False,
+        preload: bool = False,
+    ):
+        super(Urban100, self).__init__(
+            os.path.join(root, "SRBenchmarks"),
+            scale,
+            "bicubic",
+            split,
+            transform,
+            loader,
+            download,
+            predecode,
+            preload,
+        )
