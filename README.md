@@ -17,21 +17,21 @@ For example, here is a low-resolution image, magnified x4 by a neural network, a
 
 
 In this repository, you will find:
-* the popular super-resolution networks, pretrained
-* common super-resolution datasets
-* Pytorch datasets and transforms adapted to super-resolution
-* a unified training script for all models
+*   the popular super-resolution networks, pretrained
+*   common super-resolution datasets
+*   Pytorch datasets and transforms adapted to super-resolution
+*   a unified training script for all models
 
 
 
 ## Models
 
 The following pretrained models are available. Click on the links for the paper:
-* [EDSR](https://arxiv.org/abs/1707.02921)
-* [CARN](https://arxiv.org/abs/1803.08664)
-* [RDN](https://arxiv.org/abs/1802.08797)
-* [RCAN](https://arxiv.org/abs/1807.02758)
-* [NinaSR](doc/NinaSR.md)
+*   [EDSR](https://arxiv.org/abs/1707.02921)
+*   [CARN](https://arxiv.org/abs/1803.08664)
+*   [RDN](https://arxiv.org/abs/1802.08797)
+*   [RCAN](https://arxiv.org/abs/1807.02758)
+*   [NinaSR](doc/NinaSR.md)
 
 Newer and larger models perform better: the most accurate models are EDSR (huge), RCAN and NinaSR-B2.
 For practical applications, I recommend a smaller model, such as NinaSR-B1.
@@ -134,11 +134,11 @@ All models are defined in `torchsr.models`. Other useful tools to augment your m
 ## Datasets
 
 The following datasets are available. Click on the links for the project page:
-* [DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)
-* [RealSR](https://github.com/csjcai/RealSR)
-* [Flicr2K](https://github.com/limbee/NTIRE2017)
-* [REDS](https://seungjunnah.github.io/Datasets/reds)
-* [Set5](http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html), [Set14](https://paperswithcode.com/dataset/set14), [B100](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/), [Urban100](https://paperswithcode.com/dataset/urban100)
+*   [DIV2K](https://data.vision.ee.ethz.ch/cvl/DIV2K/)
+*   [RealSR](https://github.com/csjcai/RealSR)
+*   [Flicr2K](https://github.com/limbee/NTIRE2017)
+*   [REDS](https://seungjunnah.github.io/Datasets/reds)
+*   [Set5](http://people.rennes.inria.fr/Aline.Roumy/results/SR_BMVC12.html), [Set14](https://paperswithcode.com/dataset/set14), [B100](https://www2.eecs.berkeley.edu/Research/Projects/CS/vision/bsds/), [Urban100](https://paperswithcode.com/dataset/urban100)
 
 All datasets are defined in `torchsr.datasets`. They return a list of images, with the high-resolution image followed by downscaled or degraded versions.
 Data augmentation methods are provided in `torchsr.transforms`.
