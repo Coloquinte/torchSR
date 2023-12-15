@@ -31,14 +31,14 @@ http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/DIV2K_test_LR_unknown
 http://data.vision.ee.ethz.ch/cvl/DIV2K/validation_release/DIV2K_test_LR_unknown_X4.zip
 "
 
-mkdir -p $directory
+mkdir -p "${directory}"
 
 for url in $urls
 do
-    wget -P $directory $url
+    wget -P "${directory}" "${url}"
 done
 
-for file in $directory/*.zip
+for file in "${directory}"/*.zip
 do
-    unzip $file -d $directory && rm $file
+    unzip "${file}" -d "${directory}" && rm "${file}"
 done

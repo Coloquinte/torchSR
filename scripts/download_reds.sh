@@ -17,14 +17,14 @@ http://data.cv.snu.ac.kr:8008/webdav/dataset/REDS/test_sharp_bicubic.zip
 http://data.cv.snu.ac.kr:8008/webdav/dataset/REDS/test_blur_bicubic.zip
 "
 
-mkdir -p $directory
+mkdir -p "${directory}"
 
 for url in $urls
 do
-    wget -P $directory $url
+    wget -P "${directory}" "${url}"
 done
 
-for file in $directory/*.zip
+for file in "${directory}"/*.zip
 do
-    unzip $file -d $directory && rm $file
+    unzip "${file}" -d "${directory}" && rm "${file}"
 done
