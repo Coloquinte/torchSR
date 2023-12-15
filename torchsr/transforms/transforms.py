@@ -362,8 +362,12 @@ class RandomFlipTurn(nn.Module):
 class GaussianBlur(nn.Module):
     def __init__(self, kernel_size=None, sigma=(0.1, 2.0), isotropic=False):
         super(GaussianBlur, self).__init__()
-        self.kernel_size = None if kernel_size is None else to_tuple(kernel_size)
-        self.sigma = param_to_tuple(sigma, 'GaussianBlur.sigma')
+        self.kernel_size = (
+            None
+            if kernel_size is None
+            else to_tuple(kernel_size, 2, "GaussianBlur.kernel_size")
+        )
+        self.sigma = param_to_tuple(sigma, "GaussianBlur.sigma")
         self.isotropic = isotropic
 
     def forward(self, x):
