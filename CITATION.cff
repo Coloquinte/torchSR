@@ -1,0 +1,19 @@
+cff-version: 1.2.0
+title: torchSR
+message: >-
+  If you use this software and want to cite it, please use
+  the citation below.
+type: software
+authors:
+  - family-names: Gouvine
+    given-names: Gabriel
+    orcid: 'https://orcid.org/0000-0003-3404-6659'
+repository-code: 'https://github.com/Coloquinte/torchSR'
+keywords:
+  - superresolution
+  - pytorch
+  - EDSR
+  - RCAN
+license: MIT
+date-released: '2023-10-25'
+
