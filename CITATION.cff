@@ -7,7 +7,7 @@ type: software
 authors:
   - family-names: Gouvine
     given-names: Gabriel
-    orcid: 'https://orcid.org/0000-0003-3404-6659'
+    orcid: 0000-0003-3404-6659
 repository-code: 'https://github.com/Coloquinte/torchSR'
 keywords:
   - superresolution
@@ -15,5 +15,6 @@ keywords:
   - EDSR
   - RCAN
 license: MIT
-date-released: '2023-10-25'
+date-released: 2021-05-30
+doi: 10.5281/zenodo.4868308
 
